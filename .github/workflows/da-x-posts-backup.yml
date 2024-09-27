@@ -1,0 +1,22 @@
+---
+name: DA X Posts Backup AMI
+run-name: DA X Posts Backup AMI da-x-post-backup-primer-(date-time) by @${{ github.actor }}
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+
+jobs:
+  da-x-post-backup-ami:
+    uses: nationalarchives/ds-github-actions/.github/workflows/da-x-posts-backup-ami-build.yml@main
+    with:
+      base_role: "arn:aws:iam::637423167251:role/gha-oidc-role"
+      playbook_role: "arn:aws:iam::637423167251:role/gha-devops-role"
+      region: "eu-west-2"
+      key_name: "da-x-post-backup-eu-west-2"
+      instance_type: "t3a.micro"
+      volume_size: 200
+...
