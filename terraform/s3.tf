@@ -1,11 +1,11 @@
-module "s3-da-sftp-intake" {
-    source = "./s3/da-sftp-intake"
+module "s3-ds-backup-kpf-administration" {
+    source = "./s3/ds-backup-kpf-administration"
 
     default_tags = local.default_tags
 }
 
-module "s3-ds-backup-kpf-administration" {
-    source = "./s3/ds-backup-kpf-administration"
+module "s3-da-sftp-intake" {
+    source = "./s3/da-sftp-intake"
 
     default_tags = local.default_tags
 }
@@ -72,4 +72,21 @@ module "s3-tna-service-backup" {
     tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
 
     default_tags = local.default_tags
+}
+
+import {
+  to = aws_s3_bucket.da_sftp_intake
+  id = "da-sftp-intake"
+}
+import {
+  to = aws_s3_bucket_ownership_controls.da_sftp_intake
+  id = "da-sftp-intake"
+}
+import {
+  to = aws_s3_bucket_server_side_encryption_configuration.da_sftp_intake
+  id = "da-sftp-intake,${data.aws_caller_identity.current.account_id}"
+}
+import {
+  to = aws_s3_bucket_public_access_block.da_sftp_intake
+  id = "da-sftp-intake"
 }
