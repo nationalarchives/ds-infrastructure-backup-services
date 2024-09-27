@@ -8,6 +8,7 @@ module "service_backups" {
     key_name      = "service-backups-eu-west-2"
     subnet_id     = local.private_subnet_a_info.id
     volume_size   = 20
+    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
     default_tags = local.default_tags
 }
