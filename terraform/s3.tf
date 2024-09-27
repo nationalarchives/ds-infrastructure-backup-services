@@ -1,5 +1,37 @@
-module "s3" {
-    source = "../../ds-infrastructure-backup-services/terraform/s3"
+module "da-sftp-intake" {
+    source = "./s3/da-sftp-intake"
+
+    default_tags = local.default_tags
+}
+
+module "ds-backup-kpf-administration" {
+    source = "./s3/ds-backup-kpf-administration"
+
+    default_tags = local.default_tags
+}
+
+module "tna-backup-drop-zone" {
+    source = "./s3/tna-backup-drop-zone"
+
+    tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
+
+    bkup_drop_zone_access_points = [
+        {
+            "ap_name" = "ds-bkup-databases",
+            "ap_path" = "digital-services/databases",
+            "role_arns" = [
+                "arn:aws:iam::846769538626:role/mysql-main-prime-role"
+            ]
+        },
+    ]
+
+    default_tags = local.default_tags
+}
+
+module "tna-backup-intake" {
+    source = "./s3/tna-backup-intake"
+
+    tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
 
     bkup_access_points = [
         {
@@ -11,15 +43,33 @@ module "s3" {
         },
     ]
 
-    bkup_drop_zone_access_points = [
-        {
-            "ap_name" = "ds-bkup-databases",
-            "ap_path" = "digital-services/databases",
-            "role_arns" = [
-                "arn:aws:iam::846769538626:role/mysql-main-prime-role"
-            ]
-        },
-    ]
+    default_tags = local.default_tags
+}
+
+module "tna-backup-inventory" {
+    source = "./s3/tna-backup-inventory"
+
+    default_tags = local.default_tags
+}
+
+module "tna-backup-tooling" {
+    source = "./s3/tna-backup-tooling"
+
+    default_tags = local.default_tags
+}
+
+module "tna-backup-vault" {
+    source = "./s3/tna-backup-vault"
+
+    tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
+
+    default_tags = local.default_tags
+}
+
+module "tna-service-backup" {
+    source = "./s3/tna-service-backup"
+
+    tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
 
     default_tags = local.default_tags
 }

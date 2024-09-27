@@ -1,3 +1,5 @@
+variable "default_tags" {}
+
 ##
 # this bucket records the bucket inventories
 # ------------------------------------------------------------------------------
@@ -15,7 +17,7 @@ resource "aws_s3_bucket" "tna_backup_inventory" {
 }
 
 resource "aws_s3_bucket_ownership_controls" "tna_backup_inventory" {
-    bucket = aws_s3_bucket.tna_service_backup.id
+    bucket = aws_s3_bucket.tna_backup_inventory.id
 
     rule {
         object_ownership = "BucketOwnerEnforced"
@@ -23,7 +25,7 @@ resource "aws_s3_bucket_ownership_controls" "tna_backup_inventory" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "tna_backup_inventory" {
-    bucket = aws_s3_bucket.tna_service_backup.id
+    bucket = aws_s3_bucket.tna_backup_inventory.id
 
     rule {
         apply_server_side_encryption_by_default {
@@ -33,10 +35,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tna_backup_invent
 }
 
 resource "aws_s3_bucket_public_access_block" "tna_backup_inventory" {
-    bucket = aws_s3_bucket.tna_service_backup.id
+    bucket = aws_s3_bucket.tna_backup_inventory.id
 
     block_public_acls       = false
     block_public_policy     = false
     ignore_public_acls      = false
     restrict_public_buckets = false
+}
+
+output "tna_backup_inventory_arn" {
+    value = aws_s3_bucket.tna_backup_inventory.arn
 }

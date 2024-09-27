@@ -1,3 +1,6 @@
+variable "default_tags" {}
+variable "tna_backup_inventory_arn" {}
+
 ##
 # backup final destination
 # all objects come from tna-backup-intake and should have the correct
@@ -65,7 +68,7 @@ resource "aws_s3_bucket_inventory" "tna_backup_vault" {
     destination {
         bucket {
             format     = "CSV"
-            bucket_arn = aws_s3_bucket.tna_backup_inventory.arn
+            bucket_arn = var.tna_backup_inventory_arn
         }
     }
 }

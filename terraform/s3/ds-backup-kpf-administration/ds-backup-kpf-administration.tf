@@ -1,3 +1,5 @@
+variable "default_tags" {}
+
 ##
 # this bucket is used for key pairs
 # ------------------------------------------------------------------------------

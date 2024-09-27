@@ -1,3 +1,6 @@
+variable "default_tags" {}
+variable "tna_backup_inventory_arn" {}
+
 ##
 # this bucket is used by ec2 instances which download data from non-TNA service
 # such as GitHub
@@ -33,17 +36,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tna_service_backu
     }
 }
 
-#resource "aws_s3_bucket_object_lock_configuration" "tna_service_backup" {
-#    bucket = aws_s3_bucket.tna_service_backup.id
-#
-#    rule {
-#        default_retention {
-#            mode = "COMPLIANCE"
-#            days = 60
-#        }
-#    }
-#}
-
 resource "aws_s3_bucket_public_access_block" "tna_service_backup" {
     bucket = aws_s3_bucket.tna_service_backup.id
 
@@ -66,7 +58,7 @@ resource "aws_s3_bucket_inventory" "tna_service_backup" {
   destination {
     bucket {
       format     = "CSV"
-      bucket_arn = aws_s3_bucket.tna_backup_inventory.arn
+      bucket_arn = var.tna_backup_inventory_arn
     }
   }
 }
