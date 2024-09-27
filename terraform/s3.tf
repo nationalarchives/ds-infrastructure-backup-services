@@ -90,3 +90,37 @@ import {
   to = module.s3-tna-backup-intake.aws_s3_bucket_public_access_block.tna_backup_intake
   id = "tna-backup-intake"
 }
+
+import {
+  to = module.s3-tna-backup-tooling.aws_s3_bucket.tna_backup_tooling
+  id = "tna-backup-tooling"
+}
+import {
+  to = module.s3-tna-backup-tooling.aws_s3_bucket_ownership_controls.tna_backup_tooling
+  id = "tna-backup-tooling"
+}
+import {
+  to = module.s3-tna-backup-tooling.aws_s3_bucket_server_side_encryption_configuration.tna_backup_tooling
+  id = "tna-backup-tooling"
+}
+import {
+  to = module.s3-tna-backup-tooling.aws_s3_bucket_public_access_block.tna_backup_tooling
+  id = "tna-backup-tooling"
+}
+
+import {
+  to = module.s3-tna-backup-vault.aws_s3_bucket.tna_service_backup
+  id = "tna-backup-vault"
+}
+import {
+  to = module.s3-tna-backup-vault.aws_s3_bucket_ownership_controls.tna_service_backup
+  id = "tna-backup-vault"
+}
+import {
+  to = module.s3-tna-backup-vault.aws_s3_bucket_server_side_encryption_configuration.tna_service_backup
+  id = "tna-backup-vault"
+}
+import {
+  to = module.s3-tna-backup-vault.aws_s3_bucket_public_access_block.tna_service_backup
+  id = "tna-backup-vault"
+}

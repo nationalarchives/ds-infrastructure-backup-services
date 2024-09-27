@@ -8,7 +8,7 @@ variable "tna_backup_inventory_arn" {}
 resource "aws_s3_bucket" "tna_service_backup" {
     bucket = "tna-service-backup"
 
-    force_destroy = true
+    force_destroy = false
 
     tags = merge(
         var.default_tags,

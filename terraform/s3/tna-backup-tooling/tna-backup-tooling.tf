@@ -6,7 +6,7 @@ variable "default_tags" {}
 resource "aws_s3_bucket" "tna_backup_tooling" {
     bucket = "tna-backup-tooling"
 
-    force_destroy = true
+    force_destroy = false
 
     tags = merge(
         var.default_tags,
