@@ -43,3 +43,20 @@ resource "aws_s3_bucket_public_access_block" "da_sftp_intake" {
     ignore_public_acls      = false
     restrict_public_buckets = false
 }
+
+import {
+  to = aws_s3_bucket.da_sftp_intake
+  id = "da-sftp-intake"
+}
+import {
+  to = aws_s3_bucket_ownership_controls.da_sftp_intake
+  id = "da-sftp-intake"
+}
+import {
+  to = aws_s3_bucket_server_side_encryption_configuration.da_sftp_intake
+  id = "da-sftp-intake,${data.aws_caller_identity.current.account_id}"
+}
+import {
+  to = aws_s3_bucket_public_access_block.da_sftp_intake
+  id = "da-sftp-intake"
+}
