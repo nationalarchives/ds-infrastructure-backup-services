@@ -70,10 +70,11 @@ module "mysql-main-prime" {
     vpc_id          = local.vpc_info.id
     db_subnet_cidrs = [
         local.private_subnet_a_info.cidr_block,
-        data.aws_ssm_parameter.client_vpn_cidr.value,
     ]
 
     db_subnet_id = local.private_subnet_a_info.id
+    public_subnet_cidr_block = local.public_subnet_a_info.cidr_block
+    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
     zone_id   = data.aws_ssm_parameter.route53_private_zone_id.value
     mysql_dns = "mysql-main-prime.backup.local"

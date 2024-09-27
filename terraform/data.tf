@@ -12,10 +12,6 @@ data "aws_ssm_parameter" "private_subnet_a_info" {
     name = "/infrastructure/network/private-sub-a"
 }
 
-data "aws_ssm_parameter" "client_vpn_cidr" {
-    name = "/infrastructure/network/client_vpn_cidr"
-}
-
 data "aws_ssm_parameter" "mysql_main_prime_volume_id" {
     name = "/infrastructure/databases/mysql-main-prime/volume_id"
 }

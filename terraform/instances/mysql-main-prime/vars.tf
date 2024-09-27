@@ -33,3 +33,5 @@ variable "zone_id" {}
 variable "vpc_id" {}
 variable "db_subnet_id" {}
 variable "db_subnet_cidrs" {}
+variable "public_subnet_cidr_block" {}
+variable "private_subnet_cidr_block" {}

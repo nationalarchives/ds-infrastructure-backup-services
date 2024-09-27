@@ -10,10 +10,6 @@ In _ds-infrastructure-databases_ using GitHub Actions the EBS for database serve
 created before terraform apply. \
 Building the AMIs using the GitHub Actions for instances need to be prepared
 
-### SSM - parameter store
-Parameter _/infrastructure/network/client_vpn_cidr_ need to be updated to allow
-access using the Client VPN connection
-
 ### ASM - secrets
 Secret _/infrastructure/credentials/mysql-backup_ need to be added before building the database servers. \
 structure of the secrets is:
