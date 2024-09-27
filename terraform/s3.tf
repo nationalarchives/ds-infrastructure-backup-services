@@ -75,18 +75,18 @@ module "s3-tna-service-backup" {
 }
 
 import {
-  to = module.s3-da-sftp-intake.aws_s3_bucket.da_sftp_intake
-  id = "da-sftp-intake"
+  to = module.s3-ds-backup-kpf-administration.aws_s3_bucket.ds_backup_kpf_administration
+  id = "ds-backup-kpf-administration"
 }
 import {
-  to = module.s3-da-sftp-intake.aws_s3_bucket_ownership_controls.da_sftp_intake
-  id = "da-sftp-intake"
+  to = module.s3-ds-backup-kpf-administration.aws_s3_bucket_ownership_controls.ds_backup_kpf_administration
+  id = "ds-backup-kpf-administration"
 }
 import {
-  to = module.s3-da-sftp-intake.aws_s3_bucket_server_side_encryption_configuration.da_sftp_intake
-  id = "da-sftp-intake"
+  to = module.s3-ds-backup-kpf-administration.aws_s3_bucket_server_side_encryption_configuration.ds_backup_kpf_administration
+  id = "ds-backup-kpf-administration"
 }
 import {
-  to = module.s3-da-sftp-intake.aws_s3_bucket_public_access_block.da_sftp_intake
-  id = "da-sftp-intake"
+  to = module.s3-ds-backup-kpf-administration.aws_s3_bucket_public_access_block.ds_backup_kpf_administration
+  id = "ds-backup-kpf-administration"
 }
