@@ -7,7 +7,7 @@ variable "default_tags" {}
 resource "aws_s3_bucket" "da_sftp_intake" {
     bucket = "da-sftp-intake"
 
-    force_destroy = true
+    force_destroy = false
 
     tags = merge(
         var.default_tags,
