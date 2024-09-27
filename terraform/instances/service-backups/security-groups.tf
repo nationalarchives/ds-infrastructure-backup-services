@@ -10,7 +10,7 @@ resource "aws_security_group" "service_backups" {
 
 resource "aws_security_group_rule" "rp_response_ingress" {
     cidr_blocks       = [
-        "192.168.2.0/23"
+        var.private_subnet_cidr_block,
     ]
     description       = "allow response from internal subnets"
     from_port         = 1024
