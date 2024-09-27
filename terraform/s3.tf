@@ -75,18 +75,18 @@ module "s3-tna-service-backup" {
 }
 
 import {
-  to = module.s3-tna-backup-intake.aws_s3_bucket.tna_backup_intake
-  id = "tna-backup-intake"
+  to = module.s3-tna-backup-inventory.aws_s3_bucket.tna_backup_inventory
+  id = "tna-backup-inventory"
 }
 import {
-  to = module.s3-tna-backup-intake.aws_s3_bucket_ownership_controls.tna_backup_intake
-  id = "tna-backup-intake"
+  to = module.s3-tna-backup-inventory.aws_s3_bucket_ownership_controls.tna_backup_inventory
+  id = "tna-backup-inventory"
 }
 import {
-  to = module.s3-tna-backup-intake.aws_s3_bucket_server_side_encryption_configuration.tna_backup_intake
-  id = "tna-backup-intake"
+  to = module.s3-tna-backup-inventory.aws_s3_bucket_server_side_encryption_configuration.tna_backup_inventory
+  id = "tna-backup-inventory"
 }
 import {
-  to = module.s3-tna-backup-intake.aws_s3_bucket_public_access_block.tna_backup_intake
-  id = "tna-backup-intake"
+  to = module.s3-tna-backup-inventory.aws_s3_bucket_public_access_block.tna_backup_inventory
+  id = "tna-backup-inventory"
 }
