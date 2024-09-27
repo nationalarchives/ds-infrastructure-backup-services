@@ -6,7 +6,7 @@ variable "default_tags" {}
 resource "aws_s3_bucket" "ds_backup_kpf_administration" {
     bucket = "ds-backup-kpf-administration"
 
-    force_destroy = true
+    force_destroy = false
 
     tags = merge(
         var.default_tags,
