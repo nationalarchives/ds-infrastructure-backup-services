@@ -1,16 +1,16 @@
-module "da-sftp-intake" {
+module "s3-da-sftp-intake" {
     source = "./s3/da-sftp-intake"
 
     default_tags = local.default_tags
 }
 
-module "ds-backup-kpf-administration" {
+module "s3-ds-backup-kpf-administration" {
     source = "./s3/ds-backup-kpf-administration"
 
     default_tags = local.default_tags
 }
 
-module "tna-backup-drop-zone" {
+module "s3-tna-backup-drop-zone" {
     source = "./s3/tna-backup-drop-zone"
 
     tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
@@ -28,7 +28,7 @@ module "tna-backup-drop-zone" {
     default_tags = local.default_tags
 }
 
-module "tna-backup-intake" {
+module "s3-tna-backup-intake" {
     source = "./s3/tna-backup-intake"
 
     tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
@@ -46,19 +46,19 @@ module "tna-backup-intake" {
     default_tags = local.default_tags
 }
 
-module "tna-backup-inventory" {
+module "s3-tna-backup-inventory" {
     source = "./s3/tna-backup-inventory"
 
     default_tags = local.default_tags
 }
 
-module "tna-backup-tooling" {
+module "s3-tna-backup-tooling" {
     source = "./s3/tna-backup-tooling"
 
     default_tags = local.default_tags
 }
 
-module "tna-backup-vault" {
+module "s3-tna-backup-vault" {
     source = "./s3/tna-backup-vault"
 
     tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
@@ -66,7 +66,7 @@ module "tna-backup-vault" {
     default_tags = local.default_tags
 }
 
-module "tna-service-backup" {
+module "s3-tna-service-backup" {
     source = "./s3/tna-service-backup"
 
     tna_backup_inventory_arn = module.tna-backup-inventory.tna_backup_inventory_arn
