@@ -75,18 +75,18 @@ module "s3-tna-service-backup" {
 }
 
 import {
-  to = aws_s3_bucket.da_sftp_intake
+  to = module.s3-da-sftp-intake.aws_s3_bucket.da_sftp_intake
   id = "da-sftp-intake"
 }
 import {
-  to = aws_s3_bucket_ownership_controls.da_sftp_intake
+  to = module.s3-da-sftp-intake.aws_s3_bucket_ownership_controls.da_sftp_intake
   id = "da-sftp-intake"
 }
 import {
-  to = aws_s3_bucket_server_side_encryption_configuration.da_sftp_intake
+  to = module.s3-da-sftp-intake.aws_s3_bucket_server_side_encryption_configuration.da_sftp_intake
   id = "da-sftp-intake,${data.aws_caller_identity.current.account_id}"
 }
 import {
-  to = aws_s3_bucket_public_access_block.da_sftp_intake
+  to = module.s3-da-sftp-intake.aws_s3_bucket_public_access_block.da_sftp_intake
   id = "da-sftp-intake"
 }
