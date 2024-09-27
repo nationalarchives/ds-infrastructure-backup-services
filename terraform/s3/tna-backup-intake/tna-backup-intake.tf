@@ -65,7 +65,7 @@ resource "aws_s3_bucket_inventory" "tna_backup_intake" {
 
 resource "aws_s3_bucket_policy" "tna_backup_intake_access_from_another_account" {
     bucket = aws_s3_bucket.tna_backup_intake.id
-    policy = file("${path.module}/templates/tna-backup-intake-bucket-policy.json")
+    policy = file("${path.root}/s3/templates/tna-backup-intake-bucket-policy.json")
 }
 
 resource "aws_s3_access_point" "backup_access_point" {
@@ -89,7 +89,7 @@ resource "aws_s3control_access_point_policy" "ap_policy" {
     for_each         = {for k in var.bkup_access_points : k.ap_name => k}
     access_point_arn = aws_s3_access_point.backup_access_point["${each.value.ap_name}"].arn
 
-    policy = templatefile("${path.module}/templates/backup-access-point-policy.tftpl", {
+    policy = templatefile("${path.root}/s3/templates/backup-access-point-policy.tftpl", {
         ap_name   = each.value.ap_name,
         ap_path   = each.value.ap_path,
         role_arns = each.value.role_arns

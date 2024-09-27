@@ -65,7 +65,7 @@ resource "aws_s3_bucket_inventory" "tna_backup_drop_zone" {
 
 resource "aws_s3_bucket_policy" "tna_backup_drop_zone_access_from_another_account" {
     bucket = aws_s3_bucket.tna_backup_drop_zone.id
-    policy = file("${path.module}/templates/tna-backup-drop-zone-bucket-policy.json")
+    policy = file("${path.root}/s3/templates/tna-backup-drop-zone-bucket-policy.json")
 }
 
 resource "aws_s3_access_point" "backup_drop_zone_access_point" {
@@ -89,7 +89,7 @@ resource "aws_s3control_access_point_policy" "drop_zone_ap_policy" {
     for_each         = {for k in var.bkup_drop_zone_access_points : k.ap_name => k}
     access_point_arn = aws_s3_access_point.backup_drop_zone_access_point["${each.value.ap_name}"].arn
 
-    policy = templatefile("${path.module}/templates/backup-drop-zone-access-point-policy.tftpl", {
+    policy = templatefile("${path.root}/s3/templates/backup-drop-zone-access-point-policy.tftpl", {
         ap_name   = each.value.ap_name,
         ap_path   = each.value.ap_path,
         role_arns = each.value.role_arns
