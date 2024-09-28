@@ -104,7 +104,7 @@ import {
 }
 import {
   to = module.service_backups.aws_iam_instance_profile.ec2_tna_service_backup_profile
-  id = "ec2_tna_service_backup_profile"
+  id = "arn:aws:iam::637423167251:instance-profile/ec2-tna-service-backup-profile"
 }
 import {
   to = module.service_backups.aws_security_group.service_backups
