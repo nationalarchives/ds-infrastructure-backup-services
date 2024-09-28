@@ -8,7 +8,6 @@ module "da_sftp_x_posts" {
     key_name      = "da-x-post-backup-eu-west-2"
     subnet_id     = local.private_subnet_a_info.id
     volume_size   = 200
-    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
     default_tags = local.default_tags
 }
