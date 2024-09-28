@@ -1,3 +1,18 @@
+module "da_sftp_x_posts" {
+    source = "./instances/da-sftp-x-posts"
+
+    vpc_id = local.vpc_info.id
+
+    image_id      = data.aws_ami.da_sftp_x_posts.id
+    instance_type = "t3a.micro"
+    key_name      = "da-x-post-backup-eu-west-2"
+    subnet_id     = local.private_subnet_a_info.id
+    volume_size   = 200
+    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
+
+    default_tags = local.default_tags
+}
+
 module "service_backups" {
     source = "./instances/service-backups"
 
@@ -87,26 +102,34 @@ module "mysql-main-prime" {
 
 
 import {
-  to = module.service_backups.aws_instance.service_backups
-  id = "i-075754830e674adb5"
+  to = module.da_sftp_x_posts.aws_instance.x_posts_backup
+  id = "i-0989834fbd9e74581"
 }
 import {
-  to = module.service_backups.aws_launch_template.service_backups
-  id = "lt-0e5f7c23d7c6cb8db"
+  to = module.da_sftp_x_posts.aws_launch_template.da_x_posts_backup
+  id = "lt-0e7f1051550baee4c"
 }
 import {
-  to = module.service_backups.aws_iam_policy.ec2_tna_service_backup_policy
-  id = "arn:aws:iam::637423167251:policy/tna_service_backup_policy"
+  to = module.da_sftp_x_posts.aws_iam_policy.ec2_da_x_posts_backup_policy
+  id = "arn:aws:iam::637423167251:policy/da-x-posts-backup-policy"
 }
 import {
-  to = module.service_backups.aws_iam_role.ec2_tna_service_backup_role
-  id = "ec2-tna-service-backup-role"
+  to = module.da_sftp_x_posts.aws_iam_role.ec2_da_x_posts_backup_role
+  id = "ec2-da-x-posts-role"
 }
 import {
-  to = module.service_backups.aws_iam_instance_profile.ec2_tna_service_backup_profile
-  id = "ec2-tna-service-backup-profile"
+  to = module.da_sftp_x_posts.aws_iam_instance_profile.ec2_da_x_posts_backup_profile
+  id = "ec2-da-x-posts-profile"
 }
 import {
-  to = module.service_backups.aws_security_group.service_backups
-  id = "sg-0673b81b75cae553d"
+  to = module.da_sftp_x_posts.aws_route53_zone.sftp_public
+  id = "Z09855151G26I3AHVIPO"
+}
+import {
+  to = module.da_sftp_x_posts.aws_route53_record.sftp_public
+  id = "Z09855151G26I3AHVIPO_da-sftp-xposts.nationalarchives.gov.uk_A"
+}
+import {
+  to = module.da_sftp_x_posts.aws_security_group.da_x_posts_backup
+  id = "sg-036c14f451ddf3fe4"
 }

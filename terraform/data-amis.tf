@@ -17,7 +17,7 @@ data "aws_ami" "service_backups" {
     ]
 }
 
-data "aws_ami" "da_sftp_x-posts" {
+data "aws_ami" "da_sftp_x_posts" {
     most_recent = true
     filter {
         name = "name"

@@ -4,7 +4,7 @@ resource "aws_security_group" "service_backups" {
     vpc_id      = var.vpc_id
 
     tags = merge(var.default_tags, {
-        Name = "beta-rp"
+        Name = "service-backups"
     })
 }
 
