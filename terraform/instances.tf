@@ -85,3 +85,28 @@ module "mysql-main-prime" {
     })
 }
 
+
+import {
+  to = module.service_backups.aws_instance.service_backups
+  id = "i-075754830e674adb5"
+}
+import {
+  to = module.service_backups.aws_launch_template.service_backups
+  id = "lt-0e5f7c23d7c6cb8db"
+}
+import {
+  to = module.service_backups.aws_iam_policy.ec2_tna_service_backup_policy
+  id = "arn:aws:iam::637423167251:policy/tna_service_backup_policy"
+}
+import {
+  to = module.service_backups.aws_iam_role.ec2_tna_service_backup_role
+  id = "ec2-tna-service-backup-role"
+}
+import {
+  to = module.service_backups.aws_iam_instance_profile.ec2_tna_service_backup_profile
+  id = "ec2_tna_service_backup_profile"
+}
+import {
+  to = module.service_backups.aws_security_group.service_backups
+  id = "sg-0673b81b75cae553d"
+}
