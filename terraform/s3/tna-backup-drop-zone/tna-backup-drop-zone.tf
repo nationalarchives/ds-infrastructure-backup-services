@@ -96,3 +96,11 @@ resource "aws_s3control_access_point_policy" "drop_zone_ap_policy" {
         role_arns = each.value.role_arns
     })
 }
+
+output "tna_backup_drop_zone_arn" {
+    value = aws_s3_bucket.tna_backup_drop_zone.arn
+}
+
+output "tna_backup_drop_zone_name" {
+    value = aws_s3_bucket.tna_backup_drop_zone.bucket
+}
