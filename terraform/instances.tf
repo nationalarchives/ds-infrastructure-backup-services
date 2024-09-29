@@ -98,37 +98,3 @@ module "mysql-main-prime" {
         Product = "MySQL"
     })
 }
-
-
-import {
-  to = module.da_sftp_x_posts.aws_instance.x_posts_backup
-  id = "i-0989834fbd9e74581"
-}
-import {
-  to = module.da_sftp_x_posts.aws_launch_template.da_x_posts_backup
-  id = "lt-0e7f1051550baee4c"
-}
-import {
-  to = module.da_sftp_x_posts.aws_iam_policy.ec2_da_x_posts_backup_policy
-  id = "arn:aws:iam::637423167251:policy/da-x-posts-backup-policy"
-}
-import {
-  to = module.da_sftp_x_posts.aws_iam_role.ec2_da_x_posts_backup_role
-  id = "ec2-da-x-posts-role"
-}
-import {
-  to = module.da_sftp_x_posts.aws_iam_instance_profile.ec2_da_x_posts_backup_profile
-  id = "ec2-da-x-posts-profile"
-}
-import {
-  to = module.da_sftp_x_posts.aws_route53_zone.sftp_public
-  id = "Z09855151G26I3AHVIPO"
-}
-import {
-  to = module.da_sftp_x_posts.aws_route53_record.sftp_public
-  id = "Z09855151G26I3AHVIPO_da-sftp-xposts.nationalarchives.gov.uk_A"
-}
-import {
-  to = module.da_sftp_x_posts.aws_security_group.da_x_posts_backup
-  id = "sg-036c14f451ddf3fe4"
-}
