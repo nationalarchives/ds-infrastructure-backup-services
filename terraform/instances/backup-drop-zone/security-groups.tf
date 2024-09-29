@@ -1,9 +1,9 @@
 ##
 # instance security group
 #
-resource "aws_security_group" "backup_intake" {
-    name        = "backup-intake"
-    description = "backup intake security group"
+resource "aws_security_group" "backup_drop_zone" {
+    name        = "backup-drop-zone"
+    description = "backup drop zone security group"
     vpc_id      = var.vpc_id
 
     tags = merge(var.tags, {
@@ -20,7 +20,7 @@ resource "aws_security_group_rule" "api_html_ingress" {
     from_port         = 80
     to_port           = 80
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "ingress"
 }
 
@@ -33,7 +33,7 @@ resource "aws_security_group_rule" "api_htmls_ingress" {
     from_port         = 443
     to_port           = 443
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "ingress"
 }
 
@@ -45,7 +45,7 @@ resource "aws_security_group_rule" "response_ingress" {
     from_port         = 49152
     to_port           = 65535
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "ingress"
 }
 
@@ -57,7 +57,7 @@ resource "aws_security_group_rule" "http_egress" {
     from_port         = 80
     to_port           = 80
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "egress"
 }
 
@@ -69,7 +69,7 @@ resource "aws_security_group_rule" "https_egress" {
     from_port         = 443
     to_port           = 443
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "egress"
 }
 
@@ -81,7 +81,7 @@ resource "aws_security_group_rule" "ephemeral_egress" {
     from_port         = 49152
     to_port           = 65535
     protocol          = "tcp"
-    security_group_id = aws_security_group.backup_intake.id
+    security_group_id = aws_security_group.backup_drop_zone.id
     type              = "egress"
 }
 ##

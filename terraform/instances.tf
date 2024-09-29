@@ -39,8 +39,8 @@ module "shared_lb" {
     tags = local.default_tags
 }
 
-module "backup-intake" {
-    source = "./instances/backup-intake"
+module "backup-drop-zone" {
+    source = "./instances/backup-drop-zone"
 
     image_id      = data.aws_ami.backup_intake.id
     instance_type = "t3a.large"
