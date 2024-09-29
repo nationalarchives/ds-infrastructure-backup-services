@@ -7,7 +7,7 @@ resource "aws_security_group" "backup_drop_zone" {
     vpc_id      = var.vpc_id
 
     tags = merge(var.tags, {
-        Name = "backup-intake"
+        Name = "backup-drop-zone"
     })
 }
 

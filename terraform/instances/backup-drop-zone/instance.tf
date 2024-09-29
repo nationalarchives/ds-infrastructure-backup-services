@@ -4,7 +4,7 @@ resource "aws_instance" "backup_drop_zone" {
     key_name               = var.key_name
     iam_instance_profile   = aws_iam_instance_profile.ec2_tna_backup_drop_zone_profile.name
     vpc_security_group_ids = [
-        aws_security_group.backup_intake.id,
+        aws_security_group.backup_drop_zone.id,
     ]
     subnet_id              = var.subnet_id
     user_data              = file("${path.module}/scripts/userdata.sh")
