@@ -77,13 +77,3 @@ resource "aws_s3control_access_point_policy" "ap_policy" {
         role_arns = each.value.role_arns
     })
 }
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "tna_backup_intake" {
-    bucket = aws_s3_bucket.tna_backup_intake.id
-
-    rule {
-        apply_server_side_encryption_by_default {
-            sse_algorithm = "AES256"
-        }
-    }
-}
