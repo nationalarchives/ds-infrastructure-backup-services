@@ -73,3 +73,20 @@ module "s3-tna-service-backup" {
 
     default_tags = local.default_tags
 }
+
+import {
+  to = module.s3-tna-backup-intake.aws_s3_bucket.tna_backup_intake
+  id = "tna-backup-intake"
+}
+import {
+  to = module.s3-tna-backup-intake.aws_s3_bucket_ownership_controls.tna_backup_intake
+  id = "tna-backup-intake"
+}
+import {
+  to = module.s3-tna-backup-intake.aws_s3_bucket_server_side_encryption_configuration.tna_backup_intake
+  id = "tna-backup-intake"
+}
+import {
+  to = module.s3-tna-backup-intake.aws_s3_bucket_public_access_block.tna_backup_intake
+  id = "tna-backup-intake"
+}
