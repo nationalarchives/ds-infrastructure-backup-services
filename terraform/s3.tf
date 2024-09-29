@@ -90,3 +90,7 @@ import {
   to = module.s3-tna-backup-intake.aws_s3_bucket_public_access_block.tna_backup_intake
   id = "tna-backup-intake"
 }
+import {
+  to = module.s3-tna-backup-intake.aws_s3_access_point.backup_access_point["ds-backup-target"]
+  id = "637423167251:ds-backup-target"
+}
