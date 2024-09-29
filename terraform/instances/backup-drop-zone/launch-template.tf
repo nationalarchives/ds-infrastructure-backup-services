@@ -12,7 +12,7 @@ resource "aws_launch_template" "backup_drop_zone" {
     disable_api_termination = true
 
     vpc_security_group_ids = [
-        aws_security_group.backup_intake.id,
+        aws_security_group.backup_drop_zone.id,
     ]
 
     user_data = base64encode(file("${path.module}/scripts/userdata.sh"))

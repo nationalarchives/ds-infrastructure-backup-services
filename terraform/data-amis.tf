@@ -36,12 +36,12 @@ data "aws_ami" "da_sftp_x_posts" {
     ]
 }
 
-data "aws_ami" "backup_intake" {
+data "aws_ami" "backup_drop_zone" {
     most_recent = true
     filter {
         name = "name"
         values = [
-            "backup-intake-primer*"
+            "backup-drop-zone-primer*"
         ]
     }
     filter {

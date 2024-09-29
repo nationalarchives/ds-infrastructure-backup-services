@@ -33,7 +33,7 @@ module "shared_lb" {
     vpc_id = local.vpc_info.id
     subnet_id = local.public_subnet_a_info.id
 
-    backup_intake_instance_id = module.backup-intake.backup_intake_instance_id
+    backup_drop_zone_instance_id = module.backup-drop-zone.backup_intake_instance_id
     cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
 
     tags = local.default_tags
@@ -42,10 +42,10 @@ module "shared_lb" {
 module "backup-drop-zone" {
     source = "./instances/backup-drop-zone"
 
-    image_id      = data.aws_ami.backup_intake.id
+    image_id      = data.aws_ami.backup_drop_zone.id
     instance_type = "t3a.large"
     volume_size   = 100
-    key_name      = "backup-intake-eu-west-2"
+    key_name      = "backup-drop-zone-eu-west-2"
 
     vpc_id    = local.vpc_info.id
     subnet_id = local.private_subnet_a_info.id

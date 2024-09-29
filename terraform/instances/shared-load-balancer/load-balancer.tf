@@ -38,7 +38,7 @@ resource "aws_lb_target_group" "backup_intake" {
 
 resource "aws_lb_target_group_attachment" "backup_intake" {
     target_group_arn = aws_lb_target_group.backup_intake.arn
-    target_id        = var.backup_intake_instance_id
+    target_id        = var.backup_drop_zone_instance_id
     port             = 80
 }
 
