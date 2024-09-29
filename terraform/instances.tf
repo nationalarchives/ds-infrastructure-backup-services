@@ -6,7 +6,7 @@ module "da_sftp_x_posts" {
     image_id      = data.aws_ami.da_sftp_x_posts.id
     instance_type = "t3a.micro"
     key_name      = "da-x-post-backup-eu-west-2"
-    subnet_id     = local.private_subnet_a_info.id
+    subnet_id     = local.public_subnet_a_info.id
     volume_size   = 200
 
     default_tags = local.default_tags
