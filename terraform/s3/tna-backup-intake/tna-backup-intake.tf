@@ -45,24 +45,6 @@ resource "aws_s3_bucket_public_access_block" "tna_backup_intake" {
     restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_inventory" "tna_backup_intake" {
-    bucket = aws_s3_bucket.tna_backup_intake.id
-    name   = "EntireBucketDaily"
-
-    included_object_versions = "All"
-
-    schedule {
-        frequency = "Weekly"
-    }
-
-    destination {
-        bucket {
-            format     = "CSV"
-            bucket_arn = var.tna_backup_inventory_arn
-        }
-    }
-}
-
 resource "aws_s3_bucket_policy" "tna_backup_intake_access_from_another_account" {
     bucket = aws_s3_bucket.tna_backup_intake.id
     policy = file("${path.root}/s3/templates/tna-backup-intake-bucket-policy.json")
@@ -94,4 +76,14 @@ resource "aws_s3control_access_point_policy" "ap_policy" {
         ap_path   = each.value.ap_path,
         role_arns = each.value.role_arns
     })
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "tna_backup_intake" {
+    bucket = aws_s3_bucket.tna_backup_intake.id
+
+    rule {
+        apply_server_side_encryption_by_default {
+            sse_algorithm = "AES256"
+        }
+    }
 }
