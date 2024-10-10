@@ -22,8 +22,9 @@ def process_object(event_data):
     asm_id = os.getenv('ASM_ID')
 
     random_id = set_random_id()
+    print(random_id)
     db_secrets = Secrets(asm_id)
-    print(db_secrets)
+    print(db_secrets.get_json())
 #    s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
 #    object_info = s3_object.get_object_info()
 #    object_info['identifier'] = random_id()

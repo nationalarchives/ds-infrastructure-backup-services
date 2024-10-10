@@ -47,7 +47,7 @@ resource "aws_lambda_function" "backup_check_in" {
 
     handler = "backup-check-in.lambda_handler"
 
-    memory_size = 512
+    memory_size = 1024
     timeout     = 10
 
     ephemeral_storage {
