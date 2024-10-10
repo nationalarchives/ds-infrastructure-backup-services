@@ -1,6 +1,6 @@
 data "archive_file" "lambda_backup_check_in" {
     type        = "zip"
-    source_dir  = "${path.root}/lambda/backup-check-in/source"
+    source_dir  = "${path.root}/lambda/backup-check-in/src"
     output_path = "${path.root}/lambda/backup-check-in-zip"
 }
 
