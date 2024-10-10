@@ -18,7 +18,7 @@ class Bucket:
             elif error.response['Error']['Code'] == 'InvalidObjectState':
                 print('S3 - InvalidObjectState')
             else:
-                print('ASM - unknown error')
+                print('S3 - unknown error')
             raise error
         else:
             self.deconstruct_path()
