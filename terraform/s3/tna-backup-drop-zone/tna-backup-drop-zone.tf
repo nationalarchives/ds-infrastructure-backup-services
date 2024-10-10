@@ -104,3 +104,7 @@ output "tna_backup_drop_zone_arn" {
 output "tna_backup_drop_zone_name" {
     value = aws_s3_bucket.tna_backup_drop_zone.bucket
 }
+
+output "tna_backup_drop_zone_id" {
+    value = aws_s3_bucket.tna_backup_drop_zone.id
+}

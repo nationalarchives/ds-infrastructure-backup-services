@@ -1,10 +1,3 @@
-#variable "notifications_channel" {}
-
-#module "slack-notifications" {
-#    source                = "./lambda/slack_notifications"
-#    notifications_channel = var.notifications_channel
-#}
-
 module "backup-check-in" {
     source = "./lambda/backup-check-in"
 
@@ -30,6 +23,9 @@ module "backup-check-in" {
         data.klayers_package_latest_version.mysql-connector-python-3_12.arn,
         aws_lambda_layer_version.datetime_5_5.arn,
     ]
+
+    bucket_id = module.s3-tna-backup-drop-zone.tna_backup_drop_zone_id
+    topic_arn = module.backup-check-in.s3_backup_check_in_topic_arn
 
     tags = local.default_tags
 }

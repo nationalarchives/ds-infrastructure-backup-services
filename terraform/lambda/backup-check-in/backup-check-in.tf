@@ -64,7 +64,7 @@ resource "aws_lambda_function" "backup_check_in" {
     environment {
         variables = {
             QUEUE_URL = var.queue_url
-            ASM_ID = var.asm_id
+            ASM_ID    = var.asm_id
         }
     }
 
@@ -98,4 +98,15 @@ resource "aws_s3_bucket_notification" "lambda_backup_check_in" {
     depends_on = [
         aws_lambda_permission.backup_check_in
     ]
+}
+
+resource "aws_s3_bucket_notification" "backup_check_in" {
+    bucket = var.bucket_id
+
+    topic {
+        topic_arn = var.topic_arn
+        events = [
+            "s3:ObjectCreated:*"
+        ]
+    }
 }
