@@ -9,7 +9,7 @@ class Bucket:
         self.full_path = ""
         self.location = ""
         self.object_name = ""
-        self.client = boto3.client('s3Client')
+        self.client = boto3.client('s3')
         try:
             self.obj_data = self.client.get_object(Bucket=self.bucket, Key=self.key)
         except botocore.exceptions.ClientError as error:
