@@ -22,7 +22,9 @@ module "backup-check-in" {
 
     security_group_ids = []
 
-    runtime = "python3.12"
+    runtime   = "python3.12"
+    queue_url = module.backup-check-in-queue.backup_check_in_queue_url
+    asm_id    = "application/lambda/backup-check-in"
     layers = [
         data.klayers_package_latest_version.boto3-3_12.arn,
         data.klayers_package_latest_version.mysql-connector-python-3_12.arn,

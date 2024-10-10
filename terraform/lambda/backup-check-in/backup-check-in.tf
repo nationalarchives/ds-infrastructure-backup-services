@@ -63,8 +63,8 @@ resource "aws_lambda_function" "backup_check_in" {
 
     environment {
         variables = {
-            QUEUE_URL = "bar"
-            ASM_ID = ""
+            QUEUE_URL = var.queue_url
+            ASM_ID = var.asm_id
         }
     }
 

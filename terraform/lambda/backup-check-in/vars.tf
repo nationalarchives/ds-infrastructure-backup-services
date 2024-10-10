@@ -13,4 +13,7 @@ variable "region" {}
 variable "bucket_arn" {}
 variable "bucket_name" {}
 
+variable "queue_url" {}
+variable "asm_id" {}
+
 variable "vpc_id" {}
