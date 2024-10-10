@@ -4,7 +4,8 @@ from database.db_mysql import Database
 from sqs.sqs import Queue
 from s3.s3 import Bucket
 from secrets.asm import Secrets
-import helper_fx
+from helper_fx.helpers import set_random_id
+from helper_fx.helpers import find_key_dict
 
 
 def lambda_handler(event, context):
@@ -19,7 +20,7 @@ def process_object(event_data):
     queue_url = os.getenv('QUEUE_URL')
     asm_id = os.getenv('ASM_ID')
 
-    random_id = helper_fx.set_random_id()
+    random_id = set_random_id()
     db_secrets = Secrets(asm_id)
 
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
@@ -37,19 +38,19 @@ def process_object(event_data):
         object_info['response_metadata_str'] = json.dumps(s3_object['ResponseMetadata'], default=str)
     if "Metadata" in s3_object:
         obj_metadata = s3_object['Metadata']
-        if helper_fx.find_key_dict("retention_period", obj_metadata):
+        if find_key_dict("retention_period", obj_metadata):
             object_info['retention'] = obj_metadata['retention_period']
         else:
             object_info['retention'] = ''
-        if helper_fx.find_key_dict("lockmode", obj_metadata):
+        if find_key_dict("lockmode", obj_metadata):
             object_info['lock_mode'] = obj_metadata['lock_mode']
         else:
             object_info['lock_mode'] = ''
-        if helper_fx.find_key_dict("legal_hold", obj_metadata):
+        if find_key_dict("legal_hold", obj_metadata):
             object_info['legal_hold'] = obj_metadata['legal_hold']
         else:
             object_info['legal_hold'] = ''
-        if helper_fx.find_key_dict(obj_metadata, "lock-until-date"):
+        if find_key_dict("lock-until-date", obj_metadata):
             object_info['lock_until_date'] = obj_metadata['lock-until-date']
         else:
             object_info['lock_until_date'] = ''
