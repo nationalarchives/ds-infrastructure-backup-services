@@ -1,4 +1,4 @@
-variable "notifications_channel" {}
+#variable "notifications_channel" {}
 
 #module "slack_notifications" {
 #    source                = "./lambda/slack_notifications"
