@@ -1,6 +1,6 @@
 resource "aws_security_group" "lambda_backup_drop_zone_sg" {
     name        = "lambda-backup-drop-zone-sg"
-    description = "lambda function for backup check-§in"
+    description = "lambda function for backup check-in"
     vpc_id      = var.vpc_id
 
     tags = merge(var.tags, {

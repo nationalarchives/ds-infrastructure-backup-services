@@ -92,7 +92,7 @@ resource "aws_s3_bucket_notification" "lambda_backup_check_in" {
         events = [
             "s3:ObjectCreated:*"
         ]
-        lambda_function_arn = "${aws_lambda_function.backup_check_in.arn}"
+        lambda_function_arn = aws_lambda_function.backup_check_in.arn}
     }
 
     depends_on = [
