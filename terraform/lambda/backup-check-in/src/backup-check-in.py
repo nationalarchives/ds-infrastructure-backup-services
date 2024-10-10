@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     event_data = event['Records'][0]['s3']
     process_object(event_data)
     return {
-        'message': 'backup-check-in finished'
+        'message': 'backup-check-in finished for {bucket}/{object}'.format(bucket=event_data['bucket']['name'], object=event_data['object']['key'])
     }
 
 
