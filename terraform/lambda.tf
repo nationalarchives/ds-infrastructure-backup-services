@@ -5,8 +5,8 @@ variable "notifications_channel" {}
 #    notifications_channel = var.notifications_channel
 #}
 
-module "backup_intake" {
-    source = "./lambda/backup-intake"
+module "backup_check_in" {
+    source = "./lambda/backup-check-in"
 
     region         = "eu-west-2"
     aws_account_id = data.aws_caller_identity.current.account_id
