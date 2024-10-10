@@ -1,7 +1,7 @@
 resource "aws_instance" "mysql_main" {
     launch_template {
         id      = aws_launch_template.mysql_main_prime.id
-        version = "$$Latest"
+        version = "$Latest"
     }
     subnet_id                   = var.db_subnet_id
     associate_public_ip_address = false
