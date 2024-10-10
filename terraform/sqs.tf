@@ -1,3 +1,3 @@
-module "backup-check-in-queue" {
+module "sqs-backup-check-in" {
     source = "./sqs"
 }

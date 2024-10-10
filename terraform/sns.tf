@@ -1,4 +1,4 @@
-module "backup-check-in" {
+module "sns-backup-check-in" {
     source = "./sns"
 
     account_id = data.aws_caller_identity.current.account_id

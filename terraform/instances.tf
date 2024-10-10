@@ -1,4 +1,4 @@
-module "da-sftp-x-posts" {
+module "ec2-da-sftp-x-posts" {
     source = "./instances/da-sftp-x-posts"
 
     vpc_id = local.vpc_info.id
@@ -12,7 +12,7 @@ module "da-sftp-x-posts" {
     default_tags = local.default_tags
 }
 
-module "service-backups" {
+module "ec2-service-backups" {
     source = "./instances/service-backups"
 
     vpc_id = local.vpc_info.id
@@ -27,19 +27,19 @@ module "service-backups" {
     default_tags = local.default_tags
 }
 
-module "shared-lb" {
+module "ec2-shared-lb" {
     source = "./instances/shared-load-balancer"
 
     vpc_id = local.vpc_info.id
     subnet_id = local.public_subnet_a_info.id
 
-    backup_drop_zone_instance_id = module.backup-drop-zone.backup_intake_instance_id
+    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.backup_intake_instance_id
     cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
 
     tags = local.default_tags
 }
 
-module "backup-drop-zone" {
+module "ec2-backup-drop-zone" {
     source = "./instances/backup-drop-zone"
 
     image_id      = data.aws_ami.backup_drop_zone.id
@@ -54,7 +54,7 @@ module "backup-drop-zone" {
     tags = local.default_tags
 }
 
-module "mysql-main-prime" {
+module "ec2-mysql-main-prime" {
     source = "./instances/mysql-main-prime"
 
     resource_identifier = "main-prime"

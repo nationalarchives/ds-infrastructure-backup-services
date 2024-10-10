@@ -1,4 +1,4 @@
-module "backup-check-in" {
+module "lambda-backup-check-in" {
     source = "./lambda/backup-check-in"
 
     region         = "eu-west-2"
@@ -16,7 +16,7 @@ module "backup-check-in" {
     security_group_ids = []
 
     runtime   = "python3.12"
-    queue_url = module.backup-check-in-queue.backup_check_in_queue_url
+    queue_url = module.sqs-backup-check-in.backup_check_in_queue_url
     asm_id    = "application/lambda/backup-check-in"
     layers = [
         data.klayers_package_latest_version.boto3-3_12.arn,
@@ -25,7 +25,7 @@ module "backup-check-in" {
     ]
 
     bucket_id = module.s3-tna-backup-drop-zone.tna_backup_drop_zone_id
-    topic_arn = module.backup-check-in.s3_backup_check_in_topic_arn
+    topic_arn = module.sns-backup-check-in.s3_backup_check_in_topic_arn
 
     tags = local.default_tags
 }
