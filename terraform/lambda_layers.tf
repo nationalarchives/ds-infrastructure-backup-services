@@ -7,61 +7,6 @@
 # 4. copy zip to s3 bucket
 
 ##
-# python 3.9
-# ------------------------------------------------------------------------------
-data "klayers_package_latest_version" "boto3" {
-    name   = "boto3"
-    region = "eu-west-2"
-
-    python_version = "3.9"
-}
-
-resource "aws_lambda_layer_version" "datetime" {
-    layer_name = "datetime"
-
-    s3_bucket = "ds-${var.environment}-deployment-source"
-    s3_key    = "lambda/layers/datetime.zip"
-
-    compatible_runtimes = [
-        "python3.9",
-    ]
-}
-
-resource "aws_lambda_layer_version" "pytz" {
-    layer_name = "pytz"
-
-    s3_bucket = "ds-${var.environment}-deployment-source"
-    s3_key    = "lambda/layers/pytz_layer_2023.2.zip"
-
-    compatible_runtimes = [
-        "python3.9",
-    ]
-}
-
-##
-# python 3.11
-# ------------------------------------------------------------------------------
-data "klayers_package_latest_version" "boto3_11" {
-    name   = "boto3"
-    region = "eu-west-2"
-
-    python_version = "3.11"
-}
-
-resource "aws_lambda_layer_version" "datetime_5_2" {
-    layer_name = "datetime_5_2"
-
-    s3_bucket = "ds-${var.environment}-deployment-source"
-    s3_key    = "lambda/layers/datetime-5.2.zip"
-
-    compatible_runtimes = [
-        "python3.9",
-        "python3.10",
-        "python3.11",
-    ]
-}
-
-##
 # python 3.12
 # ------------------------------------------------------------------------------
 # compatible runtimes python3.9, python3.10, python3.11 and python3.12
@@ -83,7 +28,7 @@ data "klayers_package_latest_version" "mysql-connector-python-3_12" {
 resource "aws_lambda_layer_version" "pytz_2024_2" {
     layer_name = "pytz_2024_2"
 
-    s3_bucket = "ds-${var.environment}-deployment-source"
+    s3_bucket = "tna-backup-tooling"
     s3_key    = "lambda/layers/pytz_layer_2024.2.zip"
 
     compatible_runtimes = [
@@ -97,7 +42,7 @@ resource "aws_lambda_layer_version" "pytz_2024_2" {
 resource "aws_lambda_layer_version" "datetime_5_5" {
     layer_name = "datetime_5_5"
 
-    s3_bucket = "ds-${var.environment}-deployment-source"
+    s3_bucket = "tna-backup-tooling"
     s3_key    = "lambda/layers/DateTime-5.5.zip"
 
     compatible_runtimes = [
