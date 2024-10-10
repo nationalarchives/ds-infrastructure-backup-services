@@ -1,7 +1,7 @@
 import os
 import json
 from database.db_mysql import Database
-from queue.sqs import Queue
+from sqs.sqs import Queue
 from s3.s3 import Bucket
 from secrets.asm import Secrets
 import helper_fx
