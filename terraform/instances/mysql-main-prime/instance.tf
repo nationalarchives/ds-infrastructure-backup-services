@@ -4,7 +4,6 @@ resource "aws_instance" "mysql_main" {
         version = "$Latest"
     }
     subnet_id                   = var.db_subnet_id
-    #associate_public_ip_address = false
 
     root_block_device {
         tags = {
