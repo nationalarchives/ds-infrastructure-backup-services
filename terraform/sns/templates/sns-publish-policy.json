@@ -6,10 +6,10 @@
                 "Service": "s3.amazonaws.com"
             },
             "Action": "sns:Publish",
-            "Resource": "arn:aws:sns:eu-west-2:{account_id}:{topic}",
+            "Resource": "arn:aws:sns:eu-west-2:${account_id}:${topic}",
             "Condition": {
                 "StringEquals": {
-                    "AWS:SourceArn": "{bucket_arn}"
+                    "AWS:SourceArn": "${bucket_arn}"
                 }
             }
         }
