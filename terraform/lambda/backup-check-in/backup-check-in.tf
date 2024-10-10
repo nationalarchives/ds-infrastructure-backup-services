@@ -55,10 +55,17 @@ resource "aws_lambda_function" "backup_check_in" {
     }
 
     vpc_config {
-        subnet_ids         = var.subnet_ids
+        subnet_ids = var.subnet_ids
         security_group_ids = concat(var.security_group_ids, [
             aws_security_group.lambda_backup_drop_zone_sg.id
         ])
+    }
+
+    environment {
+        variables = {
+            QUEUE_URL = "bar"
+            ASM_ID = ""
+        }
     }
 
     tags = merge(var.tags, {

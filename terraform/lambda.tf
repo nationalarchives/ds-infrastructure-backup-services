@@ -1,11 +1,11 @@
 #variable "notifications_channel" {}
 
-#module "slack_notifications" {
+#module "slack-notifications" {
 #    source                = "./lambda/slack_notifications"
 #    notifications_channel = var.notifications_channel
 #}
 
-module "backup_check_in" {
+module "backup-check-in" {
     source = "./lambda/backup-check-in"
 
     region         = "eu-west-2"

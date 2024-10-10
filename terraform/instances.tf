@@ -1,4 +1,4 @@
-module "da_sftp_x_posts" {
+module "da-sftp-x-posts" {
     source = "./instances/da-sftp-x-posts"
 
     vpc_id = local.vpc_info.id
@@ -12,7 +12,7 @@ module "da_sftp_x_posts" {
     default_tags = local.default_tags
 }
 
-module "service_backups" {
+module "service-backups" {
     source = "./instances/service-backups"
 
     vpc_id = local.vpc_info.id
@@ -27,7 +27,7 @@ module "service_backups" {
     default_tags = local.default_tags
 }
 
-module "shared_lb" {
+module "shared-lb" {
     source = "./instances/shared-load-balancer"
 
     vpc_id = local.vpc_info.id
