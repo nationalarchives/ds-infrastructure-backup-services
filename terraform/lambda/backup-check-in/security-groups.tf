@@ -11,7 +11,7 @@ resource "aws_security_group" "lambda_backup_drop_zone_sg" {
 resource "aws_vpc_security_group_ingress_rule" "replies" {
     security_group_id = aws_security_group.lambda_backup_drop_zone_sg.id
 
-    cidr_ipv4   = "10.128.212.0/23"
+    cidr_ipv4   = "192.168.2.0/23"
     description = "traffic back from db"
     from_port   = 49152
     ip_protocol = "tcp"
