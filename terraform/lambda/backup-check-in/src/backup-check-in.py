@@ -29,7 +29,6 @@ def process_object(event_data):
                    'size_str': str(s3_object.obj_data['ContentLength']), 'type': s3_object.obj_data['ContentType']}
     if "ResponseMetadata" in s3_object.obj_data:
         object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
-        object_data['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
@@ -40,7 +39,6 @@ def process_object(event_data):
             object_data['legal_hold'] = obj_metadata['legal_hold']
         if find_key_dict("lock-until-date", obj_metadata):
             object_data['lock_until_date'] = obj_metadata['lock-until-date']
-        object_data['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
 
     queue = Queue(queue_url)
     sqs_body = '''\
@@ -62,8 +60,7 @@ def process_object(event_data):
 
     db_secrets = Secrets(asm_id)
     db_secrets_values = json.loads(db_secrets.get_str())
-    print(type(db_secrets_values))
     check_in_db = Database(db_secrets_values)
-    check_in_db.insert('sqs_log', object_data)
+    check_in_db.insert('checkin_data', object_data)
 
     check_in_db.close()
