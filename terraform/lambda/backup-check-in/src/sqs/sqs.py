@@ -10,27 +10,29 @@ class Queue:
     def add(self, msg_body):
         try:
             response = self.queue_client.send_message(
-            QueueUrl=self.queue_url,
-            MessageBody=msg_body)
+                QueueUrl=self.queue_url,
+                MessageBody=msg_body)
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'InvalidMessageContents ':
                 print('SQS - InvalidMessageContents')
-            if error.response['Error']['Code'] == 'UnsupportedOperation ':
+            elif error.response['Error']['Code'] == 'UnsupportedOperation ':
                 print('SQS - UnsupportedOperation')
-            if error.response['Error']['Code'] == 'RequestThrottled ':
+            elif error.response['Error']['Code'] == 'RequestThrottled ':
                 print('SQS - RequestThrottled')
-            if error.response['Error']['Code'] == 'QueueDoesNotExist ':
+            elif error.response['Error']['Code'] == 'QueueDoesNotExist ':
                 print('SQS - QueueDoesNotExist')
-            if error.response['Error']['Code'] == 'InvalidSecurity ':
+            elif error.response['Error']['Code'] == 'InvalidSecurity ':
                 print('SQS - InvalidSecurity')
-            if error.response['Error']['Code'] == 'InvalidAddress ':
+            elif error.response['Error']['Code'] == 'InvalidAddress ':
                 print('SQS - InvalidAddress')
             else:
-                return response
+                print('SQS - unknown error')
+            raise error
+        else:
+            return response
 
     def delete_message(self):
         pass
 
     def poll(self):
         pass
-
