@@ -33,10 +33,10 @@ def process_object(event_data):
     object_info['size'] = s3_object.obj_data['ContentLength']
     object_info['size_str'] = str(s3_object.obj_data['ContentLength'])
     object_info['type'] = s3_object.obj_data['ContentType']
-    if "ResponseMetadata" in s3_object:
+    if "ResponseMetadata" in s3_object.obj_data:
         object_info['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
         object_info['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
-    if "Metadata" in s3_object:
+    if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
             object_info['retention'] = obj_metadata['retention_period']
