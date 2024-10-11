@@ -24,35 +24,28 @@ def process_object(event_data):
     random_id = set_random_id(length=128)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_info = s3_object.get_object_info()
-    object_info['identifier'] = random_id
-    object_info['bucket'] = s3_object.bucket
-    object_info['key'] = s3_object.key
-    object_info['location'] = s3_object.location
-    object_info['object_name'] = s3_object.object_name
-    object_info['size'] = s3_object.obj_data['ContentLength']
-    object_info['size_str'] = str(s3_object.obj_data['ContentLength'])
-    object_info['type'] = s3_object.obj_data['ContentType']
+    object_data = {}
+    object_data['identifier'] = random_id
+    object_data['bucket'] = s3_object.bucket
+    object_data['key'] = s3_object.key
+    object_data['location'] = s3_object.location
+    object_data['object_name'] = s3_object.object_name
+    object_data['size'] = s3_object.obj_data['ContentLength']
+    object_data['size_str'] = str(s3_object.obj_data['ContentLength'])
+    object_data['type'] = s3_object.obj_data['ContentType']
     if "ResponseMetadata" in s3_object.obj_data:
-        object_info['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
-        object_info['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
+        object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
+        object_data['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
-            object_info['retention'] = obj_metadata['retention_period']
-        else:
-            object_info['retention'] = ''
+            object_data['retention'] = obj_metadata['retention_period']
         if find_key_dict("lockmode", obj_metadata):
-            object_info['lock_mode'] = obj_metadata['lock_mode']
-        else:
-            object_info['lock_mode'] = ''
+            object_data['lock_mode'] = obj_metadata['lock_mode']
         if find_key_dict("legal_hold", obj_metadata):
-            object_info['legal_hold'] = obj_metadata['legal_hold']
-        else:
-            object_info['legal_hold'] = ''
+            object_data['legal_hold'] = obj_metadata['legal_hold']
         if find_key_dict("lock-until-date", obj_metadata):
-            object_info['lock_until_date'] = obj_metadata['lock-until-date']
-        else:
-            object_info['lock_until_date'] = ''
+            object_data['lock_until_date'] = obj_metadata['lock-until-date']
         object_info['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
 
     queue = Queue(queue_url)
