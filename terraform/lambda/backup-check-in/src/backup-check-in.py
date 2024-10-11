@@ -54,7 +54,7 @@ def process_object(event_data):
             object_info['lock_until_date'] = obj_metadata['lock-until-date']
         else:
             object_info['lock_until_date'] = ''
-        object_info['metadata_str'] = json.dumps(s3_object.obj_data['MetaData'], default=str)
+        object_info['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
 
     print(object_info)
     queue = Queue(queue_url)
