@@ -39,8 +39,7 @@ class Database:
         sql_stmt = 'INSERT INTO ' + tbl_name + ' ' + name_list + ' VALUES ' + val_list
 
         try:
-            print(sql_stmt)
-            #self.db_cursor.execute(sql_stmt)
+            self.db_cursor.execute(sql_stmt)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
