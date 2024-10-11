@@ -8,6 +8,7 @@ class Database:
             'user': db_secrets['db_username'],
             'password': db_secrets['db_password'],
             'host': db_secrets['db_host'],
+            'port': db_secrets['db_port'],
             'database': db_secrets['db_name'],
             'raise_on_warnings': True
         }
