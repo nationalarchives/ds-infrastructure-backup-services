@@ -74,8 +74,7 @@ def process_object(event_data):
     del object_info['size_str']
 
     db_secrets = Secrets(asm_id)
-    print(json.loads(db_secrets.get()))
-    check_in_db = Database(json.loads(db_secrets.get()))
+    check_in_db = Database(json.loads(db_secrets.get_str()))
     check_in_db.insert('sqs_log', object_info)
 
     check_in_db.close()
