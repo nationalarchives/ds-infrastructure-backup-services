@@ -94,10 +94,6 @@ resource "aws_s3_bucket_notification" "lambda_backup_check_in" {
         ]
         lambda_function_arn = aws_lambda_function.backup_check_in.arn
     }
-
-    depends_on = [
-        aws_lambda_permission.backup_check_in
-    ]
 }
 
 resource "aws_s3_bucket_notification" "backup_check_in" {
