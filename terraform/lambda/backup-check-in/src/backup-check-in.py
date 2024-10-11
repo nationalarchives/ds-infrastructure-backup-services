@@ -22,11 +22,10 @@ def process_object(event_data):
     asm_id = os.getenv('ASM_ID')
 
     random_id = set_random_id()
-    print(random_id)
     db_secrets = Secrets(asm_id)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_info = s3_object.get_object_info()
-    object_info['identifier'] = random_id()
+    object_info['identifier'] = random_id
     object_info['bucket'] = s3_object['bucket']
     object_info['key'] = s3_object['key']
     object_info['location'] = s3_object['location']
@@ -57,6 +56,7 @@ def process_object(event_data):
             object_info['lock_until_date'] = ''
         object_info['metadata_str'] = json.dumps(s3_object['MetaData'], default=str)
 
+    print(object_info)
     queue = Queue(queue_url)
     sqs_body = '''\
     {{
