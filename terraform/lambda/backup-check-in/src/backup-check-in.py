@@ -56,12 +56,14 @@ def process_object(event_data):
             object_info['lock_until_date'] = ''
         object_info['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
 
-    print(object_info)
     queue = Queue(queue_url)
     sqs_body = '''\
     {{
         "identifier": "{identifier}"
         "bucket": "{bucket}"
+        "key": "{key}"
+        "location": "{location}"
+        "object_name": "{object_name}"
         "etag": "{ETag}"
         "size": "{size_str}"
         "type": "{type}"
@@ -72,6 +74,8 @@ def process_object(event_data):
 
     del object_info['size_str']
 
+    print(type(db_secrets.get_json()))
+    print(db_secrets.get_json())
     check_in_db = Database(db_secrets.get_json())
     check_in_db.insert('sqs_log', object_info)
 
