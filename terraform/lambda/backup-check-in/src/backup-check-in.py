@@ -25,7 +25,7 @@ def process_object(event_data):
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'key': s3_object.key,
                    'location': s3_object.location, 'object_name': s3_object.object_name,
-                   'etag': s3_object.object_data['ETag'], 'size': s3_object.obj_data['ContentLength'],
+                   'etag': s3_object.obj_data['ETag'], 'size': s3_object.obj_data['ContentLength'],
                    'size_str': str(s3_object.obj_data['ContentLength']), 'type': s3_object.obj_data['ContentType']}
     if "ResponseMetadata" in s3_object.obj_data:
         object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
