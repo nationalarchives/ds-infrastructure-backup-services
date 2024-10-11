@@ -23,16 +23,10 @@ def process_object(event_data):
 
     random_id = set_random_id(length=128)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
-    object_info = s3_object.get_object_info()
-    object_data = {}
-    object_data['identifier'] = random_id
-    object_data['bucket'] = s3_object.bucket
-    object_data['key'] = s3_object.key
-    object_data['location'] = s3_object.location
-    object_data['object_name'] = s3_object.object_name
-    object_data['size'] = s3_object.obj_data['ContentLength']
-    object_data['size_str'] = str(s3_object.obj_data['ContentLength'])
-    object_data['type'] = s3_object.obj_data['ContentType']
+    object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'key': s3_object.key,
+                   'location': s3_object.location, 'object_name': s3_object.object_name,
+                   'etag': s3_object.object_data['ETag'], 'size': s3_object.obj_data['ContentLength'],
+                   'size_str': str(s3_object.obj_data['ContentLength']), 'type': s3_object.obj_data['ContentType']}
     if "ResponseMetadata" in s3_object.obj_data:
         object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
         object_data['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
@@ -56,7 +50,7 @@ def process_object(event_data):
         "key": "{key}"
         "location": "{location}"
         "object_name": "{object_name}"
-        "etag": "{ETag}"
+        "etag": "{etag}"
         "size": "{size_str}"
         "type": "{type}"
         "last_modified": "{last_modified}"
@@ -64,12 +58,12 @@ def process_object(event_data):
         '''.format(**object_data)
     sqs_results = queue.add(sqs_body, random_id)
 
-    del object_info['size_str']
+    del object_data['size_str']
 
     db_secrets = Secrets(asm_id)
     db_secrets_values = json.loads(db_secrets.get_str())
     print(type(db_secrets_values))
     check_in_db = Database(db_secrets_values)
-    check_in_db.insert('sqs_log', object_info)
+    check_in_db.insert('sqs_log', object_data)
 
     check_in_db.close()
