@@ -21,7 +21,7 @@ def process_object(event_data):
     queue_url = os.getenv('QUEUE_URL')
     asm_id = os.getenv('ASM_ID')
 
-    random_id = set_random_id()
+    random_id = set_random_id(length=128)
     db_secrets = Secrets(asm_id)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_info = s3_object.get_object_info()
@@ -68,7 +68,7 @@ def process_object(event_data):
         "last_modified": "{last_modified}"
     }}
         '''.format(**object_info)
-    sqs_results = queue.add(sqs_body)
+    sqs_results = queue.add(sqs_body, random_id)
 
     del object_info['size_str']
 
