@@ -26,18 +26,18 @@ def process_object(event_data):
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_info = s3_object.get_object_info()
     object_info['identifier'] = random_id
-    object_info['bucket'] = s3_object['bucket']
-    object_info['key'] = s3_object['key']
-    object_info['location'] = s3_object['location']
-    object_info['object_name'] = s3_object['object_name']
-    object_info['size'] = s3_object['ContentLength']
-    object_info['size_str'] = str(s3_object['ContentLength'])
-    object_info['type'] = s3_object['ContentType']
+    object_info['bucket'] = s3_object.bucket
+    object_info['key'] = s3_object.key
+    object_info['location'] = s3_object.location
+    object_info['object_name'] = s3_object.object_name
+    object_info['size'] = s3_object.obj_data['ContentLength']
+    object_info['size_str'] = str(s3_object.obj_data['ContentLength'])
+    object_info['type'] = s3_object.obj_data['ContentType']
     if "ResponseMetadata" in s3_object:
-        object_info['last_modified'] = s3_object['ResponseMetadata']['HTTPHeaders']['last-modified']
-        object_info['response_metadata_str'] = json.dumps(s3_object['ResponseMetadata'], default=str)
+        object_info['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
+        object_info['response_metadata_str'] = json.dumps(s3_object.obj_data['ResponseMetadata'], default=str)
     if "Metadata" in s3_object:
-        obj_metadata = s3_object['Metadata']
+        obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
             object_info['retention'] = obj_metadata['retention_period']
         else:
@@ -54,7 +54,7 @@ def process_object(event_data):
             object_info['lock_until_date'] = obj_metadata['lock-until-date']
         else:
             object_info['lock_until_date'] = ''
-        object_info['metadata_str'] = json.dumps(s3_object['MetaData'], default=str)
+        object_info['metadata_str'] = json.dumps(s3_object.obj_data['MetaData'], default=str)
 
     print(object_info)
     queue = Queue(queue_url)
