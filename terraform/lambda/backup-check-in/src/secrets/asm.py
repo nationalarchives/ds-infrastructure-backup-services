@@ -29,4 +29,4 @@ class Secrets:
         else:
             secret_string = sm_response['SecretString'].replace("'", "\"")
             secret_string = secret_string.replace('\n', '')
-            return json.loads(json.dumps(secret_string))
+            return json.loads(json.dumps(sm_response['SecretString']))

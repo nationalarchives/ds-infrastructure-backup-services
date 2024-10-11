@@ -27,7 +27,7 @@ class Bucket:
         return self.obj_data
 
     def deconstruct_path(self):
-        self.location = self.key.split('/')[-1]
-        self.object_name = "/".join(self.key.split('/')[:-1])
+        self.object_name = self.key.split('/')[-1]
+        self.location = "/".join(self.key.split('/')[:-1])
         self.full_path = self.bucket + "/" + self.key,
 
