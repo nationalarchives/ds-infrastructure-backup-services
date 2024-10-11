@@ -28,4 +28,5 @@ class Secrets:
             raise error
         else:
             secret_string = sm_response['SecretString'].replace("'", "\"")
+            secret_string = secret_string.replace('\n', '')
             return json.loads(secret_string)
