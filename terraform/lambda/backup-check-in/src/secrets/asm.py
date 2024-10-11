@@ -27,4 +27,4 @@ class Secrets:
                 print('ASM - unknown error')
             raise error
         else:
-            return json.dumps(sm_response['SecretString'])
+            return json.loads(json.dumps(sm_response['SecretString']))
