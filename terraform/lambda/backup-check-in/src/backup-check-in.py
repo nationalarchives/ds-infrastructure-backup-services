@@ -46,7 +46,7 @@ def process_object(event_data):
             object_data['legal_hold'] = obj_metadata['legal_hold']
         if find_key_dict("lock-until-date", obj_metadata):
             object_data['lock_until_date'] = obj_metadata['lock-until-date']
-        object_info['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
+        object_data['metadata_str'] = json.dumps(s3_object.obj_data['Metadata'], default=str)
 
     queue = Queue(queue_url)
     sqs_body = '''\
@@ -61,7 +61,7 @@ def process_object(event_data):
         "type": "{type}"
         "last_modified": "{last_modified}"
     }}
-        '''.format(**object_info)
+        '''.format(**object_data)
     sqs_results = queue.add(sqs_body, random_id)
 
     del object_info['size_str']
