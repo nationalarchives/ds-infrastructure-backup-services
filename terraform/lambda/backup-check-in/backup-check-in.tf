@@ -11,6 +11,7 @@ resource "aws_iam_policy" "lambda_s3_cw" {
     policy = templatefile("${path.module}/templates/lambda_s3_cw.json", {
         aws_account_id = var.aws_account_id
         region         = var.region
+        queue_arn      = var.queue_arn
     })
 }
 

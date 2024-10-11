@@ -51,6 +51,15 @@
             "Resource": [
                 "*"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sqs:sendmessage"
+            ],
+            "Resource": [
+                "${queue_arn}"
+            ]
         }
     ]
 }

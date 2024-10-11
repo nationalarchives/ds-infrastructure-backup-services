@@ -9,3 +9,7 @@ resource "aws_sqs_queue" "backup_check_in_queue" {
 output "backup_check_in_queue_url" {
     value = aws_sqs_queue.backup_check_in_queue.url
 }
+
+output "backup_check_in_queue_arn" {
+    value = aws_sqs_queue.backup_check_in_queue.arn
+}

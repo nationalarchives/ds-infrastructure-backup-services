@@ -14,6 +14,7 @@ variable "bucket_arn" {}
 variable "bucket_name" {}
 
 variable "queue_url" {}
+variable "queue_arn" {}
 variable "asm_id" {}
 
 variable "bucket_id" {}
