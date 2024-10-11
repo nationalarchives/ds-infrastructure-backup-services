@@ -9,7 +9,7 @@ class Secrets:
         self.secret_name = secret_name
         print(self.secret_name)
 
-    def get_json(self):
+    def get(self):
         try:
             sm_response = self.client.get_secret_value(SecretId=self.secret_name)
         except botocore.exceptions.ClientError as error:
@@ -27,4 +27,4 @@ class Secrets:
                 print('ASM - unknown error')
             raise error
         else:
-            return json.dumps(sm_response['SecretString'])
+            return json.loads(json.dumps(sm_response['SecretString']))
