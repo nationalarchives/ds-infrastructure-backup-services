@@ -16,7 +16,6 @@
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:secretsmanager:eu-west-2:846769538626:secret:/infrastructure/back-service/lambda/credentials-4Q5jVH",
                 "arn:aws:secretsmanager:eu-west-2:637423167251:secret:application/lambda/backup-check-in-dCsJNp"
             ]
         },
