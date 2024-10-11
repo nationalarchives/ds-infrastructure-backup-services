@@ -95,14 +95,3 @@ resource "aws_s3_bucket_notification" "lambda_backup_check_in" {
         lambda_function_arn = aws_lambda_function.backup_check_in.arn
     }
 }
-
-resource "aws_s3_bucket_notification" "backup_check_in" {
-    bucket = var.bucket_id
-
-    topic {
-        topic_arn = var.topic_arn
-        events = [
-            "s3:ObjectCreated:*"
-        ]
-    }
-}
