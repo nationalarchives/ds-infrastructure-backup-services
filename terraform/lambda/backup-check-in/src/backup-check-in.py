@@ -32,7 +32,7 @@ def process_object(event_data):
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
-            object_data['retention'] = obj_metadata['retention_period']
+            object_data['retention_period'] = obj_metadata['retention_period']
         if find_key_dict("lockmode", obj_metadata):
             object_data['lock_mode'] = obj_metadata['lock_mode']
         if find_key_dict("legal_hold", obj_metadata):

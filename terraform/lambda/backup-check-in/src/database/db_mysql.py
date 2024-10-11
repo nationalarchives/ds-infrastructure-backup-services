@@ -12,8 +12,7 @@ class Database:
             'raise_on_warnings': True
         }
         try:
-            print(self.db_config)
-            #self.db_connect = mysql.connector.connect(**self.db_config)
+            self.db_connect = mysql.connector.connect(**self.db_config)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
@@ -23,8 +22,7 @@ class Database:
                 print(err)
             exit(1)
         else:
-            print('cursor setting')
-            #self.db_cursor = self.db_connect.cursor()
+            self.db_cursor = self.db_connect.cursor()
 
     def insert(self, tbl_name: str, data_set: dict):
         name_list = '('
@@ -50,9 +48,8 @@ class Database:
                 print(err)
             exit(1)
         else:
-            return 1
-            #self.db_connect.commit()
-            #return self.db_cursor.lastrowid
+            self.db_connect.commit()
+            return self.db_cursor.lastrowid
 
     def update(self, tbl_name: str, data_set: dict):
         pass
