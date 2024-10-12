@@ -48,7 +48,7 @@ resource "aws_lambda_function" "backup_check_in" {
 
     handler = "backup-check-in.lambda_handler"
 
-    memory_size = 1024
+    memory_size = 512
     timeout     = 10
 
     ephemeral_storage {
@@ -76,6 +76,12 @@ resource "aws_lambda_function" "backup_check_in" {
         Service         = "backup"
         Name            = "backup_check_in"
     })
+}
+
+resource "aws_lambda_function_event_invoke_config" "example" {
+    function_name                = aws_lambda_function.backup_check_in.function_name
+    maximum_event_age_in_seconds = 300
+    maximum_retry_attempts       = 0
 }
 
 resource "aws_lambda_permission" "backup_check_in" {
