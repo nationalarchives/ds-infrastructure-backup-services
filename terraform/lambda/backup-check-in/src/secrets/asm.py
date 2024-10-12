@@ -7,7 +7,6 @@ class Secrets:
     def __init__(self, secret_name: str):
         self.client = boto3.client('secretsmanager')
         self.secret_name = secret_name
-        print(self.secret_name)
 
     def get_str(self):
         try:

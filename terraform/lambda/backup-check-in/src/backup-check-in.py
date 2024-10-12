@@ -11,6 +11,7 @@ from helper_fx.helpers import find_key_dict
 
 def lambda_handler(event, context):
     event_data = event['Records'][0]['s3']
+    print(event_data)
     process_object(event_data)
     return {
         'statusCode': 200,
