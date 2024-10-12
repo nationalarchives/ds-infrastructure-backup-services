@@ -30,7 +30,7 @@ def process_object(event_data):
                    'object_location': s3_object.location, 'object_name': s3_object.object_name,
                    'object_etag': s3_object.obj_data['ETag'].replace('"',''), 'object_size': s3_object.obj_data['ContentLength'],
                    'size_str': str(s3_object.obj_data['ContentLength']), 'object_type': s3_object.obj_data['ContentType'],
-                   'recording_ts': str(recording_ts)}
+                   'recording_ts': str(recording_ts), 'copy_id': 0, 'record_status': 1}
     if "ResponseMetadata" in s3_object.obj_data:
         object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
     else:
