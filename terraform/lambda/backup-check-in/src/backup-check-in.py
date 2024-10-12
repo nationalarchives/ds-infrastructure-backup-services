@@ -32,7 +32,7 @@ def process_object(event_data):
                    'size_str': str(s3_object.obj_data['ContentLength']), 'object_type': s3_object.obj_data['ContentType'],
                    'recording_ts': str(recording_ts)}
     if "ResponseMetadata" in s3_object.obj_data:
-        object_data['last_modified'] = s3_object.obj_data['HTTPHeaders']['last-modified']
+        object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
     else:
         object_data['last_modified'] = 'unknown'
     if "Metadata" in s3_object.obj_data:
