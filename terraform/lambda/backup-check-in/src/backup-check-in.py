@@ -29,9 +29,7 @@ def process_object(event_data):
                    'object_location': s3_object.location, 'object_name': s3_object.object_name,
                    'object_etag': s3_object.obj_data['ETag'].replace('"',''), 'object_size': s3_object.obj_data['ContentLength'],
                    'size_str': str(s3_object.obj_data['ContentLength']), 'object_type': s3_object.obj_data['ContentType'],
-                   'recording_ts': str(recording_ts)}
-    if "ResponseMetadata" in s3_object.obj_data:
-        object_data['last_modified'] = s3_object.obj_data['LastModified']
+                   'recording_ts': str(recording_ts), 'last_modified': s3_object.obj_data['LastModified']}
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
