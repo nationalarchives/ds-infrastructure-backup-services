@@ -11,7 +11,6 @@ from helper_fx.helpers import find_key_dict
 
 def lambda_handler(event, context):
     event_data = event['Records'][0]['s3']
-    print(event_data)
     process_object(event_data)
     return {
         'statusCode': 200,
@@ -26,6 +25,7 @@ def process_object(event_data):
     recording_ts = time.time()
     random_id = set_random_id(length=128)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
+    print(s3_object)
     object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'object_key': s3_object.object_key,
                    'object_location': s3_object.location, 'object_name': s3_object.object_name,
                    'object_etag': s3_object.obj_data['ETag'].replace('"',''), 'object_size': s3_object.obj_data['ContentLength'],
