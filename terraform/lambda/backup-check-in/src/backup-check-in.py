@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from database.db_mysql import Database
 from sqs.sqs import Queue
 from s3.s3 import Bucket
@@ -21,19 +22,21 @@ def process_object(event_data):
     queue_url = os.getenv('QUEUE_URL')
     asm_id = os.getenv('ASM_ID')
 
+    recording_ts = time.time()
     random_id = set_random_id(length=128)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
-    object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'key': s3_object.key,
-                   'location': s3_object.location, 'object_name': s3_object.object_name,
-                   'etag': s3_object.obj_data['ETag'], 'size': s3_object.obj_data['ContentLength'],
-                   'size_str': str(s3_object.obj_data['ContentLength']), 'type': s3_object.obj_data['ContentType']}
+    object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'object_key': s3_object.object_key,
+                   'location': s3_object.location, 'name': s3_object.object_name,
+                   'object_etag': s3_object.obj_data['ETag'], 'object_size': s3_object.obj_data['ContentLength'],
+                   'size_str': str(s3_object.obj_data['ContentLength']), 'object_type': s3_object.obj_data['ContentType'],
+                   'recording_ts': str(recording_ts)}
     if "ResponseMetadata" in s3_object.obj_data:
         object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
             object_data['retention_period'] = obj_metadata['retention_period']
-        if find_key_dict("lockmode", obj_metadata):
+        if find_key_dict("lock_mode", obj_metadata):
             object_data['lock_mode'] = obj_metadata['lock_mode']
         if find_key_dict("legal_hold", obj_metadata):
             object_data['legal_hold'] = obj_metadata['legal_hold']
@@ -45,18 +48,18 @@ def process_object(event_data):
     {{
         "identifier": "{identifier}"
         "bucket": "{bucket}"
-        "key": "{key}"
+        "object_key": "{object_key}"
         "location": "{location}"
-        "object_name": "{object_name}"
-        "etag": "{etag}"
-        "size": "{size_str}"
-        "type": "{type}"
+        "name": "{name}"
+        "object_etag": "{object_etag}"
+        "object_size": "{size_str}"
+        "object_type": "{object_type}"
         "last_modified": "{last_modified}"
+        "recording_ts": "{recording_ts}"
     }}
         '''.format(**object_data)
-    sqs_results = queue.add(sqs_body, random_id)
-
     del object_data['size_str']
+    sqs_results = queue.add(sqs_body, random_id)
 
     db_secrets = Secrets(asm_id)
     db_secrets_values = json.loads(db_secrets.get_str())
