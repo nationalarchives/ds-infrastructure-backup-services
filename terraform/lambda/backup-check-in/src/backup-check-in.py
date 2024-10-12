@@ -26,12 +26,12 @@ def process_object(event_data):
     random_id = set_random_id(length=128)
     s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
     object_data = {'identifier': random_id, 'bucket': s3_object.bucket, 'object_key': s3_object.object_key,
-                   'location': s3_object.location, 'name': s3_object.object_name,
+                   'object_location': s3_object.location, 'object_name': s3_object.object_name,
                    'object_etag': s3_object.obj_data['ETag'], 'object_size': s3_object.obj_data['ContentLength'],
                    'size_str': str(s3_object.obj_data['ContentLength']), 'object_type': s3_object.obj_data['ContentType'],
                    'recording_ts': str(recording_ts)}
     if "ResponseMetadata" in s3_object.obj_data:
-        object_data['last_modified'] = s3_object.obj_data['ResponseMetadata']['HTTPHeaders']['last-modified']
+        object_data['last_modified'] = s3_object.obj_data['LastModified']
     if "Metadata" in s3_object.obj_data:
         obj_metadata = s3_object.obj_data['Metadata']
         if find_key_dict("retention_period", obj_metadata):
@@ -49,8 +49,8 @@ def process_object(event_data):
         "identifier": "{identifier}"
         "bucket": "{bucket}"
         "object_key": "{object_key}"
-        "location": "{location}"
-        "name": "{name}"
+        "object_location": "{object_location}"
+        "object_name": "{object_name}"
         "object_etag": "{object_etag}"
         "object_size": "{size_str}"
         "object_type": "{object_type}"

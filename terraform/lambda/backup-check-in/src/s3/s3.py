@@ -6,9 +6,8 @@ class Bucket:
     def __init__(self, bucket: str, object_key: str):
         self.bucket = bucket
         self.object_key = object_key
-        self.full_path = ""
-        self.location = ""
-        self.name = ""
+        self.object_location = ""
+        self.object_name = ""
         self.client = boto3.client('s3')
         try:
             self.obj_data = self.client.get_object(Bucket=self.bucket, Key=self.object_key)
@@ -29,5 +28,3 @@ class Bucket:
     def deconstruct_path(self):
         self.object_name = self.object_key.split('/')[-1]
         self.location = "/".join(self.object_key.split('/')[:-1])
-        self.full_path = self.bucket + "/" + self.object_key,
-
