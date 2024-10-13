@@ -88,8 +88,8 @@ def process_object(event_data):
 
     created_at = str(datetime.datetime.now())[0:19]
     queue_data = {'message_id': sqs_results['MD5OfMessageBody'], 'md5_of_message_body': sqs_results['MD5OfMessageBody'],
-                  'md5_of_message_attributes': sqs_results['MD5OfMessageBody'],
-                  'md5_of_message_system_attributes': sqs_results['MD5OfMessageBody'],
+                  'md5_of_message_attributes': sqs_results['MD5OfMessageAttributes'],
+                  'md5_of_message_system_attributes': sqs_results['MD5OfMessageSystemAttributes'],
                   'sequence_number': sqs_results['MD5OfMessageBody'], 'created_at': created_at,
                   'status': 2, 'file_id': file_id}
     queue_id = check_in_db.insert('queues', queue_data)
