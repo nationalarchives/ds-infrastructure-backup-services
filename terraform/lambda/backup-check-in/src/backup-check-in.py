@@ -5,6 +5,7 @@ from database.db_mysql import Database
 from sqs.sqs import Queue
 from s3.s3 import Bucket
 from secrets.asm import Secrets
+from helper_fx.helpers import set_random_id
 from helper_fx.helpers import find_key_dict
 
 
@@ -83,7 +84,7 @@ def process_object(event_data):
         "created_at": "{created_at}"
     }}
         '''.format(**object_data)
-    sqs_results = queue.add(sqs_body)
+    sqs_results = queue.add(sqs_body, set_random_id())
 
     created_at = str(datetime.datetime.now())[0:19]
     queue_data = {'message_id': sqs_results['MD5OfMessageBody'], 'md5_of_message_body': sqs_results['MD5OfMessageBody'],
