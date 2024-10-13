@@ -51,8 +51,27 @@ class Database:
             self.db_connect.commit()
             return self.db_cursor.lastrowid
 
-    def update(self, tbl_name: str, data_set: dict):
-        pass
+    def update(self, tbl_name: str, data_set: dict, where: str):
+        set_list = ''
+        for key, value in data_set.items():
+            if isinstance(value, str):
+                set_list += '{key} = "{value}", '
+            elif isinstance(value, int):
+                set_list += '{key} = {value}, '
+        set_list = set_list[:-2]
+        sql_stmt = 'UPDATE ' + tbl_name + ' SET ' + set_list + ' WHERE ' + where
+        try:
+            self.db_cursor.execute(sql_stmt)
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            else:
+                print(err)
+            exit(1)
+        else:
+            self.db_connect.commit()
+            return True
+
 
     def delete(self):
         pass
