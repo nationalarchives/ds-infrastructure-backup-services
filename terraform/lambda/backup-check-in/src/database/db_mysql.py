@@ -38,7 +38,6 @@ class Database:
         val_list = val_list[:-2] + ')'
 
         sql_stmt = 'INSERT INTO ' + tbl_name + ' ' + name_list + ' VALUES ' + val_list
-        print(sql_stmt)
         try:
             self.db_cursor.execute(sql_stmt)
         except mysql.connector.Error as err:
