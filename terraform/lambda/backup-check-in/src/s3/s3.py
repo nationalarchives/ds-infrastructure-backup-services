@@ -10,7 +10,10 @@ class Bucket:
         self.object_name = ""
         self.client = boto3.client('s3')
         try:
-            self.obj_data = self.client.get_object(Bucket=self.bucket, Key=self.object_key)
+            self.obj_data = self.client.get_object(Bucket=self.bucket,
+                                                   Key=self.object_key)
+            self.obj_attr = self.client.get_object_attributes(Bucket=self.bucket,
+                                                              Key=self.object_key)
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
@@ -24,6 +27,9 @@ class Bucket:
 
     def get_object_info(self):
         return self.obj_data
+
+    def get_object_attr(self):
+        return self.obj_attr
 
     def deconstruct_path(self):
         self.object_name = self.object_key.split('/')[-1]
