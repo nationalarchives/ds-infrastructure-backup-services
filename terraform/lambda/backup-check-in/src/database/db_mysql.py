@@ -28,12 +28,12 @@ class Database:
     def insert(self, tbl_name: str, data_set: dict):
         name_list = '('
         val_list = '('
-        for key, value in data_set.items():
-            name_list += key + ', '
-            if isinstance(value, str):
-                val_list += '"' + value + '", '
-            elif isinstance(value, int):
-                val_list += str(value) + ', '
+        for k, v in data_set.items():
+            name_list += k + ', '
+            if isinstance(v, str):
+                val_list += '"' + v + '", '
+            elif isinstance(v, int):
+                val_list += str(v) + ', '
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
 
@@ -53,11 +53,11 @@ class Database:
 
     def update(self, tbl_name: str, data_set: dict, where: str):
         set_list = ''
-        for key, value in data_set.items():
-            if isinstance(value, str):
-                set_list += '{key} = "{value}", '
-            elif isinstance(value, int):
-                set_list += '{key} = {value}, '
+        for k, v in data_set.items():
+            if isinstance(v, str):
+                set_list += '{key} = "{value}", '.format(key=k, value=v)
+            elif isinstance(v, int):
+                set_list += '{key} = {value}, '.format(key=k, value=v)
         set_list = set_list[:-2]
         sql_stmt = 'UPDATE ' + tbl_name + ' SET ' + set_list + ' WHERE ' + where
         try:
