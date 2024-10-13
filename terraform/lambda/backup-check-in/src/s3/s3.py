@@ -6,14 +6,19 @@ class Bucket:
     def __init__(self, bucket: str, object_key: str):
         self.bucket = bucket
         self.object_key = object_key
-        self.object_location = ""
         self.object_name = ""
         self.client = boto3.client('s3')
         try:
             self.obj_data = self.client.get_object(Bucket=self.bucket,
                                                    Key=self.object_key)
             self.obj_attr = self.client.get_object_attributes(Bucket=self.bucket,
-                                                              Key=self.object_key)
+                                                              Key=self.object_key,
+                                                              ObjectAttributes=[
+                                                                  'Checksum',
+                                                                  'ETag',
+                                                                  'StorageClass',
+                                                                  'ObjectSize'
+                                                              ])
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
