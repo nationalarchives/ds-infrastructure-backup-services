@@ -95,7 +95,7 @@ def process_object(event_data):
     queue_id = check_in_db.insert('queues', queue_data)
     updated_at = str(datetime.datetime.now())[0:19]
     object_data = {"queue_id": queue_id, "updated_at": updated_at}
-    where_clause = 'where id = ' + str(file_id)
+    where_clause = 'id = ' + str(file_id)
     check_in_db.update('object_checkins',  object_data, where_clause)
 
     check_in_db.close()
