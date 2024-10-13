@@ -72,11 +72,10 @@ def process_object(event_data):
     queue = Queue(queue_url)
     sqs_body = '''\
     {{
-        "identifier": "{identifier}"
+        "file_id": "{file_id}"
         "bucket": "{bucket}"
         "object_key": "{object_key}"
         "object_name": "{object_name}"
-        "file_id": "{file_id}"
         "etag": "{etag}"
         "object_size": "{size_str}"
         "object_type": "{object_type}"
