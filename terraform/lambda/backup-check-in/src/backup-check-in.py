@@ -87,7 +87,7 @@ def process_object(event_data):
     sqs_results = queue.add(sqs_body, set_random_id())
 
     created_at = str(datetime.datetime.now())[0:19]
-    queue_data = {'message_id': sqs_results['MD5OfMessageBody'], 'sequence_number': sqs_results['MD5OfMessageBody'],
+    queue_data = {'message_id': sqs_results['MD5OfMessageBody'], 'sequence_number': sqs_results['SequenceNumber'],
                   'created_at': created_at, 'status': 2, 'file_id': file_id}
     if 'MD5OfMessageBody' in sqs_results:
         queue_data['md5_of_message_body'] = sqs_results['MD5OfMessageBody']
