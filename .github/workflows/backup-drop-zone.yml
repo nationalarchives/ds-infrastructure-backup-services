@@ -19,4 +19,7 @@ jobs:
       key_name: "backup-drop-zone-eu-west-2"
       instance_type: "t3a.small"
       volume_size: 40
+    secrets:
+      vpc_id: ${{ secrets.VPC_ID }}
+      subnet_id: ${{ secrets.SUBNET_ID }}
 ...
