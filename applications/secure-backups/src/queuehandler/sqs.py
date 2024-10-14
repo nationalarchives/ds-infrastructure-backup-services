@@ -7,6 +7,8 @@ class SQSHandler:
         self.client = boto3.client('sqs')
         self.queue_name = queue_name
         self.queue_owner = queue_owner
+        self.queue_client = boto3.client('sqs')
+        self.queue_client = boto3.client('sqs')
         self.queue_url = self.get_queue_url
 
         self.client.set_queue_attributes(
@@ -35,7 +37,7 @@ class SQSHandler:
         else:
             return response['QueueUrl']
 
-    def receive_message(self):
+    def receive_message(self, max_number: int = 1):
         attempt_id = set_random_id()
         try:
             response = self.client.receive_message(
@@ -43,7 +45,7 @@ class SQSHandler:
                 AttributeNames=[
                     'SentTimestamp'
                 ],
-                MaxNumberOfMessages=1,
+                MaxNumberOfMessages=max_number,
                 MessageSystemAttributeNames=[
                     'All'
                 ],
