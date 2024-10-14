@@ -1,10 +1,7 @@
 import boto3
 import json
 import os
-from sighandler.sighandler import SignalHandler
-from queuehandler.sqs import SQSHandler
-from database.db_mysql import Database
-from secrets.asm import Secrets
+from private_tools import SignalHandler, SQSHandler, Database, Secrets
 
 
 def process_backups():
@@ -39,6 +36,8 @@ def process_backups():
             created_at = message_body['created_at']
 
             print(message_body)
+
+    db.close()
 
 
 if __name__ == "__main__":
