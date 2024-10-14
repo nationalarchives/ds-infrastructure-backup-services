@@ -43,7 +43,7 @@ module "ec2-backup-drop-zone" {
     source = "./instances/backup-drop-zone"
 
     image_id      = data.aws_ami.backup_drop_zone.id
-    instance_type = "t3a.large"
+    instance_type = "t3a.medium"
     volume_size   = 100
     key_name      = "backup-drop-zone-eu-west-2"
 
