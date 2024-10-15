@@ -18,6 +18,7 @@ def process_object(event_data):
     queue_url = os.getenv('QUEUE_URL')
     asm_id = os.getenv('ASM_ID')
 
+    print(event_data)
     trigger_ts = datetime.datetime.now().timestamp()
     unique_name_sufix = str(trigger_ts).replace('.', '_')
     created_at = str(datetime.datetime.now())[0:19]
