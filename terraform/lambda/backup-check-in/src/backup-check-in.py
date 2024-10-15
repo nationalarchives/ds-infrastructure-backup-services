@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+from urllib.parse import unquote
 from private_tools import Database, Queue, Secrets, Bucket
 from private_tools import set_random_id, find_key_dict
 
@@ -22,7 +23,7 @@ def process_object(event_data):
     trigger_ts = datetime.datetime.now().timestamp()
     unique_name_sufix = str(trigger_ts).replace('.', '_')
     created_at = str(datetime.datetime.now())[0:19]
-    s3_object = Bucket(event_data['bucket']['name'], event_data['object']['key'])
+    s3_object = Bucket(event_data['bucket']['name'], unquote(event_data['object']['key']))
 
     db_secrets = Secrets(asm_id)
     db_secrets_values = json.loads(db_secrets.get_str())
