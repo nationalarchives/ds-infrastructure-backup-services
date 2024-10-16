@@ -37,9 +37,8 @@ class Database:
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
 
-        sql_stmt = 'INSERT INTO ' + tbl_name + ' ' + name_list + ' VALUES ' + val_list
         try:
-            self.db_cursor.execute(sql_stmt)
+            self.db_cursor.execute(f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}')
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
@@ -58,9 +57,8 @@ class Database:
             elif isinstance(v, int):
                 set_list += '{key} = {value}, '.format(key=k, value=v)
         set_list = set_list[:-2]
-        sql_stmt = 'UPDATE ' + tbl_name + ' SET ' + set_list + ' WHERE ' + where
         try:
-            self.db_cursor.execute(sql_stmt)
+            self.db_cursor.execute(f'UPDATE {tbl_name} SET {set_list} WHERE {where}')
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")

@@ -1,6 +1,6 @@
 import os
 import json
-import datetime
+from datetime import datetime
 from urllib.parse import unquote_plus
 from private_tools import Database, Queue, Secrets, Bucket
 from private_tools import set_random_id, find_key_dict
@@ -20,9 +20,9 @@ def process_object(event_data):
     asm_id = os.getenv('ASM_ID')
 
     print(event_data)
-    trigger_ts = datetime.datetime.now().timestamp()
+    trigger_ts = datetime.now().timestamp()
     unique_name_sufix = str(trigger_ts).replace('.', '_')
-    created_at = str(datetime.datetime.now())[0:19]
+    created_at = str(datetime.now())[0:19]
     s3_object = Bucket(event_data['bucket']['name'], unquote_plus(event_data['object']['key']))
 
     db_secrets = Secrets(asm_id)
@@ -74,6 +74,7 @@ def process_object(event_data):
         "bucket": "{bucket}"
         "object_key": "{object_key}"
         "object_name": "{object_name}"
+        "target_name": "{target_name}"
         "etag": "{etag}"
         "object_size": "{size_str}"
         "object_type": "{object_type}"
@@ -83,7 +84,7 @@ def process_object(event_data):
         '''.format(**object_data)
     sqs_results = queue.add(sqs_body, set_random_id())
 
-    created_at = str(datetime.datetime.now())[0:19]
+    created_at = str(datetime.now())[0:19]
     queue_data = {'message_id': sqs_results['MD5OfMessageBody'], 'sequence_number': sqs_results['SequenceNumber'],
                   'created_at': created_at, 'status': 2, 'file_id': file_id}
     if 'MD5OfMessageBody' in sqs_results:
@@ -93,7 +94,7 @@ def process_object(event_data):
     if 'MD5OfMessageSystemAttributes' in sqs_results:
         queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
     queue_id = check_in_db.insert('queues', queue_data)
-    updated_at = str(datetime.datetime.now())[0:19]
+    updated_at = str(datetime.now())[0:19]
     object_data = {"queue_id": queue_id, "updated_at": updated_at}
     where_clause = 'id = ' + str(file_id)
     check_in_db.update('object_checkins',  object_data, where_clause)
