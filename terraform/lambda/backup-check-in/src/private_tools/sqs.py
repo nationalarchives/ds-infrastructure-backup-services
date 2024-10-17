@@ -1,5 +1,7 @@
 import boto3
 import botocore.exceptions
+from pyasn1.type.univ import Boolean
+
 
 class Queue:
     def __init__(self, queue_location):
@@ -33,8 +35,10 @@ class Queue:
         else:
             return response
 
-    def delete_message(self):
-        pass
+    def delete_message(self, handle: str) -> bool:
+        self.queue_client.delete_message(QueueUrl=self.queue_url,
+                        ReceiptHandle=handle)
+        return True
 
     def poll(self):
         pass

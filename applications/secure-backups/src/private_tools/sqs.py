@@ -1,6 +1,6 @@
 import boto3
 import botocore.exceptions
-from helper_fx.helpers import set_random_id
+from .helpers import set_random_id
 
 class SQSHandler:
     def __init__(self, queue_name, queue_owner):
@@ -71,11 +71,11 @@ class SQSHandler:
         else:
             return response
 
-    def delete_message(self):
+    def delete_message(self, handle: str) -> None:
         try:
-            response = self.client.delete_message(
+            self.client.delete_message(
                 QueueURL=self.queue_url,
-                ReceiptHandle=""
+                ReceiptHandle=handle
             )
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'InvalidIdFormat ':
@@ -95,5 +95,3 @@ class SQSHandler:
             else:
                 print('SQS - unknown error')
             raise error
-        else:
-            return response
