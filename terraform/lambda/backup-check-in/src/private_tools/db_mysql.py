@@ -83,8 +83,12 @@ class Database:
             else:
                 raise err
         else:
-            colums = [i[0] for i in self.db_cursor.description]
-            result = [dict(zip(colums, row)) for row in self.db_cursor.fetchall()]
+            rows = self.db_cursor.fetchall()
+            if len(rows) == 0:
+                result =  rows
+            else:
+                colums = [i[0] for i in self.db_cursor.description]
+                result = [dict(zip(colums, row)) for row in ]
             return result
 
     def delete(self):
