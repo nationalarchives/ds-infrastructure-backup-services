@@ -69,7 +69,7 @@ class Database:
 
     def select(self, tbl_name: str, fields: list, where: str = ''):
         field_list = ''
-        if len(list) > 0:
+        if len(fields) > 0:
             for fds in fields:
                 field_list += f'{fds}, '
             field_list = field_list[:-2]
