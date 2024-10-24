@@ -28,7 +28,7 @@ def process_object(event_data):
     bucket = Bucket(parameters['aws_region'])
     bucket_name = event_data['bucket']['name']
     object_key = unquote_plus(event_data['object']['key'])
-    object_path = deconstruct_path()
+    object_path = deconstruct_path(object_key)
     object_name = object_path['object_name']
     object_info = bucket.get_object_info(bucket_name, object_key)
     # neutralise older entries if the object is already in the list but not processed yet

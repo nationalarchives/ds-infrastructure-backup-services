@@ -39,7 +39,7 @@ def find_key_dict(k: str, a: dict = {}):
     return [a[key] for key in a if key.lower() == k]
 
 
-def deconstruct_path(self, object_key):
+def deconstruct_path(object_key):
     return {'object_key': object_key, 'object_name': object_key.split('/')[-1],
             'location': "/".join(object_key.split('/')[:-1])}
 
