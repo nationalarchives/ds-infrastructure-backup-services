@@ -31,10 +31,11 @@ def process_object(event_data):
     object_path = deconstruct_path(object_key)
     object_name = object_path['object_name']
     object_info = bucket.get_object_info(bucket_name, object_key)
+    etag = object_info['ETag'].replace('"','')
     # neutralise older entries if the object is already in the list but not processed yet
     upd_redundant = {'modified_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                      'status': 8}
-    upd_where = f'etag = "{object_info["ETag"]}" AND object_key = "{object_key}" AND status = 2'
+    upd_where = f'etag = "{etag}" AND object_key = "{object_key}" AND status = 2'
     check_in_db.update('object_checkins', upd_redundant, upd_where)
     # find any entry already in process
     select_where = f'etag = "{object_info["ETag"]}" AND object_key = "{object_key}" AND status = 1'
@@ -42,7 +43,7 @@ def process_object(event_data):
     found_records = check_in_db.select('object_checkins', select_fields, select_where)
     if len(found_records) == 0:
         object_data = {'bucket': bucket_name, 'object_key': object_key,
-                       'object_name': object_name, 'etag': object_info['ETag'].replace('"',''),
+                       'object_name': object_name, 'etag': etag,
                        'object_size': object_info['ContentLength'], 'object_type': object_info['ContentType'],
                        'last_modified': object_info['LastModified'],
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 2}
@@ -75,7 +76,7 @@ def process_object(event_data):
             "bucket": "{bucket}"
             "object_key": "{object_key}"
             "object_name": "{object_name}"
-            "etag": "{object_info['ETag'].replace('"','')}"
+            "etag": "{etag}"
             "object_size": "{size_str}"
             "object_type": "{object_info['ContentType']}"
             "last_modified": "{object_info['LastModified']}"
@@ -98,7 +99,7 @@ def process_object(event_data):
         check_in_db.update('object_checkins',  object_data, where_clause)
     else:
         object_data = {'bucket': bucket_name, 'object_key': object_key,
-                       'object_name': object_name, 'etag': object_info['ETag'].replace('"',''),
+                       'object_name': object_name, 'etag': etag,
                        'object_size': object_info['ContentLength'], 'object_type': object_info['ContentType'],
                        'last_modified': object_info['LastModified'],
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 7}
