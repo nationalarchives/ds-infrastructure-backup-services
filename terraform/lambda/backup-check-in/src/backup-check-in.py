@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
 def process_object(event_data):
     ssm_id = os.getenv('SSM_ID')
-    parameters = get_parameters(ssm_id)
+    parameters = get_parameters(ssm_id, 'eu-west-2')
 
     db_secrets = Secrets(parameters['asm_id'])
     db_secrets_values = json.loads(db_secrets.get_str())
