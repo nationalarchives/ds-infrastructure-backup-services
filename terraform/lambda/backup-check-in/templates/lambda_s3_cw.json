@@ -11,6 +11,13 @@
             "Resource": "arn:aws:logs:*:*:*"
         },
         {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter"
+            ],
+            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in"
+        },
+        {
             "Action": [
                 "secretsmanager:GetSecretValue"
             ],
