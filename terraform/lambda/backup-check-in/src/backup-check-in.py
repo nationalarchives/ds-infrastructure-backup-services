@@ -38,7 +38,7 @@ def process_object(event_data):
     upd_where = f'etag = "{etag}" AND object_key = "{object_key}" AND status = 2'
     check_in_db.update('object_checkins', upd_redundant, upd_where)
     # find any entry already in process
-    select_where = f'etag = "{object_info["ETag"]}" AND object_key = "{object_key}" AND status = 1'
+    select_where = f'etag = "{etag}" AND object_key = "{object_key}" AND status = 1'
     select_fields = ['id', 'etag', 'object_key']
     found_records = check_in_db.select('object_checkins', select_fields, select_where)
     if len(found_records) == 0:
