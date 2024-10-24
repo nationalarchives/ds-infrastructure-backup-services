@@ -1,6 +1,5 @@
 import boto3
 import botocore.exceptions
-from pyasn1.type.univ import Boolean
 
 
 class Queue:
