@@ -33,7 +33,7 @@ def process_object(event_data):
     object_info = bucket.get_object_info(bucket_name, object_key)
     etag = object_info['ETag'].replace('"','')
     # neutralise older entries if the object is already in the list but not processed yet
-    upd_redundant = {'modified_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    upd_redundant = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                      'status': 8}
     upd_where = f'etag = "{etag}" AND object_key = "{object_key}" AND status = 2'
     check_in_db.update('object_checkins', upd_redundant, upd_where)
