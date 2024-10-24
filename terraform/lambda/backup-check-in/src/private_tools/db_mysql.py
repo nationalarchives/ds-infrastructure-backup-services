@@ -43,8 +43,7 @@ class Database:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
             else:
-                print(err)
-            exit(1)
+                raise err
         else:
             self.db_connect.commit()
             return self.db_cursor.lastrowid
@@ -63,12 +62,30 @@ class Database:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
             else:
-                print(err)
-            exit(1)
+                raise err
         else:
             self.db_connect.commit()
             return True
 
+    def select(self, tbl_name: str, fields: list, where: str = ''):
+        field_list = ''
+        if len(list) > 0:
+            for fds in fields:
+                field_list += f'{fds}, '
+            field_list = field_list[:-2]
+        else:
+            field_list = '*'
+        try:
+            self.db_cursor.execute(f'SELECT {field_list} FROM {tbl_name} WHERE {where}')
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            else:
+                raise err
+        else:
+            colums = [i[0] for i in self.db_cursor.description]
+            result = [dict(zip(colums, row)) for row in self.db_cursor.fetchall()]
+            return result
 
     def delete(self):
         pass

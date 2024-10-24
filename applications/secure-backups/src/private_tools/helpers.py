@@ -1,5 +1,6 @@
 import random
 import string
+import re
 
 
 def size_converter(value=0, start='B', end='GB', precision=2, long_names=False, base=1024):
@@ -35,4 +36,12 @@ def find_key_dict(k: str, a: dict = {}):
     k = k.lower()
     return [a[key] for key in a if key.lower() == k]
 
+def sub_json(text: str, re_set):
+    prepared_dict = text
+    for step in re_set:
+        prepared_dict = re.sub(step['re_compile'], step['replace_with'], prepared_dict)
+    return prepared_dict
 
+def deconstruct_path(object_key):
+    return {'object_key': object_key, 'object_name': object_key.split('/')[-1],
+            'location': "/".join(object_key.split('/')[:-1])}

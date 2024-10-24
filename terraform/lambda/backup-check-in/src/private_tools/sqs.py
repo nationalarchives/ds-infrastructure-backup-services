@@ -35,10 +35,9 @@ class Queue:
         else:
             return response
 
-    def delete_message(self, handle: str) -> bool:
+    def delete_message(self, handle: str) -> None:
         self.queue_client.delete_message(QueueUrl=self.queue_url,
                         ReceiptHandle=handle)
-        return True
 
     def poll(self):
         pass

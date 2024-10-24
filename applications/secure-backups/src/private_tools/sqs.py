@@ -2,19 +2,18 @@ import boto3
 import botocore.exceptions
 from .helpers import set_random_id
 
+
 class SQSHandler:
-    def __init__(self, queue_name, queue_owner):
-        self.client = boto3.client('sqs')
+    def __init__(self, queue_name, queue_owner, region: str='eu-west-2'):
+        self.client = boto3.client('sqs',
+                                   region_name=region)
         self.queue_name = queue_name
         self.queue_owner = queue_owner
-        self.queue_client = boto3.client('sqs')
-        self.queue_client = boto3.client('sqs')
-        self.queue_url = self.get_queue_url
-
-        self.client.set_queue_attributes(
-            QueueUrl=self.queue_url,
-            Attributes={'ReceiveMessageWaitTimeSeconds': '20'}
-        )
+        self.queue_client = boto3.client('sqs',
+                                         region_name=region)
+        self.queue_url = self.get_queue_url()
+        self.client.set_queue_attributes(QueueUrl=self.queue_url,
+                                         Attributes={'ReceiveMessageWaitTimeSeconds': '20'})
 
     def get_queue_url(self):
         try:
@@ -74,7 +73,7 @@ class SQSHandler:
     def delete_message(self, handle: str) -> None:
         try:
             self.client.delete_message(
-                QueueURL=self.queue_url,
+                QueueUrl=self.queue_url,
                 ReceiptHandle=handle
             )
         except botocore.exceptions.ClientError as error:

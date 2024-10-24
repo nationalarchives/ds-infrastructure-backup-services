@@ -27,7 +27,7 @@ class Database:
                 print(err)
             exit(1)
         else:
-            self.db_cursor = self.db_connect.cursor()
+            self.db_cursor = self.db_connect.cursor(buffered=True)
 
     def select(self, tbl_name: str, column_list: list[str] | None):
         if column_list is None:
@@ -77,7 +77,20 @@ class Database:
         self.left_join = f'LEFT JOIN {tbl_name} ON ({on})'
 
     def run(self):
-        ex_cmd = f"{self.sql_stmt} {self.left_join} {self.clause}"
+        if self.cmd == 'insert':
+            self.clause = ''
+            self.left_join = ''
+            self.order = ''
+        if self.cmd == 'update' or self.cmd == 'delete':
+            self.left_join = ''
+            self.order = ''
+        ex_cmd = f'{self.sql_stmt}'
+        if len(self.left_join) > 0:
+            ex_cmd += f' {self.left_join}'
+        if len(self.clause) > 0:
+            ex_cmd += f' WHERE {self.clause}'
+        if len(self.order) > 0:
+            ex_cmd += f' ORDER BY {self.order}'
         try:
             self.db_cursor.execute(ex_cmd)
         except mysql.connector.Error as err:
@@ -85,11 +98,13 @@ class Database:
                 print("Something is wrong with your user name or password")
             else:
                 print(err)
-            exit(1)
+            raise err
         else:
             self.db_connect.commit()
             if self.cmd == 'select':
-                return self.db_cursor.fetchall()
+                fields = [i[0] for i in self.db_cursor.description]
+                result = [dict(zip(fields, row)) for row in self.db_cursor.fetchall()]
+                return result
             elif self.cmd == 'insert':
                 return self.db_cursor.lastrowid
             elif self.cmd == 'update':
@@ -100,7 +115,20 @@ class Database:
                 return False
 
     def fetch(self):
-        ex_cmd = f"{self.sql_stmt} {self.left_join} {self.clause}"
+        if self.cmd == 'insert':
+            self.clause = ''
+            self.left_join = ''
+            self.order = ''
+        if self.cmd == 'update' or self.cmd == 'delete':
+            self.left_join = ''
+            self.order = ''
+        ex_cmd = f'{self.sql_stmt}'
+        if len(self.left_join) > 0:
+            ex_cmd += f' {self.left_join}'
+        if len(self.clause) > 0:
+            ex_cmd += f' WHERE {self.clause}'
+        if len(self.order) > 0:
+            ex_cmd += f' ORDER BY {self.order}'
         try:
             self.db_cursor.execute(ex_cmd)
         except mysql.connector.Error as err:
@@ -108,7 +136,15 @@ class Database:
                 print("Something is wrong with your user name or password")
             else:
                 print(err)
-            exit(1)
+            raise err
         else:
-            self.db_connect.commit()
-            return self.db_cursor.fetchone()
+            #self.db_connect.commit()
+            data = self.db_cursor.fetchone()
+            if data:
+                row = dict(zip(self.db_cursor.column_names, data))
+            else:
+                row = {}
+            return row
+
+    def last_id(self):
+        return self.db_cursor.lastrowid

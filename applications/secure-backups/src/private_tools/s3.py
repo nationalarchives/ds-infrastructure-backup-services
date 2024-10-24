@@ -3,11 +3,11 @@ import botocore.exceptions
 
 
 class Bucket:
-    def __init__(self, region):
+    def __init__(self, region: str='eu-west-2'):
         self.client = boto3.client('s3',
                                    region_name=region)
 
-    def get_object_info(self, bucket:str, object_key: str):
+    def get_object_info(self, bucket: str, object_key: str):
         try:
             obj_data = self.client.get_object(Bucket=bucket,
                                               Key=object_key)
@@ -22,7 +22,7 @@ class Bucket:
         else:
             return obj_data
 
-    def get_object_attr(self, bucket:str, object_key):
+    def get_object_attr(self, bucket: str, object_key):
         try:
             obj_attr = self.client.get_object_attributes(Bucket=bucket,
                                                          Key=object_key,
@@ -52,4 +52,5 @@ class Bucket:
                 print('S3 - ObjectNotInActiveTierError')
             else:
                 raise error
-        return response
+        else:
+            return response
