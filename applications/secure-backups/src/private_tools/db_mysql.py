@@ -6,6 +6,7 @@ class Database:
     def __init__(self, db_secrets):
         self.sql_stmt = ''
         self.clause = ''
+        self.order = ''
         self.left_join = ''
         self.db_config = {
             'user': db_secrets['db_username'],

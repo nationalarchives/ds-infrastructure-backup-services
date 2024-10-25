@@ -42,8 +42,15 @@
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:secretsmanager:eu-west-2:637423167251:secret:service-backups/github/credentials-Jgutx9"
+                "arn:aws:secretsmanager:eu-west-2:637423167251:secret:application/lambda/backup-check-in-dCsJNp"
             ]
+        },
+        {
+            "Action": [
+                "ssm:GetParameter"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in"
         },
         {
             "Effect": "Allow",

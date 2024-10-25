@@ -34,7 +34,7 @@ def process_object(tasks, done, bucket, db):
     else:
         # update record
         cp_rec = {'etag': response['CopyObjectResult']['ETag'].replace('"', ''), 'finished_ts': datetime.now().timestamp(),
-                  'updated_at': str(datetime.now())[0:19], 'status': 0}
+                  'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
         db.update('object_copies', cp_rec)
         db.where(f'id = {object_queue_data["obj_id"]}')
         db.run()
@@ -94,11 +94,12 @@ def process_backups():
                     obj_attr = bucket_client.get_object_attr(checkin_rec['bucket'], checkin_rec['object_key'])
                     # check of any changes
                     # write to table copies
+                    target_name = f'{checkin_rec["object_name"]}_{str(datetime.now().timestamp()).replace(".","_")}'
                     object_copy = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
-                                   'object_name': checkin_rec['object_name'], 'target_name': checkin_rec['target_name'],
+                                   'object_name': target_name, 'source_name': checkin_rec['object_name'],
                                    'object_size': obj_info['ContentLength'], 'object_type': obj_info['ContentType'],
                                    'etag': obj_info['ETag'].replace('"', ''), 'object_key': checkin_rec['object_key'],
-                                   'target_bucket': s3_target, 'created_at': str(datetime.now())[0:19], 'status': 2,
+                                   'bucket': s3_target, 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 2,
                                    'percentage': '0.00'}
                     if "Metadata" in obj_info:
                         obj_metadata = obj_info['Metadata']
@@ -126,11 +127,11 @@ def process_backups():
                     queue_client.delete_message(message['ReceiptHandle'])
                     # add mp queue
                     object_name_parts = deconstruct_path(checkin_rec['object_key'])
-                    task_queue.put({'obj_id': obj_id,
+                    task_queue.put({'file_id': checkin_rec['id'], 'obj_id': obj_id,
                                     'source_bucket': checkin_rec['bucket'],
                                     'source_key': checkin_rec['object_key'],
                                     'target_bucket': s3_target,
-                                    'target_obj': f'{object_name_parts["location"]}/{checkin_rec["target_name"]}'.lstrip('/')})
+                                    'target_obj': f'{object_name_parts["location"]}/{target_name}'.lstrip('/')})
                     # run copying processes
                     for i in range(max_pp):
                         Process(target=process_object, args=(task_queue, done_queue, bucket_client, db_client,)).start()
