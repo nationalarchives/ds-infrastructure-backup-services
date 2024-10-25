@@ -4,7 +4,8 @@ from .sqs import SQSHandler
 from .asm import Secrets
 from .copier import TransferBox
 from .s3 import Bucket
-from .helpers import find_key_dict, set_random_id, size_converter, sub_json,deconstruct_path
+from .helpers import find_key_dict, set_random_id, size_converter, sub_json
+from .helpers import deconstruct_path, get_parameters
 
 __all__ = [
     'SignalHandler',
@@ -17,5 +18,6 @@ __all__ = [
     'set_random_id',
     'size_converter',
     'sub_json',
-    'deconstruct_path'
+    'deconstruct_path',
+    'get_parameters'
 ]

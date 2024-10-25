@@ -68,11 +68,8 @@ class Database:
             return True
 
     def select(self, tbl_name: str, fields: list, where: str = ''):
-        field_list = ''
         if len(fields) > 0:
-            for fds in fields:
-                field_list += f'{fds}, '
-            field_list = field_list[:-2]
+            field_list = ', '.join(fields)
         else:
             field_list = '*'
         try:

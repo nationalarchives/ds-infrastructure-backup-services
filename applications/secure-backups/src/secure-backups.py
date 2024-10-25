@@ -2,11 +2,13 @@ import boto3
 import botocore.exceptions
 import json
 import re
+import os
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 from datetime import datetime
 from private_tools import SignalHandler, SQSHandler, Database
 from private_tools import Secrets, Bucket, sub_json, find_key_dict, deconstruct_path
+from private_tools import get_parameters
 
 
 def process_object(tasks, done, bucket, db):
@@ -43,23 +45,22 @@ def process_object(tasks, done, bucket, db):
         done.put(action)
 
 def process_backups():
+    ssm_id = os.getenv('SSM_ID')
+    parameters = get_parameters(ssm_id, 'eu-west-2')
     max_pp = mp.cpu_count()
 
     signal_handler = SignalHandler()
-    queue_name = 'backup-check-in-queue.fifo'
-    asm_id = 'application/lambda/backup-check-in'
-    aws_region = 'eu-west-2'
     regex_line = re.compile(r'(?<![{}\[\]])\n')
     regex_comma = re.compile(r',(?=\s*?[{\[\]}])')
     client = boto3.client('sts')
     response = client.get_caller_identity()
     account = response['Account']
-    db_secrets = Secrets(asm_id)
+    db_secrets = Secrets(parameters['asm_id'])
     regex_set = [{'re_compile': regex_line, 'replace_with': ',\n'},
                  {'re_compile': regex_comma, 'replace_with': ''}]
     db_secrets_vals = json.loads(db_secrets.get_secrets())
     db_client = Database(db_secrets_vals)
-    queue_client = SQSHandler(queue_name, account, aws_region)
+    queue_client = SQSHandler(parameters['queue_name'], account, parameters['aws_region'])
     bucket_client = Bucket()
     s3_source = 'tna-backup-drop-zone'
     s3_target = 'tna-backup-vault'
@@ -82,54 +83,60 @@ def process_backups():
                 db_client.select('object_checkins', ['*'])
                 db_client.where(f'id = {checkin_file_id}')
                 checkin_rec = db_client.fetch()
-                # get object data
-                obj_info = bucket_client.get_object_info(checkin_rec['bucket'], checkin_rec['object_key'])
-                obj_attr = bucket_client.get_object_attr(checkin_rec['bucket'], checkin_rec['object_key'])
-                # check of any changes
-                # write to table copies
-                object_copy = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
-                               'object_name': checkin_rec['object_name'], 'target_name': checkin_rec['target_name'],
-                               'object_size': obj_info['ContentLength'], 'object_type': obj_info['ContentType'],
-                               'etag': obj_info['ETag'].replace('"', ''), 'object_key': checkin_rec['object_key'],
-                               'target_bucket': s3_target, 'created_at': str(datetime.now())[0:19], 'status': 2,
-                               'percentage': '0.00'}
-                if "Metadata" in obj_info:
-                    obj_metadata = obj_info['Metadata']
-                    if find_key_dict("retention_period", obj_metadata):
-                        object_copy['retention_period'] = obj_metadata['retention_period']
-                    if find_key_dict("lock_mode", obj_metadata):
-                        object_copy['lock_mode'] = obj_metadata['lock_mode']
-                    if find_key_dict("legal_hold", obj_metadata):
-                        object_copy['legal_hold'] = obj_metadata['legal_hold']
-                    if find_key_dict("lock-until-date", obj_metadata):
-                        object_copy['lock_until_date'] = obj_metadata['lock-until-date']
-                if 'Checksum' in obj_attr:
-                    object_checksum = obj_attr['Checksum']
-                    if 'ChecksumCRC32' in object_checksum:
-                        object_copy['checksum_crc32'] = object_checksum['ChecksumCRC32']
-                    if 'ChecksumCRC32C' in object_checksum:
-                        object_copy['checksum_crc32c'] = object_checksum['ChecksumCRC32C']
-                    if 'ChecksumSHA1' in object_checksum:
-                        object_copy['checksum_sha1'] = object_checksum['ChecksumSHA1']
-                    if 'ChecksumSHA256' in object_checksum:
-                        object_copy['checksum_sha256'] = object_checksum['ChecksumSHA256']
-                db_client.insert('object_copies', object_copy)
-                obj_id = db_client.run()
-                # remove from queue
-                queue_client.delete_message(message['ReceiptHandle'])
-                # add mp queue
-                object_name_parts = deconstruct_path(checkin_rec['object_key'])
-                task_queue.put({'obj_id': obj_id,
-                                'source_bucket': checkin_rec['bucket'],
-                                'source_key': checkin_rec['object_key'],
-                                'target_bucket': s3_target,
-                                'target_obj': f'{object_name_parts["location"]}/{checkin_rec["target_name"]}'.lstrip('/')})
-            # run copying processes
-            for i in range(max_pp):
-                Process(target=process_object, args=(task_queue, done_queue, bucket_client, db_client,)).start()
+                if checkin_rec['status'] == 8: # queue entry is redundant
+                    queue_client.delete_message(message['ReceiptHandle'])
+                    queue_data = {'status': 8, 'finished_ts': datetime.now().timestamp()}
+                    db_client.where(f'file_id = {queue_message_body["file_id"]}')
+                    db_client.update('queues', queue_data)
+                else:
+                    # get object data
+                    obj_info = bucket_client.get_object_info(checkin_rec['bucket'], checkin_rec['object_key'])
+                    obj_attr = bucket_client.get_object_attr(checkin_rec['bucket'], checkin_rec['object_key'])
+                    # check of any changes
+                    # write to table copies
+                    object_copy = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
+                                   'object_name': checkin_rec['object_name'], 'target_name': checkin_rec['target_name'],
+                                   'object_size': obj_info['ContentLength'], 'object_type': obj_info['ContentType'],
+                                   'etag': obj_info['ETag'].replace('"', ''), 'object_key': checkin_rec['object_key'],
+                                   'target_bucket': s3_target, 'created_at': str(datetime.now())[0:19], 'status': 2,
+                                   'percentage': '0.00'}
+                    if "Metadata" in obj_info:
+                        obj_metadata = obj_info['Metadata']
+                        if find_key_dict("retention_period", obj_metadata):
+                            object_copy['retention_period'] = obj_metadata['retention_period']
+                        if find_key_dict("lock_mode", obj_metadata):
+                            object_copy['lock_mode'] = obj_metadata['lock_mode']
+                        if find_key_dict("legal_hold", obj_metadata):
+                            object_copy['legal_hold'] = obj_metadata['legal_hold']
+                        if find_key_dict("lock-until-date", obj_metadata):
+                            object_copy['lock_until_date'] = obj_metadata['lock-until-date']
+                    if 'Checksum' in obj_attr:
+                        object_checksum = obj_attr['Checksum']
+                        if 'ChecksumCRC32' in object_checksum:
+                            object_copy['checksum_crc32'] = object_checksum['ChecksumCRC32']
+                        if 'ChecksumCRC32C' in object_checksum:
+                            object_copy['checksum_crc32c'] = object_checksum['ChecksumCRC32C']
+                        if 'ChecksumSHA1' in object_checksum:
+                            object_copy['checksum_sha1'] = object_checksum['ChecksumSHA1']
+                        if 'ChecksumSHA256' in object_checksum:
+                            object_copy['checksum_sha256'] = object_checksum['ChecksumSHA256']
+                    db_client.insert('object_copies', object_copy)
+                    obj_id = db_client.run()
+                    # remove from queue
+                    queue_client.delete_message(message['ReceiptHandle'])
+                    # add mp queue
+                    object_name_parts = deconstruct_path(checkin_rec['object_key'])
+                    task_queue.put({'obj_id': obj_id,
+                                    'source_bucket': checkin_rec['bucket'],
+                                    'source_key': checkin_rec['object_key'],
+                                    'target_bucket': s3_target,
+                                    'target_obj': f'{object_name_parts["location"]}/{checkin_rec["target_name"]}'.lstrip('/')})
+                    # run copying processes
+                    for i in range(max_pp):
+                        Process(target=process_object, args=(task_queue, done_queue, bucket_client, db_client,)).start()
 
-            for i in range(max_pp):
-                task_queue.put('STOP')
+                    for i in range(max_pp):
+                        task_queue.put('STOP')
     db_client.close()
 
 
