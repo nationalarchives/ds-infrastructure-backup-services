@@ -5,6 +5,7 @@ import boto3
 import botocore.exceptions
 import json
 
+
 def size_converter(value=0, start='B', end='GB', precision=2, long_names=False, base=1024):
     units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     units_long = ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Exabyte', 'Zettabyte',
@@ -48,8 +49,18 @@ def sub_json(text: str, re_set):
 
 
 def deconstruct_path(object_key):
-    return {'object_key': object_key, 'object_name': object_key.split('/')[-1],
-            'location': "/".join(object_key.split('/')[:-1])}
+    if object_key.startswith('/'):
+        object_key = object_key[1:]
+    path_elements = object_key.split('/')
+    object_name = path_elements[-1]
+    if len(path_elements) > 1:
+        ap_name = path_elements[0]
+        location = "/".join(path_elements[:-1])
+    else:
+        ap_name = ''
+        location = ''
+    return {'object_key': object_key, 'object_name': object_name,
+            'access_point': ap_name, 'location': location}
 
 
 def get_parameters(name: str, aws_region: str):

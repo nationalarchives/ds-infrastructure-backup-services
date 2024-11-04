@@ -40,13 +40,9 @@ class Database:
         try:
             self.db_cursor.execute(f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}')
         except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            else:
-                raise err
-        else:
-            self.db_connect.commit()
-            return self.db_cursor.lastrowid
+            raise err
+        self.db_connect.commit()
+        return self.db_cursor.lastrowid
 
     def update(self, tbl_name: str, data_set: dict, where: str):
         set_list = ''
@@ -59,13 +55,9 @@ class Database:
         try:
             self.db_cursor.execute(f'UPDATE {tbl_name} SET {set_list} WHERE {where}')
         except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            else:
-                raise err
-        else:
-            self.db_connect.commit()
-            return True
+            raise err
+        self.db_connect.commit()
+        return True
 
     def select(self, tbl_name: str, fields: list, where: str = ''):
         if len(fields) > 0:

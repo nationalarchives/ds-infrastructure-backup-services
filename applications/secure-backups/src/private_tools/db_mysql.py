@@ -27,8 +27,7 @@ class Database:
             else:
                 print(err)
             exit(1)
-        else:
-            self.db_cursor = self.db_connect.cursor(buffered=True)
+        self.db_cursor = self.db_connect.cursor(dictionary=True, buffered=True)
 
     def select(self, tbl_name: str, column_list: list[str] | None):
         if column_list is None:
@@ -94,35 +93,26 @@ class Database:
             ex_cmd += f' ORDER BY {self.order}'
         try:
             self.db_cursor.execute(ex_cmd)
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            else:
-                print(err)
-            raise err
-        else:
             self.db_connect.commit()
-            if self.cmd == 'select':
-                fields = [i[0] for i in self.db_cursor.description]
-                result = [dict(zip(fields, row)) for row in self.db_cursor.fetchall()]
-                return result
-            elif self.cmd == 'insert':
-                return self.db_cursor.lastrowid
-            elif self.cmd == 'update':
-                return True
-            elif self.cmd == 'delete':
-                return True
-            else:
-                return False
+        except mysql.connector.Error as err:
+            print(err)
+            raise err
+        self.clause = ''
+        self.left_join = ''
+        self.order = ''
+        if self.cmd == 'select':
+            rows = self.db_cursor.fetchall()
+            return rows
+        elif self.cmd == 'insert':
+            return self.db_cursor.lastrowid
+        elif self.cmd == 'update':
+            return True
+        elif self.cmd == 'delete':
+            return True
+        else:
+            return False
 
     def fetch(self):
-        if self.cmd == 'insert':
-            self.clause = ''
-            self.left_join = ''
-            self.order = ''
-        if self.cmd == 'update' or self.cmd == 'delete':
-            self.left_join = ''
-            self.order = ''
         ex_cmd = f'{self.sql_stmt}'
         if len(self.left_join) > 0:
             ex_cmd += f' {self.left_join}'
@@ -132,19 +122,16 @@ class Database:
             ex_cmd += f' ORDER BY {self.order}'
         try:
             self.db_cursor.execute(ex_cmd)
+            self.db_connect.commit()
         except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
-            else:
-                print(err)
+            print(err)
             raise err
         else:
-            #self.db_connect.commit()
-            data = self.db_cursor.fetchone()
-            if data:
-                row = dict(zip(self.db_cursor.column_names, data))
-            else:
-                row = {}
+            self.clause = ''
+            self.left_join = ''
+            self.order = ''
+            row = self.db_cursor.fetchone()
+            remaining_rows = self.db_cursor.fetchall()
             return row
 
     def last_id(self):

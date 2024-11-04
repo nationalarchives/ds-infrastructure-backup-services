@@ -47,14 +47,12 @@ def process_object(event_data):
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 3}
         if "Metadata" in object_info:
             obj_metadata = object_info['Metadata']
-            if find_key_dict("retention_period", obj_metadata):
-                object_data['retention_period'] = obj_metadata['retention_period']
+            if find_key_dict("retain_until_date", obj_metadata):
+                object_data['retain_until_date'] = obj_metadata['retain_until_date']
             if find_key_dict("lock_mode", obj_metadata):
                 object_data['lock_mode'] = obj_metadata['lock_mode']
             if find_key_dict("legal_hold", obj_metadata):
                 object_data['legal_hold'] = obj_metadata['legal_hold']
-            if find_key_dict("lock-until-date", obj_metadata):
-                object_data['lock_until_date'] = obj_metadata['lock-until-date']
             if 'ChecksumCRC32' in object_info:
                 object_data['checksum_crc32'] = object_info['ChecksumCRC32']
             if 'ChecksumCRC32C' in object_info:
@@ -106,14 +104,12 @@ def process_object(event_data):
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 7}
         if "Metadata" in object_info:
             obj_metadata = object_info['Metadata']
-            if find_key_dict("retention_period", obj_metadata):
-                object_data['retention_period'] = obj_metadata['retention_period']
+            if find_key_dict("retain_until_date", obj_metadata):
+                object_data['retain_until_date'] = obj_metadata['retain_until_date']
             if find_key_dict("lock_mode", obj_metadata):
                 object_data['lock_mode'] = obj_metadata['lock_mode']
             if find_key_dict("legal_hold", obj_metadata):
                 object_data['legal_hold'] = obj_metadata['legal_hold']
-            if find_key_dict("lock-until-date", obj_metadata):
-                object_data['lock_until_date'] = obj_metadata['lock-until-date']
             if 'ChecksumCRC32' in object_info:
                 object_data['checksum_crc32'] = object_info['ChecksumCRC32']
             if 'ChecksumCRC32C' in object_info:
