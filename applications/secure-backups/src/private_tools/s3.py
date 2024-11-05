@@ -73,7 +73,7 @@ class RBucket:
             self.resource.meta.client.copy(CopySource=cp_source, Bucket=target_bucket, Key=target_key, Callback=callback)
         except Exception as e:
             raise e
-        if not locking:
+        if locking:
             self.set_locking(locking, target_bucket, target_key)
 
     def set_locking(self, info, target_bucket, target_key):

@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
 
 def process_object(event_data):
-    received_ts = datetime.now().timestamp()
+    received_ts = str(datetime.now().timestamp())
     ssm_id = os.getenv('SSM_ID')
     parameters = get_parameters(ssm_id, 'eu-west-2')
 
@@ -43,7 +43,8 @@ def process_object(event_data):
         object_data = {'bucket': bucket_name, 'object_key': object_key,
                        'object_name': object_name, 'etag': etag,
                        'object_size': object_info['ContentLength'], 'object_type': object_info['ContentType'],
-                       'last_modified': object_info['LastModified'], 'received_ts': received_ts,
+                       'last_modified': object_info['ResponseMetadata']['HTTPHeaders']['last-modified'],
+                       'received_ts': received_ts,
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 3}
         if "Metadata" in object_info:
             obj_metadata = object_info['Metadata']
@@ -81,7 +82,7 @@ def process_object(event_data):
         '''
         sqs_results = queue.add(sqs_body, set_random_id())
         queue_data = {'message_id': sqs_results['MessageId'], 'sequence_number': sqs_results['SequenceNumber'],
-                      'received_ts': datetime.now().timestamp(),
+                      'received_ts': str(datetime.now().timestamp()),
                       'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                       'status': 2, 'file_id': file_id}
         if 'MD5OfMessageBody' in sqs_results:
@@ -101,6 +102,7 @@ def process_object(event_data):
                        'object_name': object_name, 'etag': etag,
                        'object_size': object_info['ContentLength'], 'object_type': object_info['ContentType'],
                        'last_modified': object_info['ResponseMetadata']['HTTPHeaders']['last-modified'],
+                       'received_ts': received_ts,
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 7}
         if "Metadata" in object_info:
             obj_metadata = object_info['Metadata']
