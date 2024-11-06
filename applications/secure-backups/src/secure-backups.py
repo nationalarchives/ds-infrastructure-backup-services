@@ -114,21 +114,26 @@ def process_backups():
                         obj_info = bucket_client.get_object_info(checkin_rec['bucket'], checkin_rec['object_key'])
                         object_name_parts = deconstruct_path(checkin_rec['object_key'])
                         if obj_info is not None:
-                            db_client.select('ap_targets', ['*'])
+                            db_client.select('ap_targets', ['access_point', 'name_processing'])
                             db_client.where(f'access_point = "{object_name_parts["access_point"]}"')
                             ap_rec = db_client.fetch()
                             if ap_rec:
                                 s3_target = ap_rec['bucket']
+                                name_processing = ap_rec['name_processing']
                             else:
                                 s3_target = default_target_bucket
+                                name_processing = 1
                             obj_attr = bucket_client.get_object_attr(checkin_rec['bucket'], checkin_rec['object_key'])
                             # check of any changes
                             # write to table copies
-                            tn_split = checkin_rec["object_name"].split('.')
-                            if len(tn_split) > 1:
-                                target_name = f'{(".").join(tn_split[:-1])}_{str(datetime.now().timestamp()).replace(".", "_")}.{"".join(tn_split[-1:])}'
+                            if name_processing == 1:
+                                tn_split = checkin_rec["object_name"].split('.')
+                                if len(tn_split) > 1:
+                                    target_name = f'{(".").join(tn_split[:-1])}_{str(datetime.now().timestamp()).replace(".", "_")}.{"".join(tn_split[-1:])}'
+                                else:
+                                    target_name = f'{checkin_rec["object_name"]}_{str(datetime.now().timestamp()).replace(".", "_")}'
                             else:
-                                target_name = f'{checkin_rec["object_name"]}_{str(datetime.now().timestamp()).replace(".", "_")}'
+                                target_name = checkin_rec['object_name']
                             object_copy = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
                                            'object_name': target_name, 'source_name': checkin_rec['object_name'],
                                            'access_point': object_name_parts["access_point"], 'object_size': obj_info['ContentLength'],
