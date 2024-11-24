@@ -80,7 +80,7 @@ def main():
         s3_client.upload_file(tar_file, bucket_name, f'services/github/{tar_file}',
                               ExtraArgs={'Metadata': {'x-amz-meta-legal_hold': 'ON',
                                                       'x-amz-meta-lock_mode': 'governance',
-                                                      'x-amz-meta-retain_until_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+                                                      'x-amz-meta-retain_until_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
                                                       }
                                          }
                               )

@@ -35,8 +35,13 @@ def set_random_id(length: int = 64):
 
 
 def find_key_dict(k: str, a: dict = {}):
-    k = k.lower()
-    return [a[key] for key in a if key.lower() == k]
+    k = k.casefold()
+    return [key for key in a if key.casefold() == k]
+
+
+def find_value_dict(k: str, a: dict = {}):
+    k = k.casefold()
+    return [a[key] for key in a if key.casefold() == k]
 
 
 def deconstruct_path(object_key):

@@ -5,8 +5,10 @@ import boto3
 import botocore.exceptions
 import json
 
+from setuptools.command.upload import upload
 
-def size_converter(value=0, start='B', end='GB', precision=2, long_names=False, base=1024):
+
+def size_converter(value: int=0, start: str='B', end: str='GB', precision: int=2, long_names: bool=False, base: int=1024):
     units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     units_long = ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Exabyte', 'Zettabyte',
                   'Yottabyte']
@@ -37,8 +39,13 @@ def set_random_id(length: int = 64):
 
 
 def find_key_dict(k: str, a: dict = {}):
-    k = k.lower()
-    return [a[key] for key in a if key.lower() == k]
+    k = k.casefold()
+    return [key for key in a if key.casefold() == k]
+
+
+def find_value_dict(k: str, a: dict = {}):
+    k = k.casefold()
+    return [a[key] for key in a if key.casefold() == k]
 
 
 def sub_json(text: str, re_set):
@@ -80,3 +87,28 @@ def get_parameters(name: str, aws_region: str):
     for k, v in values.items():
         params.update({k: v})
     return params
+
+
+def create_upload_map(total_size: int, max_block_size: int=104857600):
+    upload_map = []
+    part_count = -(-total_size // max_block_size)
+    if part_count <= 1:
+        upload_map = [[0, (total_size - 1)]]
+    else:
+        part_size = -(-total_size // part_count)
+        to_transfer_total = total_size
+        for i in range(part_count):
+            if i > 0:
+                if upload_map[i-1][2] < part_size:
+                    transfer_size = upload_map[i-1][2]
+                else:
+                    transfer_size = part_size
+                range_from = upload_map[i-1][1] + 1
+                range_to = range_from + transfer_size - 1
+                to_transfer_total -= transfer_size
+            else:
+                range_from = 0
+                range_to = part_size - 1
+                to_transfer_total = total_size - part_size
+            upload_map.append([range_from, range_to, to_transfer_total])
+    return upload_map
