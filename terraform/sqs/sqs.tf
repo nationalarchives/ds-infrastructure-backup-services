@@ -1,9 +1,10 @@
 resource "aws_sqs_queue" "backup_check_in_queue" {
-    name                    = "backup-check-in-queue.fifo"
-    fifo_queue              = true
-    deduplication_scope     = "messageGroup"
-    fifo_throughput_limit   = "perMessageGroupId"
-    sqs_managed_sse_enabled = true
+    name                      = "backup-check-in-queue.fifo"
+    fifo_queue                = true
+    deduplication_scope       = "messageGroup"
+    fifo_throughput_limit     = "perMessageGroupId"
+    sqs_managed_sse_enabled   = true
+    receive_wait_time_seconds = 20
 }
 
 output "backup_check_in_queue_url" {
