@@ -113,7 +113,7 @@ import {
 #  to = module.s3-ds-live-digital-files-backup.aws_s3control_access_point_policy.ap_policy["ds-backup-target"]
 #  id = "arn:aws:s3:eu-west-2:637423167251:accesspoint/ds-backup-target"
 #}
-import {
-  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_policy.tna_backup_intake_access_from_another_account
-  id = "ds-live-digital-files-backup"
-}
+#import {
+#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_policy.tna_backup_intake_access_from_another_account
+#  id = "ds-live-digital-files-backup"
+#}
