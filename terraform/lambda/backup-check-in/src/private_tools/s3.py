@@ -81,11 +81,12 @@ class s3_object:
         obj_info = {'bucket_name': bucket, 'object_key': key,
                     'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
                     'content_length': obj_get['ContentLength'],
-                    'expires_string': obj_get['ExpiresString'],
                     'etag': obj_get['ETag'].replace('"', ''),
                     'content_type': obj_get['ContentType'],
                     'serverside_encryption': obj_get['ServerSideEncryption'],
                     'storage_class': obj_attr['StorageClass']}
+        if "ExpiresString" in obj_get:
+            obj_info['expires_string'] = obj_get['ExpiresString']
         if "Metadata" in obj_get:
             if find_value_dict("retain_until_date", obj_get['Metadata']):
                 obj_info['retain_until_date'] = obj_get['Metadata']['retain_until_date']
