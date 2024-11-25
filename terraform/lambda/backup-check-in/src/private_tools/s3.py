@@ -10,7 +10,7 @@ class Bucket:
         self.client = boto3.client('s3',
                                    region_name=region)
 
-    def get_object_info(self, bucket:str, object_key: str):
+    def get_object_info(self, bucket: str, object_key: str):
         try:
             obj_data = self.client.get_object(Bucket=bucket,
                                               Key=object_key)
@@ -25,7 +25,7 @@ class Bucket:
         else:
             return obj_data
 
-    def get_object_attr(self, bucket:str, object_key):
+    def get_object_attr(self, bucket: str, object_key):
         try:
             obj_attr = self.client.get_object_attributes(Bucket=bucket,
                                                          Key=object_key,
@@ -66,10 +66,8 @@ class s3_object:
     def info(self, *, bucket: str, key: str):
         try:
             obj_get = self.client.get_object(Bucket=bucket,
-                                              Key=key)
-            obj_attr = self.client.get_object_attributes(Bucket=bucket,
-                                                         Key=key,
-                                                         VersionId=obj_get['VersionId'],
+                                             Key=key)
+            obj_attr = self.client.get_object_attributes(Bucket=bucket, Key=key,
                                                          ObjectAttributes=['Checksum',
                                                                            'StorageClass'])
         except botocore.exceptions.ClientError as error:
@@ -85,7 +83,6 @@ class s3_object:
                     'content_length': obj_get['ContentLength'],
                     'expires_string': obj_get['ExpiresString'],
                     'etag': obj_get['ETag'].replace('"', ''),
-                    'version_id': obj_get['VersionId'],
                     'content_type': obj_get['ContentType'],
                     'serverside_encryption': obj_get['ServerSideEncryption'],
                     'storage_class': obj_attr['StorageClass']}
