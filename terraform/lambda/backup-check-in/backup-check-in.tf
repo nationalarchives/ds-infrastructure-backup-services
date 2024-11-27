@@ -19,14 +19,19 @@ resource "aws_iam_role" "lambda_execution_role" {
     name = "lambda-backup-check-in-execution-role"
     assume_role_policy = file("${path.root}/templates/assume-role-lambda-policy.json")
 
-    managed_policy_arns = [
-        "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-        aws_iam_policy.lambda_s3_cw.arn,
-    ]
-
     description = "allow lambda to assume role and access s3 and cw"
 
     tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "vpc_access" {
+    role       = aws_iam_role.lambda_execution_role.name
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "s3_cw" {
+    role       = aws_iam_role.lambda_execution_role.name
+    policy_arn = aws_iam_policy.lambda_s3_cw.arn
 }
 
 # using this option allows setting of log retention and removal of the log group
