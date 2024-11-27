@@ -92,9 +92,11 @@ class Bucket:
                                                          MultipartUpload=parts, UploadId=upload_id)
         print(response)
         return_value = {'location': response['Location'], 'bucket': response['Bucket'],
-                        'object_key': response['Key'], 'expiration': response['Expiration'],
+                        'object_key': response['Key'],
                         'etag': response['ETag'], 'version_id': response['VersionId'],
                         'server_side_encryption': response['ServerSideEncryption']}
+        if find_key_dict('Expiration', response):
+            return_value['expiration'] = response['Expiration']
         if find_key_dict('SSEKMSKeyId', response):
             return_value['sse_kmd_key_id'] = response['SSEKMSKeyId']
         if find_key_dict('ChecksumCRC32', response['CopyPartResult']):

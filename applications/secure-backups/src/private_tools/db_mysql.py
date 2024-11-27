@@ -55,9 +55,12 @@ class Database:
         set_list = ''
         for k, v in data_set.items():
             if isinstance(v, str):
-                set_list += '{key} = "{value}", '.format(key=k, value=v)
+                if v[0] == '@':
+                    set_list += f'{k} = {v[1:]}, '
+                else:
+                    set_list += f'{k} = "{v}", '
             elif isinstance(v, int):
-                set_list += '{key} = {value}, '.format(key=k, value=v)
+                set_list += f'{k} = {v}, '
         set_list = set_list[:-2]
         self.sql_stmt = f'UPDATE {tbl_name} SET {set_list}'
         self.cmd = 'update'

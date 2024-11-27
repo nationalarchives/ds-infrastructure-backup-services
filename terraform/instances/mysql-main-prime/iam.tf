@@ -27,14 +27,6 @@ resource "aws_iam_role" "instance_role" {
     name               = "mysql-${var.resource_identifier}-role"
     assume_role_policy = file("${path.root}/templates/assume-role-ec2-policy.json")
 
-    managed_policy_arns = [
-        "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-        "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-        aws_iam_policy.deployment_source_access_policy.arn,
-        aws_iam_policy.backup_policy.arn,
-        var.attach_ebs_volume_policy_arn
-    ]
-
     tags = var.tags
 }
 
@@ -43,4 +35,29 @@ resource "aws_iam_instance_profile" "instance_profile" {
     role = aws_iam_role.instance_role.name
 
     tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "deployment" {
+    role       = aws_iam_role.instance_role.name
+    policy_arn = aws_iam_policy.deployment_source_access_policy.ar
+}
+
+resource "aws_iam_role_policy_attachment" "backup" {
+    role       = aws_iam_role.instance_role.name
+    policy_arn = aws_iam_policy.backup_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ebs" {
+    role       = aws_iam_role.instance_role.name
+    policy_arn = var.attach_ebs_volume_policy_arn
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_instance_core" {
+    role       = aws_iam_role.instance_role.name
+    policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
+    role       = aws_iam_role.instance_role.name
+    policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }

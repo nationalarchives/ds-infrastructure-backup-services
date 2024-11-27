@@ -4,8 +4,7 @@ import re
 import boto3
 import botocore.exceptions
 import json
-
-from setuptools.command.upload import upload
+from datetime import datetime
 
 
 def size_converter(value: int=0, start: str='B', end: str='GB', precision: int=2, long_names: bool=False, base: int=1024):
@@ -112,3 +111,15 @@ def create_upload_map(total_size: int, max_block_size: int=104857600):
                 to_transfer_total = total_size - part_size
             upload_map.append([range_from, range_to, to_transfer_total])
     return upload_map
+
+
+def process_obj_name(name: str, add_ts: int=1):
+    if add_ts == 1:
+        tn_split = name.split('.')
+        if len(tn_split) > 1:
+            target_name = f'{".".join(tn_split[:-1])}_{str(datetime.now().timestamp()).replace(".", "_")}.{"".join(tn_split[-1:])}'
+        else:
+            target_name = f'{name}_{str(datetime.now().timestamp()).replace(".", "_")}'
+    else:
+        target_name = name
+    return target_name
