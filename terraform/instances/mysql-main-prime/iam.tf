@@ -39,7 +39,7 @@ resource "aws_iam_instance_profile" "instance_profile" {
 
 resource "aws_iam_role_policy_attachment" "deployment" {
     role       = aws_iam_role.instance_role.name
-    policy_arn = aws_iam_policy.deployment_source_access_policy.ar
+    policy_arn = aws_iam_policy.deployment_source_access_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "backup" {
