@@ -5,6 +5,7 @@ locals {
         Region     = var.region
         Account    = var.account_id
         Terraform  = "true"
+        Repository = "ds-infrastructure-backup-services"
     }
 
     vpc_info = jsondecode(data.aws_ssm_parameter.vpc_info.value)
