@@ -14,7 +14,8 @@ class Database:
             'host': db_secrets['db_host'],
             'port': db_secrets['db_port'],
             'database': db_secrets['db_name'],
-            'raise_on_warnings': True
+            'raise_on_warnings': True,
+            'consume_results': True
         }
         self.cmd = ''
         try:
@@ -46,6 +47,8 @@ class Database:
                 val_list += '"' + v + '", '
             elif isinstance(v, int):
                 val_list += str(v) + ', '
+            elif isinstance(v, float):
+                val_list += str(v) + ', '
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
         self.sql_stmt = f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}'
@@ -60,6 +63,8 @@ class Database:
                 else:
                     set_list += f'{k} = "{v}", '
             elif isinstance(v, int):
+                set_list += f'{k} = {v}, '
+            elif isinstance(v, float):
                 set_list += f'{k} = {v}, '
         set_list = set_list[:-2]
         self.sql_stmt = f'UPDATE {tbl_name} SET {set_list}'
@@ -134,8 +139,10 @@ class Database:
             self.left_join = ''
             self.order = ''
             row = self.db_cursor.fetchone()
-            remaining_rows = self.db_cursor.fetchall()
-            return row
+            return_row = row
+            while row is not None:
+                row = self.db_cursor.fetchone()
+            return return_row
 
     def last_id(self):
         return self.db_cursor.lastrowid

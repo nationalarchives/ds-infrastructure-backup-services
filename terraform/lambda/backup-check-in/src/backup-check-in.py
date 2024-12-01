@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
 
 def process_object(event_data):
-    received_ts = str(datetime.now().timestamp())
+    received_ts = datetime.now().timestamp()
     ssm_id = os.getenv('SSM_ID')
     parameters = get_parameters(ssm_id, 'eu-west-2')
 
@@ -32,7 +32,7 @@ def process_object(event_data):
     object_name = object_path['object_name']
     # neutralise older entries if the object is already in the list but not processed yet
     upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                  'finished_ts': str(datetime.now().timestamp()),
+                  'finished_ts': datetime.now().timestamp(),
                   'status': 3}
     upd_where = f'etag = "{obj_info["etag"]}" AND object_key = "{obj_key}" AND status = 0'
     check_in_db.update('object_checkins', upd_fields, upd_where)
@@ -95,12 +95,12 @@ def process_object(event_data):
             queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
     else:
         queue_data = {'message_id': None, 'sequence_number': None}
-    queue_data['received_ts'] = str(datetime.now().timestamp())
+    queue_data['received_ts'] = datetime.now().timestamp()
     queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     queue_data['status'] = checkin_status
     queue_data['checkin_id'] = checkin_id
     queue_id = check_in_db.insert('queues', queue_data)
-    if checkin_status == 0:
+    if checkin_status == 0 or checkin_status == 2:
         update_status = 2
     else:
         update_status = checkin_status

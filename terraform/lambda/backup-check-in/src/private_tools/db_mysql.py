@@ -34,6 +34,8 @@ class Database:
                 val_list += '"' + v + '", '
             elif isinstance(v, int):
                 val_list += str(v) + ', '
+            elif isinstance(v, float):
+                val_list += str(v) + ', '
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
 
@@ -48,9 +50,11 @@ class Database:
         set_list = ''
         for k, v in data_set.items():
             if isinstance(v, str):
-                set_list += '{key} = "{value}", '.format(key=k, value=v)
+                set_list += f'{k} = "{v}", '
             elif isinstance(v, int):
-                set_list += '{key} = {value}, '.format(key=k, value=v)
+                set_list += f'{k} = {v}, '
+            elif isinstance(v, float):
+                set_list += f'{k} = {v}, '
         set_list = set_list[:-2]
         try:
             self.db_cursor.execute(f'UPDATE {tbl_name} SET {set_list} WHERE {where}')

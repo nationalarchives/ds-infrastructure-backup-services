@@ -17,15 +17,22 @@ module "s3-tna-backup-drop-zone" {
 
     bkup_drop_zone_access_points = [
         {
+            "ap_name" = "tna-external-services-backup",
+            "ap_path" = "tna-external-services-backup",
+            "role_arns" = [
+                "arn:aws:iam::846769538626:role/digital-files-backup"
+            ]
+        },
+        {
             "ap_name" = "ds-live-digital-files-backup",
-            "ap_path" = "ds-digital-files",
+            "ap_path" = "ds-digital-files-backup",
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/digital-files-backup"
             ]
         },
         {
             "ap_name" = "ds-bkup-databases",
-            "ap_path" = "digital-services/databases",
+            "ap_path" = "digital-services/ds-bkup-databases",
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role"
             ]
@@ -89,22 +96,29 @@ module "s3-ds-live-digital-files-backup" {
     default_tags = local.default_tags
 }
 
-import {
-  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket.ds_live_digital_files_backup
-  id = "ds-live-digital-files-backup"
+module "s3-tna-external-services-backup" {
+    source = "./s3/tna-external-services-backup"
+
+    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
+    default_tags = local.default_tags
 }
-import {
-  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_ownership_controls.ds_live_digital_files_backup
-  id = "ds-live-digital-files-backup"
-}
-import {
-  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_server_side_encryption_configuration.ds_live_digital_files_backup
-  id = "ds-live-digital-files-backup"
-}
-import {
-  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_public_access_block.ds_live_digital_files_backup
-  id = "ds-live-digital-files-backupe"
-}
+
+#import {
+#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket.ds_live_digital_files_backup
+#  id = "ds-live-digital-files-backup"
+#}
+#import {
+#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_ownership_controls.ds_live_digital_files_backup
+#  id = "ds-live-digital-files-backup"
+#}
+#import {
+#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_server_side_encryption_configuration.ds_live_digital_files_backup
+#  id = "ds-live-digital-files-backup"
+#}
+#import {
+#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_public_access_block.ds_live_digital_files_backup
+#  id = "ds-live-digital-files-backupe"
+#}
 #import {
 #  to = module.s3-ds-live-digital-files-backup.aws_s3_access_point.backup_access_point["ds-backup-target"]
 #  id = "637423167251:ds-backup-target"
