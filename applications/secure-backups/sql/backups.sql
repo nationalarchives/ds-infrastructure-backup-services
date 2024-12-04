@@ -124,6 +124,10 @@ CREATE TABLE `backups`.`ap_targets` (
   PRIMARY KEY (`id`),
   INDEX(`access_point`));
 
+INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("github-backup", "tna-external-services-backup", 1, NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("ds-databases-backup", "tna-databases-backup",1, NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, NOW(), 1);
+
 CREATE TABLE `backups`.`part_uploads` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `checkin_id` BIGINT UNSIGNED NOT NULL,
