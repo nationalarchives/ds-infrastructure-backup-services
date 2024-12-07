@@ -13,7 +13,7 @@ resource "aws_sqs_queue" "backup_check_in_queue" {
 }
 
 resource "aws_sqs_queue" "backup_check_in_dl_queue" {
-    name                      = "backup-check-in-dl-queue"
+    name                      = "backup-check-in-dl-queue.fifo"
     message_retention_seconds = 345600
     fifo_queue                = true
 }
