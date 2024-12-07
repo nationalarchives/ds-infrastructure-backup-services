@@ -15,6 +15,7 @@ resource "aws_sqs_queue" "backup_check_in_queue" {
 resource "aws_sqs_queue" "backup_check_in_dl_queue" {
     name                      = "backup-check-in-dl-queue"
     message_retention_seconds = 345600
+    fifo_queue                = true
 }
 
 output "backup_check_in_queue_url" {
