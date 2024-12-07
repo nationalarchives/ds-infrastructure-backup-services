@@ -2,7 +2,6 @@ import boto3
 import json
 import re
 import os, sys
-import multiprocessing as mp
 from datetime import datetime
 from private_tools import SignalHandler, SQSHandler, Database
 from private_tools import Secrets, Bucket
@@ -13,7 +12,6 @@ from private_tools import create_upload_map, process_obj_name
 def process_backups():
     ssm_id = os.getenv('SSM_ID')
     parameters = get_parameters(ssm_id, 'eu-west-2')
-    max_th = mp.cpu_count() * 4
 
     signal_handler = SignalHandler()
     regex_line = re.compile(r'(?<![{}\[\]])\n')

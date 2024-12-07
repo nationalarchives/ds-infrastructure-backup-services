@@ -5,6 +5,16 @@ resource "aws_sqs_queue" "backup_check_in_queue" {
     fifo_throughput_limit     = "perMessageGroupId"
     sqs_managed_sse_enabled   = true
     receive_wait_time_seconds = 20
+    redrive_policy = jsonencode({
+        deadLetterTargetArn = aws_sqs_queue.backup_check_in_dl_queue.arn
+        maxReceiveCount     = 1
+    })
+    message_retention_seconds = 86400
+}
+
+resource "aws_sqs_queue" "backup_check_in_dl_queue" {
+    name                      = "backup-check-in-dl-queue"
+    message_retention_seconds = 345600
 }
 
 output "backup_check_in_queue_url" {
