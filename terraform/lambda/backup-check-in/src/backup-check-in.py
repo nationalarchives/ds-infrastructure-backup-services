@@ -69,7 +69,7 @@ def process_object(event_data):
     checkin_id = check_in_db.insert('object_checkins', checkin_rec)
     if checkin_status == 0:
         obj_info['checkin_id'] = checkin_id
-        size_str = str(obj_info['content_length'])
+        size_str = str(obj_info['object_size'])
 
         queue = Queue(parameters['queue_url'])
         sqs_body = f'''\
