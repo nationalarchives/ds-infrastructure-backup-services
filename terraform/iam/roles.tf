@@ -19,3 +19,8 @@ resource "aws_iam_role_policy_attachment" "SecretsManagerReadWrite" {
     role       = aws_iam_role.ec2_backup_drop_zone.id
     policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
+
+resource "aws_iam_instance_profile" "ec2_backup_drop_zone" {
+    name = "ec2-backup-drop-zone-role"
+    role = aws_iam_role.ec2_backup_drop_zone.name
+}
