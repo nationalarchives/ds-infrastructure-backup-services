@@ -14,10 +14,9 @@ class Bucket:
 
     def get_object_info(self, *, bucket: str, key: str):
         try:
-            obj_get = self.client.get_object(Bucket=bucket,
-                                             Key=key)
+            obj_get = self.client.get_object(Bucket=bucket, Key=key, Range='bytes=0-0')
             obj_attr = self.client.get_object_attributes(Bucket=bucket, Key=key,
-                                                         ObjectAttributes=['Checksum', 'StorageClass'])
+                                                         ObjectAttributes=['Checksum', 'StorageClass', 'ObjectSize'])
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
@@ -29,10 +28,10 @@ class Bucket:
             return None
         obj_info = {'bucket_name': bucket, 'object_key': key,
                     'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'content_length': obj_get['ContentLength'],
+                    'content_length': obj_attr['ObjectSize'],
                     'etag': obj_get['ETag'].replace('"', ''),
                     'content_type': obj_get['ContentType'],
-                    'serverside_encryption': obj_get['ServerSideEncryption'],}
+                    'serverside_encryption': obj_get['ServerSideEncryption'], }
         if "ExpiresString" in obj_get:
             obj_info['expires_string'] = obj_get['ExpiresString']
         if "Metadata" in obj_get:
@@ -52,7 +51,20 @@ class Bucket:
                 obj_info['checksum_sha1'] = obj_attr['ChecksumSHA1']
             if 'ChecksumSHA256' in obj_info:
                 obj_info['checksum_sha256'] = obj_attr['ChecksumSHA256']
+            if 'SSECustomerAlgorithm' in obj_info:
+                obj_info['sse_customer_algorithm'] = obj_attr['SSECustomerAlgorithm']
+            if 'SSECustomerKeyMD5' in obj_info:
+                obj_info['sse_customer_key_md5'] = obj_attr['SSECustomerKeyMD5']
+            if 'SSEKMSKeyId' in obj_info:
+                obj_info['sse_kms_key_id'] = obj_attr['SSEKMSKeyId']
         return obj_info
+
+    def get_object_tags(self, *, bucket: str, key: str, version_id: str = None):
+        if version_id:
+            response = self.client.get_object_tags(Bucket=bucket, Key=key, VersionId=version_id)
+        else:
+            response = self.client.get_object_tags(Bucket=bucket, Key=key)
+        return response['TagSet']
 
     def create_multipart_upload(self, bucket: str, object_key: str, expires: str = None,
                                 metadata: dict = None, content_type: str = None,

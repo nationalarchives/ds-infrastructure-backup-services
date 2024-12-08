@@ -113,6 +113,12 @@ def process_backups():
                                 object_copy['checksum_crc32c'] = checkin_rec['checksum_crc32c']
                             if 'checksum_sha1' in obj_info:
                                 object_copy['checksum_sha1'] = checkin_rec['checksum_sha1']
+                            if 'sse_customer_algorithm' in obj_info:
+                                object_copy['sse_customer_algorithm'] = checkin_rec['sse_customer_algorithm']
+                            if 'checksum_sha256' in obj_info:
+                                object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
+                            if 'checksum_sha256' in obj_info:
+                                object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
                             if 'checksum_sha256' in obj_info:
                                 object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
                             db_client.insert('object_copies', object_copy)

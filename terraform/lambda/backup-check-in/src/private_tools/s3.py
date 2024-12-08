@@ -65,11 +65,11 @@ class s3_object:
 
     def info(self, *, bucket: str, key: str):
         try:
-            obj_get = self.client.get_object(Bucket=bucket,
-                                             Key=key)
+            obj_get = self.client.get_object(Bucket=bucket, Key=key, Range='bytes=0-0')
             obj_attr = self.client.get_object_attributes(Bucket=bucket, Key=key,
                                                          ObjectAttributes=['Checksum',
-                                                                           'StorageClass'])
+                                                                           'StorageClass',
+                                                                           'ObjectSize'])
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
@@ -80,13 +80,18 @@ class s3_object:
             raise error
         obj_info = {'bucket_name': bucket, 'object_key': key,
                     'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'content_length': obj_get['ContentLength'],
+                    'object_size': obj_attr['ObjectSize'],
                     'etag': obj_get['ETag'].replace('"', ''),
                     'content_type': obj_get['ContentType'],
-                    'serverside_encryption': obj_get['ServerSideEncryption'],
-                    'storage_class': obj_attr['StorageClass']}
+                    'serverside_encryption': obj_get['ServerSideEncryption'], }
         if "ExpiresString" in obj_get:
             obj_info['expires_string'] = obj_get['ExpiresString']
+        if "SSECustomerAlgorithm" in obj_get:
+            obj_info['sse_customer_algorithm'] = obj_get['SSECustomerAlgorithm']
+        if "SSECustomerKeyMD5" in obj_get:
+            obj_info['sse_customer_key_md5'] = obj_get['SSECustomerKeyMD5']
+        if "SSEKMSKeyId" in obj_get:
+            obj_info['sse_kms_key_id'] = obj_get['SSEKMSKeyId']
         if "Metadata" in obj_get:
             if find_value_dict("retain_until_date", obj_get['Metadata']):
                 obj_info['retain_until_date'] = obj_get['Metadata']['retain_until_date']

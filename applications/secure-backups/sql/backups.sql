@@ -30,7 +30,9 @@ CREATE TABLE `backups`.`object_checkins` (
   `checksum_sha1` CHAR(40) NULL,
   `checksum_sha256` CHAR(64) NULL,
   `serverside_encryption` CHAR(64) NULL,
-  `storage_class` CHAR(45) NULL,
+  `sse_customer_algorithm` VARCHAR(256) NULL,
+  `sse_customer_key_md5` VARCHAR(256) NULL,
+  `sse_kms_key_id` VARCHAR(256) NULL,
   `last_modified` VARCHAR(64) NULL,
   `retain_until_date` VARCHAR(45) NULL,
   `lock_mode` VARCHAR(45) NULL,
@@ -79,6 +81,8 @@ CREATE TABLE `backups`.`object_copies` (
   `etag` VARCHAR(256) NOT NULL,
   `expiration` VARCHAR(256) NULL,
   `server_side_encryption` VARCHAR(12) NULL,
+  `sse_customer_algorithm` VARCHAR(256) NULL,
+  `sse_customer_key_md5` VARCHAR(256) NULL,
   `sse_kms_key_id` VARCHAR(256) NULL,
   `checksum_crc32` CHAR(8) NULL,
   `checksum_crc32c` CHAR(10) NULL,
@@ -147,3 +151,14 @@ CREATE TABLE `backups`.`queue_status` (
   PRIMARY KEY (`id`),
   INDEX(`queue_name`),
   INDEX(`queue_arn`));
+
+CREATE TABLE `backups`.`queue_status` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `source` VARCHAR(20) NOT NULL,
+  `source_id` BIGINT UNSIGNED NOT NULL,
+  `object_key` VARCHAR(1024) NOT NULL,
+  `tag_key` VARCHAR(128) NOT NULL,
+  `tag_value` VARCHAR(256) NULL,
+  `created_at` DATETIME NULL,
+  `status` TINYINT UNSIGNED NULL,
+  PRIMARY KEY (`id`));

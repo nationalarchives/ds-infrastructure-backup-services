@@ -17,7 +17,7 @@ def send_queue_metrics(sqs_queue, dbc):
                  'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                  'status': 0}
     dbc.insert('queue_status', queue_rec)
-
+    copy_id = dbc.run()
 
 def queue_monitor():
     ssm_id = os.getenv('SSM_ID')

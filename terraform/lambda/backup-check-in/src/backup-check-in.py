@@ -49,7 +49,7 @@ def process_object(event_data):
         checkin_status = 3
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
                    'object_name': object_name, 'etag': obj_info['etag'],
-                   'object_size': obj_info['content_length'], 'object_type': obj_info['content_type'],
+                   'object_size': obj_info['object_size'], 'object_type': obj_info['content_type'],
                    'last_modified': obj_info['last_modified'], 'received_ts': received_ts,
                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': checkin_status}
     if 'retain_until_date' in obj_info:
@@ -63,9 +63,9 @@ def process_object(event_data):
     if 'checksum_crc32c' in obj_info:
         checkin_rec['checksum_crc32c'] = obj_info['checksum_crc32c']
     if 'checksum_sha1' in obj_info:
-        checkin_rec['checksum_sha1'] = obj_info['ChecksumSHA1']
-    if 'ChecksumSHA256' in obj_info:
-        checkin_rec['checksum_sha256'] = obj_info['checksum_sha1']
+        checkin_rec['checksum_sha1'] = obj_info['checksum_sha1']
+    if 'checksum_sha256' in obj_info:
+        checkin_rec['checksum_sha256'] = obj_info['checksum_sha256']
     checkin_id = check_in_db.insert('object_checkins', checkin_rec)
     if checkin_status == 0:
         obj_info['checkin_id'] = checkin_id
