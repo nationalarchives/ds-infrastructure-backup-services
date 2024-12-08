@@ -32,11 +32,12 @@ class Bucket:
                     'content_length': obj_get['ContentLength'],
                     'etag': obj_get['ETag'].replace('"', ''),
                     'content_type': obj_get['ContentType'],
-                    'serverside_encryption': obj_get['ServerSideEncryption'],
-                    'storage_class': obj_attr['StorageClass']}
+                    'serverside_encryption': obj_get['ServerSideEncryption'],}
         if "ExpiresString" in obj_get:
             obj_info['expires_string'] = obj_get['ExpiresString']
         if "Metadata" in obj_get:
+            if find_value_dict("storage_class", obj_get['Metadata']):
+                obj_info['storage_class'] = obj_get['Metadata']['storage_class']
             if find_value_dict("retain_until_date", obj_get['Metadata']):
                 obj_info['retain_until_date'] = obj_get['Metadata']['retain_until_date']
             if find_value_dict("lock_mode", obj_get['Metadata']):

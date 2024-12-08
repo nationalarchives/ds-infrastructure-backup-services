@@ -21,9 +21,10 @@ CREATE TABLE `backups`.`object_checkins` (
   `object_name` VARCHAR(1024) NOT NULL,
   `object_size` BIGINT NULL,
   `object_type` VARCHAR(256) NULL,
-  `version_id` VARCHAR(256) NULL,
+  `kms_key_arn` VARCHAR(2048) NULL,
+  `source_account_id` VARCHAR(12) NULL,
   `etag` VARCHAR(256) NOT NULL,
-  `expires_string` VARCHAR(256)NULL,
+  `expires_string` VARCHAR(256) NULL,
   `checksum_crc32` CHAR(8) NULL,
   `checksum_crc32c` CHAR(10) NULL,
   `checksum_sha1` CHAR(40) NULL,
@@ -38,34 +39,7 @@ CREATE TABLE `backups`.`object_checkins` (
   `finished_ts` FLOAT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
-  `status` INT NULL,
-  PRIMARY KEY (`id`));
-
-
-
-CREATE TABLE `backups`.`object_checkins` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `queue_id` BIGINT UNSIGNED NULL,
-  `copy_id` BIGINT UNSIGNED NULL,
-  `object_name` VARCHAR(1024) NOT NULL,
-  `object_size` BIGINT NULL,
-  `object_type` VARCHAR(256) NULL,
-  `bucket` VARCHAR(63) NOT NULL,
-  `object_key` VARCHAR(1024) NOT NULL,
-  `etag` VARCHAR(256) NOT NULL,
-  `checksum_crc32` CHAR(8) NULL,
-  `checksum_crc32c` CHAR(10) NULL,
-  `checksum_sha1` CHAR(40) NULL,
-  `checksum_sha256` CHAR(64) NULL,
-  `last_modified` VARCHAR(64) NULL,
-  `retain_until_date` VARCHAR(45) NULL,
-  `lock_mode` VARCHAR(45) NULL,
-  `legal_hold` VARCHAR(45) NULL,
-  `received_ts` FLOAT NULL,
-  `finished_ts` FLOAT NULL,
-  `created_at` DATETIME NULL,
-  `updated_at` DATETIME NULL,
-  `status` INT NULL,
+  `status` TINYINT UNSIGNED NULL,
   PRIMARY KEY (`id`));
 
 CREATE TABLE `backups`.`queues` (
@@ -77,11 +51,13 @@ CREATE TABLE `backups`.`queues` (
   `md5_of_message_attributes` CHAR(32) NULL,
   `md5_of_message_system_attributes` CHAR(32) NULL,
   `sequence_number` CHAR(32) NULL,
+  `kms_key_arn` VARCHAR(2048) NULL,
+  `source_account_id` VARCHAR(12) NULL,
   `received_ts` FLOAT NULL,
   `finished_ts` FLOAT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
-  `status` INT NULL,
+  `status` TINYINT UNSIGNED NULL,
   INDEX (`message_id`),
   PRIMARY KEY (`id`));
 
@@ -96,7 +72,14 @@ CREATE TABLE `backups`.`object_copies` (
   `object_key` VARCHAR(1024) NOT NULL,
   `object_size` BIGINT NULL,
   `object_type` VARCHAR(256) NULL,
+  `upload_id` VARCHAR(256) NULL,
+  `version_id` VARCHAR(256) NULL,
+  `kms_key_arn` VARCHAR(2048) NULL,
+  `source_account_id` VARCHAR(12) NULL,
   `etag` VARCHAR(256) NOT NULL,
+  `expiration` VARCHAR(256) NULL,
+  `server_side_encryption` VARCHAR(12) NULL,
+  `sse_kms_key_id` VARCHAR(256) NULL,
   `checksum_crc32` CHAR(8) NULL,
   `checksum_crc32c` CHAR(10) NULL,
   `checksum_sha1` CHAR(40) NULL,
@@ -110,7 +93,7 @@ CREATE TABLE `backups`.`object_copies` (
   `finished_ts` FLOAT NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
-  `status` INT NULL,
+  `status` TINYINT UNSIGNED NULL,
   PRIMARY KEY (`id`));
 
 CREATE TABLE `backups`.`ap_targets` (
@@ -118,15 +101,18 @@ CREATE TABLE `backups`.`ap_targets` (
   `access_point` VARCHAR(50) NOT NULL,
   `bucket` VARCHAR(63) NOT NULL,
   `name_processing` TINYINT UNSIGNED DEFAULT 0,
+  `source_account_id` VARCHAR(12) NULL,
+  `kms_key_arn` VARCHAR(2048) NULL,
+  `storage_class` VARCHAR(80) NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
-  `status` INT NULL,
+  `status` TINYINT UNSIGNED NULL,
   PRIMARY KEY (`id`),
   INDEX(`access_point`));
 
-INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("github-backup", "tna-external-services-backup", 1, NOW(), 1);
-INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("ds-databases-backup", "tna-databases-backup",1, NOW(), 1);
-INSERT INTO ap_targets (access_point, bucket, name_processing, created_at, status) VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("github-backup", "tna-external-services-backup", 1, "968803923593", NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("ds-databases-backup", "tna-databases-backup",1, "968803923593", NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, "968803923593", NOW(), 1);
 
 CREATE TABLE `backups`.`part_uploads` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -137,6 +123,8 @@ CREATE TABLE `backups`.`part_uploads` (
   `access_point` VARCHAR(50) NOT NULL,
   `target_bucket` VARCHAR(63) NOT NULL,
   `target_key` VARCHAR(1024) NOT NULL,
+  `kms_key_arn` VARCHAR(2048) NULL,
+  `source_account_id` VARCHAR(12) NULL,
   `retain_until_date` VARCHAR(45) NULL,
   `lock_mode` VARCHAR(45) NULL,
   `legal_hold` VARCHAR(45) NULL,
@@ -146,6 +134,16 @@ CREATE TABLE `backups`.`part_uploads` (
   `percentage` DECIMAL(6,2) NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
-  `status` INT NULL,
+  `status` TINYINT UNSIGNED NULL,
   PRIMARY KEY (`id`));
 
+CREATE TABLE `backups`.`queue_status` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `queue_name` VARCHAR(100) NOT NULL,
+  `queue_arn` VARCHAR(120) NOT NULL,
+  `queue_length` INT UNSIGNED NULL,
+  `created_at` DATETIME NULL,
+  `status` TINYINT UNSIGNED NULL,
+  PRIMARY KEY (`id`),
+  INDEX(`queue_name`),
+  INDEX(`queue_arn`));

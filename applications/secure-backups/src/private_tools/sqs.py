@@ -36,6 +36,9 @@ class SQSHandler:
         else:
             return response['QueueUrl']
 
+    def get_attributes(self):
+        return self.client.get_queue_attributes(QueueUrl=self.queue_url,)
+
     def receive_message(self, max_number: int = 1):
         attempt_id = set_random_id()
         try:
