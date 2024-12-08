@@ -1,5 +1,5 @@
 module "iam" {
     source = "./iam"
 
-    = local.default_tags
+    default_tags = local.default_tags
 }
