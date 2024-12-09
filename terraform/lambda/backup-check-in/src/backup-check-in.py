@@ -30,23 +30,18 @@ def process_object(event_data):
     obj_info = s3_obj.info(bucket=event_data['bucket']['name'], key=obj_key)
     object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
     object_name = object_path['object_name']
-    # neutralise older entries if the object is already in the list but not processed yet
-    upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                  'finished_ts': datetime.now().timestamp(),
-                  'status': 3}
-    upd_where = f'etag = "{obj_info["etag"]}" AND object_key = "{obj_key}" AND status = 0'
-    check_in_db.update('object_checkins', upd_fields, upd_where)
-    # find any entry already in process
     checkin_status = 0
-    select_where = f'etag = "{obj_info["etag"]}" AND object_key = "{obj_key}" AND status = 1'
+    # neutralise older entries if the object is already in the list but not in progress
+    upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                  'finished_ts': datetime.now().timestamp(), 'status': 3}
+    upd_where = f'object_key = "{obj_key}" AND status = 0'
+    check_in_db.update('object_checkins', upd_fields, upd_where)
+    # find any entry already in progress
+    select_where = f'object_key = "{obj_key}" AND status = 1'
     found_records = check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'], select_where)
     if len(found_records) > 0:
         checkin_status = 5
     # find already
-    select_where = f'etag = "{obj_info["etag"]}" AND object_key = "{obj_key}" AND status = 0'
-    found_records = check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'], select_where)
-    if len(found_records) > 0:
-        checkin_status = 3
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
                    'object_name': object_name, 'etag': obj_info['etag'],
                    'object_size': obj_info['object_size'], 'object_type': obj_info['content_type'],
@@ -66,11 +61,20 @@ def process_object(event_data):
         checkin_rec['checksum_sha1'] = obj_info['checksum_sha1']
     if 'checksum_sha256' in obj_info:
         checkin_rec['checksum_sha256'] = obj_info['checksum_sha256']
+    if 'expires_string' in obj_info:
+        checkin_rec['expires_string'] = obj_info['expires_string']
+    if 'serverside_encryption' in obj_info:
+        checkin_rec['serverside_encryption'] = obj_info['serverside_encryption']
+    if 'sse_customer_algorithm' in obj_info:
+        checkin_rec['sse_customer_algorithm'] = obj_info['sse_customer_algorithm']
+    if 'sse_customer_key_md5' in obj_info:
+        checkin_rec['sse_customer_key_md5'] = obj_info['sse_customer_key_md5']
+    if 'sse_kms_key_id' in obj_info:
+        checkin_rec['sse_kms_key_id'] = obj_info['sse_kms_key_id']
     checkin_id = check_in_db.insert('object_checkins', checkin_rec)
     if checkin_status == 0:
         obj_info['checkin_id'] = checkin_id
         size_str = str(obj_info['object_size'])
-
         queue = Queue(parameters['queue_url'])
         sqs_body = f'''\
         {{
@@ -86,7 +90,8 @@ def process_object(event_data):
         }}
         '''
         sqs_results = queue.add(sqs_body, set_random_id())
-        queue_data = {'message_id': sqs_results['MessageId'], 'sequence_number': sqs_results['SequenceNumber']}
+        queue_data = {'message_id': sqs_results['MessageId'],
+                      'sequence_number': sqs_results['SequenceNumber']}
         if 'MD5OfMessageBody' in sqs_results:
             queue_data['md5_of_message_body'] = sqs_results['MD5OfMessageBody']
         if 'MD5OfMessageAttributes' in sqs_results:
@@ -100,11 +105,7 @@ def process_object(event_data):
     queue_data['status'] = checkin_status
     queue_data['checkin_id'] = checkin_id
     queue_id = check_in_db.insert('queues', queue_data)
-    if checkin_status == 0 or checkin_status == 2:
-        update_status = 2
-    else:
-        update_status = checkin_status
-    object_data = {'queue_id': queue_id, 'status': update_status,
+    object_data = {'queue_id': queue_id,
                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                    'finished_ts': datetime.now().timestamp()}
     where_clause = 'id = ' + str(checkin_id)

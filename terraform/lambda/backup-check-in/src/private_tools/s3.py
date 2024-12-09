@@ -99,12 +99,12 @@ class s3_object:
                 obj_info['lock_mode'] = obj_get['Metadata']['lock_mode']
             if find_value_dict("legal_hold", obj_get['Metadata']):
                 obj_info['legal_hold'] = obj_get['Metadata']['legal_hold']
-            if 'ChecksumCRC32' in obj_info:
-                obj_info['checksum_crc32'] = obj_attr['ChecksumCRC32']
-            if 'ChecksumCRC32C' in obj_info:
-                obj_info['checksum_crc32c'] = obj_attr['ChecksumCRC32C']
-            if 'ChecksumSHA1' in obj_info:
-                obj_info['checksum_sha1'] = obj_attr['ChecksumSHA1']
-            if 'ChecksumSHA256' in obj_info:
-                obj_info['checksum_sha256'] = obj_attr['ChecksumSHA256']
+        if 'ChecksumCRC32' in obj_info:
+            obj_info['checksum_crc32'] = obj_attr['ChecksumCRC32']
+        if 'ChecksumCRC32C' in obj_info:
+            obj_info['checksum_crc32c'] = obj_attr['ChecksumCRC32C']
+        if 'ChecksumSHA1' in obj_info:
+            obj_info['checksum_sha1'] = obj_attr['ChecksumSHA1']
+        if 'ChecksumSHA256' in obj_info:
+            obj_info['checksum_sha256'] = obj_attr['ChecksumSHA256']
         return obj_info
