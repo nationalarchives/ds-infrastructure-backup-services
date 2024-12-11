@@ -180,9 +180,10 @@ def process_backups():
                                             'content_length': task['content_length'], 'percentage': percentage,
                                             'byte_range': byte_range, 'part': position,
                                             'source_account_id': task["source_account_id"],
-                                            'kms_key_arn': task["kms_key_arn"],
                                             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                             'status': 0}
+                        if 'kms_key_arn' in task and task['kms_key_arn']:
+                            part_upload_data['kms_key_arn'] = task['kms_key_arn']
                         db_client.insert('part_uploads', part_upload_data)
                         part_upload_id = db_client.run()
                         part_upload_data['part_upload_id'] = part_upload_id
@@ -208,23 +209,23 @@ def process_backups():
                                                                           multipart_upload_block, upload_id)
                     copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
                                  'etag': complete_upload['etag'].replace('"', ''),
-                                 'upload_id': upload_id, }
+                                 'upload_id': upload_id, 'status': 2, }
                     if 'VersionId' in complete_upload:
-                        object_copy['version_id'] = complete_upload['VersionId']
+                        copy_data['version_id'] = complete_upload['VersionId']
                     if 'ServerSideEncryption' in complete_upload:
-                        object_copy['server_side_encryption'] = complete_upload['ServerSideEncryption']
+                        copy_data['server_side_encryption'] = complete_upload['ServerSideEncryption']
                     if 'SSEKMSKeyId' in complete_upload:
-                        object_copy['sse_kms_key_id'] = complete_upload['SSEKMSKeyId']
+                        copy_data['sse_kms_key_id'] = complete_upload['SSEKMSKeyId']
                     if 'Expiration' in complete_upload:
-                        object_copy['expiration'] = complete_upload['Expiration']
+                        copy_data['expiration'] = complete_upload['Expiration']
                     if 'ChecksumCRC32' in complete_upload:
-                        object_copy['checksum_crc32'] = complete_upload['ChecksumCRC32']
+                        copy_data['checksum_crc32'] = complete_upload['ChecksumCRC32']
                     if 'ChecksumCRC32C' in complete_upload:
-                        object_copy['checksum_crc32c'] = complete_upload['ChecksumCRC32C']
+                        copy_data['checksum_crc32c'] = complete_upload['ChecksumCRC32C']
                     if 'ChecksumSHA1' in complete_upload:
-                        object_copy['checksum_sha1'] = complete_upload['ChecksumSHA1']
+                        copy_data['checksum_sha1'] = complete_upload['ChecksumSHA1']
                     if 'ChecksumSHA256' in complete_upload:
-                        object_copy['checksum_sha256'] = complete_upload['ChecksumSHA256']
+                        copy_data['checksum_sha256'] = complete_upload['ChecksumSHA256']
                     db_client.where(f'id = {task["copy_id"]}')
                     db_client.update('object_copies', copy_data)
                     db_client.run()
