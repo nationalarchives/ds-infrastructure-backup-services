@@ -73,11 +73,10 @@ class s3_object:
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
-            elif error.response['Error']['Code'] == 'InvalidObjectState':
-                print('S3 - InvalidObjectState')
+                return None
             else:
                 print('S3 - unknown error')
-            raise error
+                raise error
         obj_info = {'bucket_name': bucket, 'object_key': key,
                     'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
                     'object_size': obj_attr['ObjectSize'],

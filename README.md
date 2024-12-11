@@ -25,3 +25,16 @@ structure of the secrets is:
     "network_cidr":"cidr-of-subnet"
 }
 ```
+
+### Status of records
+#### object_checkins
+0 - new record
+1 - in progress
+2 - ingested
+3 - redundant; switched from 0
+5 - new record is redundant because status 1 record exists
+8 - file doesn't exist
+9 - queue entry error
+
+
+

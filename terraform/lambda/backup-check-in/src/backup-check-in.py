@@ -28,9 +28,12 @@ def process_object(event_data):
     s3_obj = s3_object(region=parameters['aws_region'])
     obj_key = unquote_plus(event_data['object']['key'])
     obj_info = s3_obj.info(bucket=event_data['bucket']['name'], key=obj_key)
+    if obj_info == None:
+        checkin_status = 8
+    else:
+        checkin_status = 0
     object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
     object_name = object_path['object_name']
-    checkin_status = 0
     # neutralise older entries if the object is already in the list but not in progress
     upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                   'finished_ts': datetime.now().timestamp(), 'status': 3}
@@ -100,6 +103,7 @@ def process_object(event_data):
             queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
     else:
         queue_data = {'message_id': None, 'sequence_number': None}
+        checkin_status = 9
     queue_data['received_ts'] = datetime.now().timestamp()
     queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     queue_data['status'] = checkin_status
@@ -107,7 +111,8 @@ def process_object(event_data):
     queue_id = check_in_db.insert('queues', queue_data)
     object_data = {'queue_id': queue_id,
                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                   'finished_ts': datetime.now().timestamp()}
+                   'finished_ts': datetime.now().timestamp(),
+                   'status': checkin_status}
     where_clause = 'id = ' + str(checkin_id)
     check_in_db.update('object_checkins', object_data, where_clause)
     check_in_db.close()

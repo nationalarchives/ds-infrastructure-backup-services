@@ -38,10 +38,11 @@ class Database:
                 val_list += str(v) + ', '
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
-
+        sql_stmt = f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}'
         try:
-            self.db_cursor.execute(f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}')
+            self.db_cursor.execute(sql_stmt)
         except mysql.connector.Error as err:
+            print(sql_stmt)
             raise err
         self.db_connect.commit()
         return self.db_cursor.lastrowid
@@ -56,9 +57,11 @@ class Database:
             elif isinstance(v, float):
                 set_list += f'{k} = {v}, '
         set_list = set_list[:-2]
+        sql_stmt = f'UPDATE {tbl_name} SET {set_list} WHERE {where}'
         try:
-            self.db_cursor.execute(f'UPDATE {tbl_name} SET {set_list} WHERE {where}')
+            self.db_cursor.execute(sql_stmt)
         except mysql.connector.Error as err:
+            print(sql_stmt)
             raise err
         self.db_connect.commit()
         return True
@@ -68,8 +71,9 @@ class Database:
             field_list = ', '.join(fields)
         else:
             field_list = '*'
+        sql_stmt = f'SELECT {field_list} FROM {tbl_name} WHERE {where}'
         try:
-            self.db_cursor.execute(f'SELECT {field_list} FROM {tbl_name} WHERE {where}')
+            self.db_cursor.execute(sql_stmt)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")

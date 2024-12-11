@@ -54,7 +54,7 @@ def process_backups():
                     continue
                 else:
                     # update queue record
-                    queue_data = {'status': 1, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                    queue_data = {'status': 1, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     db_client.where(f'checkin_id = {checkin_id}')
                     db_client.update('queues', queue_data)
                     db_client.run()
@@ -69,7 +69,7 @@ def process_backups():
                         queue_client.delete_message(message['ReceiptHandle'])
                         queue_data = {'status': queue_status,
                                       'finished_ts': datetime.now().timestamp(),
-                                      'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                                      'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                         db_client.where(f'id = {queue_rec["id"]}')
                         db_client.update('queues', queue_data)
                         db_client.run()
@@ -79,16 +79,16 @@ def process_backups():
                                                              key=checkin_rec['object_key'])
                         if obj_info is None:
                             queue_client.delete_message(message['ReceiptHandle'])
-                            queue_data = {'status': 9, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            queue_data = {'status': 9, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'checkin_id = {checkin_id}')
                             db_client.update('queues', queue_data)
                             db_client.run()
-                            checkin_data = {'status': 9, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            checkin_data = {'status': 9, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'id = {checkin_id}')
                             db_client.update('object_checkins', checkin_data)
                             db_client.run()
                         else:
-                            checkin_data = {'status': 1, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            checkin_data = {'status': 1, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'id = {checkin_id}')
                             db_client.update('object_checkins', checkin_data)
                             db_client.run()

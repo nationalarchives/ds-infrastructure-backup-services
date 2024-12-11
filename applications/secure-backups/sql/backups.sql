@@ -10,7 +10,7 @@ FLUSH PRIVILEGES;
 
 # set up of database
 #
-CREATE SCHEMA `backups` ;
+CREATE SCHEMA `backups`;
 
 CREATE TABLE `backups`.`object_checkins` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -152,13 +152,14 @@ CREATE TABLE `backups`.`queue_status` (
   INDEX(`queue_name`),
   INDEX(`queue_arn`));
 
-CREATE TABLE `backups`.`queue_status` (
+CREATE TABLE `backups`.`object_tags` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `source` VARCHAR(20) NOT NULL,
   `source_id` BIGINT UNSIGNED NOT NULL,
+  `source_type` VARCHAR(64) NOT NULL,
   `object_key` VARCHAR(1024) NOT NULL,
   `tag_key` VARCHAR(128) NOT NULL,
   `tag_value` VARCHAR(256) NULL,
+  `tag_type` VARCHAR(25) NOT NULL,
   `created_at` DATETIME NULL,
   `status` TINYINT UNSIGNED NULL,
   PRIMARY KEY (`id`));

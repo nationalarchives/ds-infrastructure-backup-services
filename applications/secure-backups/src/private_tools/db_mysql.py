@@ -103,7 +103,7 @@ class Database:
             self.db_cursor.execute(ex_cmd)
             self.db_connect.commit()
         except mysql.connector.Error as err:
-            print(err)
+            print(ex_cmd)
             raise err
         self.clause = ''
         self.left_join = ''
@@ -132,7 +132,7 @@ class Database:
             self.db_cursor.execute(ex_cmd)
             self.db_connect.commit()
         except mysql.connector.Error as err:
-            print(err)
+            print(ex_cmd)
             raise err
         else:
             self.clause = ''
