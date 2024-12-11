@@ -39,7 +39,7 @@ def process_backups():
                 message_body = json.loads(sub_json(message['Body'], regex_set))
                 checkin_id = message_body['checkin_id']
                 # read queue entry
-                db_client.select('queues', ['*'])
+                db_client.select('queues', ['id', 'message_id', 'status'])
                 db_client.where(f'message_id = "{message["MessageId"]}"')
                 queue_rec = db_client.fetch()
                 if queue_rec is None:
@@ -47,18 +47,30 @@ def process_backups():
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
                     continue
+                elif queue_rec['status'] != 0:
+                    del queue_rec
+                    # remove from queue
+                    queue_client.delete_message(message['ReceiptHandle'])
+                    continue
                 else:
+                    # update queue record
+                    queue_data = {'status': 1, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                    db_client.where(f'checkin_id = {checkin_id}')
+                    db_client.update('queues', queue_data)
+                    db_client.run()
                     # read checkin entry
-                    checkin_fl = ['id', 'bucket', 'object_key', 'object_name', 'retain_until_date', 'lock_mode',
-                                  'legal_hold', 'checksum_crc32', 'checksum_crc32c', 'checksum_sha1',
-                                  'checksum_sha256', 'status']
-                    db_client.select('object_checkins', checkin_fl)
+                    db_client.select('object_checkins', ['*'])
                     db_client.where(f'id = {checkin_id}')
                     checkin_rec = db_client.fetch()
-                    if checkin_rec['status'] == 5:  # queue entry is redundant - ignore
+                    if checkin_rec is None:
+                        queue_status = 9
+                    elif checkin_rec['status'] != 0:
+                        queue_status = checkin_rec['status']
                         queue_client.delete_message(message['ReceiptHandle'])
-                        queue_data = {'status': 5, 'finished_ts': datetime.now().timestamp()}
-                        db_client.where(f'checkin_id = {checkin_id}')
+                        queue_data = {'status': queue_status,
+                                      'finished_ts': datetime.now().timestamp(),
+                                      'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                        db_client.where(f'id = {queue_rec["id"]}')
                         db_client.update('queues', queue_data)
                         db_client.run()
                     else:
@@ -67,11 +79,19 @@ def process_backups():
                                                              key=checkin_rec['object_key'])
                         if obj_info is None:
                             queue_client.delete_message(message['ReceiptHandle'])
-                            queue_data = {'status': 9, 'finished_ts': datetime.now().timestamp()}
+                            queue_data = {'status': 9, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'checkin_id = {checkin_id}')
                             db_client.update('queues', queue_data)
                             db_client.run()
+                            checkin_data = {'status': 9, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            db_client.where(f'id = {checkin_id}')
+                            db_client.update('object_checkins', checkin_data)
+                            db_client.run()
                         else:
+                            checkin_data = {'status': 1, 'update_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            db_client.where(f'id = {checkin_id}')
+                            db_client.update('object_checkins', checkin_data)
+                            db_client.run()
                             object_name_parts = deconstruct_path(checkin_rec['object_key'])
                             db_client.select('ap_targets', ['access_point', 'name_processing', 'kms_key_arn'])
                             db_client.where(f'access_point = "{object_name_parts["access_point"]}"')
@@ -126,12 +146,7 @@ def process_backups():
                             # update checkin record
                             checkin_upd = {'copy_id': copy_id, 'status': 2, 'finished_ts': datetime.now().timestamp()}
                             db_client.where(f'id = {checkin_rec["id"]}')
-                            db_client.update('checkins', checkin_upd)
-                            # update queue record
-                            queue_data = {'status': 0, 'finished_ts': datetime.now().timestamp()}
-                            db_client.where(f'checkin_id = {checkin_id}')
-                            db_client.update('queues', queue_data)
-                            db_client.run()
+                            db_client.update('object_checkins', checkin_upd)
                             # remove from queue
                             queue_client.delete_message(message['ReceiptHandle'])
                             # add mp queue
@@ -144,6 +159,11 @@ def process_backups():
                                               'content_length': obj_info['content_length'],
                                               'source_account_id': source_account_id, 'kms_key_arn': kms_key_arn})
                     del checkin_rec
+                    # update queue record
+                    queue_data = {'status': 2, 'finished_ts': datetime.now().timestamp()}
+                    db_client.where(f'checkin_id = {checkin_id}')
+                    db_client.update('queues', queue_data)
+                    db_client.run()
             if task_list:
                 job_list = []
                 for task in task_list:
