@@ -47,7 +47,7 @@ def process_backups():
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
                     continue
-                elif queue_rec['status'] != 0:
+                elif queue_rec['status'] < 2:
                     del queue_rec
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
@@ -64,7 +64,7 @@ def process_backups():
                     checkin_rec = db_client.fetch()
                     if checkin_rec is None:
                         queue_status = 9
-                    elif checkin_rec['status'] != 0:
+                    elif checkin_rec['status'] > 1:
                         queue_status = checkin_rec['status']
                         queue_client.delete_message(message['ReceiptHandle'])
                         queue_data = {'status': queue_status,
@@ -231,6 +231,8 @@ def process_backups():
                     db_client.run()
                     s3_client.rm_object(task['source_bucket'], task['source_key'])
             db_client.close()
+        else:
+            pass
         del queue_response
 
 
