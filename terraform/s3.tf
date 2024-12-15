@@ -24,6 +24,13 @@ module "s3-tna-backup-drop-zone" {
             ]
         },
         {
+            "ap_name" = "tna-services-bkup-github",
+            "ap_path" = "tna-services-bkup-github",
+            "role_arns" = [
+                "arn:aws:iam::846769538626:role/digital-files-backup"
+            ]
+        },
+        {
             "ap_name" = "tna-external-services-backup",
             "ap_path" = "tna-external-services-backup",
             "role_arns" = [

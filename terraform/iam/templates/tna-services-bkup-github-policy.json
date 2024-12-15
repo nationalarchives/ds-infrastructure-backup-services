@@ -1,0 +1,17 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::tna-backup-drop-zone",
+                "arn:aws:s3:::tna-backup-drop-zone/*",
+                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-services-bkup-github",
+                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-services-bkup-github/*"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}

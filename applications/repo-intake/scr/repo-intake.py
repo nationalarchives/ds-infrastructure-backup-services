@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 from private_tools import get_asm_parameter, sha256sum, sha1sum
 
 def main():
-    bucket_name = 'tna-backup-drop-zone'
-    bucket_index = str(datetime.now()).replace(" ", "_")
+    access_point = 'tna-external-service-a65ok1p3o5g5bo5nnt1k4p7tqbcygeuw2b-s3alias'
     root_dir = '/github-backup'
     zip_dir = '/github-zips'
 
@@ -70,14 +69,14 @@ def main():
 
         # create a tar file of the entire github organistion
         os.chdir('/')
-        tar_file = f'{repo["organisation"]}_{str(datetime.now()).replace(" ", "_")}.tar'
+        tar_file = f'{repo["organisation"]}_{str(datetime.now()).replace(" ", "_").replace(":", "-")}.tar'
         with tarfile.open(tar_file, 'w') as tar:
             for entry in os.scandir(zip_dir):
                 if entry.is_file():
                     tar.add(f'{zip_dir}/{entry.name}')
                     os.remove(f'{zip_dir}/{entry.name}')
 
-        s3_client.upload_file(tar_file, bucket_name, f'services/github/{tar_file}',
+        s3_client.upload_file(tar_file, access_point, f'services/github/{tar_file}',
                               ExtraArgs={'Metadata': {'x-amz-meta-legal_hold': 'ON',
                                                       'x-amz-meta-lock_mode': 'governance',
                                                       'x-amz-meta-retain_until_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')

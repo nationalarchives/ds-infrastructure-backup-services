@@ -3,7 +3,7 @@ locals {
         Owner      = "Digital Services"
         CostCentre = "Digital Services"
         Region     = var.region
-        Account    = var.account_id
+        Account    = data.aws_caller_identity.current.account_id
         Terraform  = "true"
         Repository = "ds-infrastructure-backup-services"
     }

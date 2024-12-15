@@ -90,7 +90,7 @@ resource "aws_s3control_access_point_policy" "drop_zone_ap_policy" {
     for_each         = {for k in var.bkup_drop_zone_access_points : k.ap_name => k}
     access_point_arn = aws_s3_access_point.backup_drop_zone_access_point["${each.value.ap_name}"].arn
 
-    policy = templatefile("${path.root}/s3/templates/backup-drop-zone-access-point-policy.tftpl", {
+    policy = templatefile("${path.root}/s3/templates/backup-drop-zone-access-point-policy.json", {
         ap_name   = each.value.ap_name,
         ap_path   = each.value.ap_path,
         role_arns = each.value.role_arns
