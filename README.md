@@ -40,7 +40,10 @@ structure of the secrets is:
 0 - new record
 1 - picked up by copying process
 2 - finished
-4, 5, 8, 9 - indicating check wasn't as expected
+4 - 
+5 - checkin record in progress or ingested
+8 - checkin record doesn't exist
+9 - queue entry points to none existing object
 #### object_copies
 0 - new record
 1 - copying in progress

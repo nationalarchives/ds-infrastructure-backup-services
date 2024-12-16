@@ -47,7 +47,7 @@ def process_backups():
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
                     continue
-                elif queue_rec['status'] < 2:
+                elif queue_rec['status'] > 0:
                     del queue_rec
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
@@ -63,9 +63,9 @@ def process_backups():
                     db_client.where(f'id = {checkin_id}')
                     checkin_rec = db_client.fetch()
                     if checkin_rec is None:
-                        queue_status = 9
+                        queue_status = 8
                     elif checkin_rec['status'] > 1:
-                        queue_status = checkin_rec['status']
+                        queue_status = 5
                         queue_client.delete_message(message['ReceiptHandle'])
                         queue_data = {'status': queue_status,
                                       'finished_ts': datetime.now().timestamp(),
@@ -79,7 +79,7 @@ def process_backups():
                                                              key=checkin_rec['object_key'])
                         if obj_info is None:
                             queue_client.delete_message(message['ReceiptHandle'])
-                            queue_data = {'status': 9, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            queue_data = {'status': 8, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'checkin_id = {checkin_id}')
                             db_client.update('queues', queue_data)
                             db_client.run()
@@ -88,12 +88,14 @@ def process_backups():
                             db_client.update('object_checkins', checkin_data)
                             db_client.run()
                         else:
-                            checkin_data = {'status': 1, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                            checkin_data = {'status': 2, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'id = {checkin_id}')
                             db_client.update('object_checkins', checkin_data)
                             db_client.run()
                             object_name_parts = deconstruct_path(checkin_rec['object_key'])
-                            db_client.select('ap_targets', ['access_point', 'name_processing', 'kms_key_arn'])
+                            db_client.select('ap_targets',
+                                             ['access_point', 'bucket', 'source_account_id', 'name_processing',
+                                              'kms_key_arn'])
                             db_client.where(f'access_point = "{object_name_parts["access_point"]}"')
                             ap_rec = db_client.fetch()
                             if ap_rec:
@@ -144,7 +146,7 @@ def process_backups():
                             db_client.insert('object_copies', object_copy)
                             copy_id = db_client.run()
                             # update checkin record
-                            checkin_upd = {'copy_id': copy_id, 'status': 2, 'finished_ts': datetime.now().timestamp()}
+                            checkin_upd = {'copy_id': copy_id, 'status': 3, 'finished_ts': datetime.now().timestamp()}
                             db_client.where(f'id = {checkin_rec["id"]}')
                             db_client.update('object_checkins', checkin_upd)
                             # remove from queue
