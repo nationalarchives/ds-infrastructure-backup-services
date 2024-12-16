@@ -122,7 +122,9 @@ def process_backups():
                                                              key=checkin_rec['object_key'])
                         object_name_parts = deconstruct_path(checkin_rec['object_key'])
                         if obj_info is not None:
-                            db_client.select('ap_targets', ['access_point', 'name_processing'])
+                            db_client.select('ap_targets',
+                                             ['access_point', 'bucket', 'source_account_id', 'name_processing',
+                                              'kms_key_arn'])
                             db_client.where(f'access_point = "{object_name_parts["access_point"]}"')
                             ap_rec = db_client.fetch()
                             if ap_rec:
@@ -196,7 +198,7 @@ def process_backups():
                                             'content_length': task['content_length'], 'percentage': percentage,
                                             'byte_range': byte_range, 'part': position})
                         position += 1
-                    multipart_upload_block = { 'Parts' : []}
+                    multipart_upload_block = {'Parts': []}
                     mpu = s3_client.create_multipart_upload(task['target_bucket'],
                                                             task['target_obj'])
                     while True:
@@ -209,8 +211,9 @@ def process_backups():
                             thread_range = thread_len
                         threads = []
                         for i in range(thread_range):
-                            threads.append(th.Thread(target=process_object, args=(thread_list[i], s3_client, db_secrets_vals,
-                                                                                  multipart_upload_block, mpu)))
+                            threads.append(
+                                th.Thread(target=process_object, args=(thread_list[i], s3_client, db_secrets_vals,
+                                                                       multipart_upload_block, mpu)))
                         for thread in threads:
                             thread.start()
                             thread.join()

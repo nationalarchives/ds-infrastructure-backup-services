@@ -34,13 +34,13 @@ def process_object(event_data):
         checkin_status = 0
     object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
     object_name = object_path['object_name']
-    # neutralise older entries if the object is already in the list but not in progress
+    # neutralise older entries if the object is already in the list but not queued or in progress
     upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                  'finished_ts': datetime.now().timestamp(), 'status': 3}
+                  'finished_ts': datetime.now().timestamp(), 'status': 4}
     upd_where = f'object_key = "{obj_key}" AND status = 0'
     check_in_db.update('object_checkins', upd_fields, upd_where)
     # find any entry already in progress
-    select_where = f'object_key = "{obj_key}" AND status = 1'
+    select_where = f'object_key = "{obj_key}" AND (status = 1 OR status = 2)'
     found_records = check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'], select_where)
     if len(found_records) > 0:
         checkin_status = 5
@@ -103,7 +103,6 @@ def process_object(event_data):
             queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
     else:
         queue_data = {'message_id': None, 'sequence_number': None}
-        checkin_status = 9
     queue_data['received_ts'] = datetime.now().timestamp()
     queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     queue_data['status'] = checkin_status
@@ -112,7 +111,7 @@ def process_object(event_data):
     object_data = {'queue_id': queue_id,
                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                    'finished_ts': datetime.now().timestamp(),
-                   'status': checkin_status}
+                   'status': 1}
     where_clause = 'id = ' + str(checkin_id)
     check_in_db.update('object_checkins', object_data, where_clause)
     check_in_db.close()

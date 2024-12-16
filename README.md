@@ -29,12 +29,23 @@ structure of the secrets is:
 ### Status of records
 #### object_checkins
 0 - new record
-1 - in progress
-2 - ingested
-3 - redundant; switched from 0
-5 - new record is redundant because status 1 record exists
+1 - queued
+2 - in progress
+3 - ingested
+4 - doubled up; redundant; switch old record from 0 to 4
+5 - doubled up; redundant; switch new record; because status 1 or 2;
 8 - file doesn't exist
 9 - queue entry error
+#### queues
+0 - new record
+1 - picked up by copying process
+2 - finished
+4, 5, 8, 9 - indicating check wasn't as expected
+#### object_copies
+0 - new record
+1 - copying in progress
+2 - finished
+9 - error
 
 
 
