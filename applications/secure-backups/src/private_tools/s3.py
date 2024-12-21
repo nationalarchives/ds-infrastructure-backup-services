@@ -103,7 +103,6 @@ class Bucket:
     def complete_multipart_upload(self, bucket: str, object_key: str, parts: dict, upload_id: str, ):
         response = self.client.complete_multipart_upload(Bucket=bucket, Key=object_key,
                                                          MultipartUpload=parts, UploadId=upload_id)
-        print(response)
         return_value = {'location': response['Location'], 'bucket': response['Bucket'],
                         'object_key': response['Key'],
                         'etag': response['ETag'], 'version_id': response['VersionId'],

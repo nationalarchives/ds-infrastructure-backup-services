@@ -1,23 +1,22 @@
 import boto3
 import json
-import re
 import os, sys
 import time
 from datetime import datetime
-from private_tools import SignalHandler, SQSHandler, Database, Secrets
-from private_tools import get_parameters
+from private_tools import SignalHandler, SQSHandler, Database, Secrets, get_parameters
 
 
 def send_queue_metrics(sqs_queue, dbc):
     queue_attribs = sqs_queue.get_attributes()
     queue_name: str = queue_attribs['Attributes']['QueueArn'].split(":")[-1]
     queue_length: int = queue_attribs['Attributes']['ApproximateNumberOfMessages']
-    queue_rec = {'queue_name': queue_name, 'queue_length': queue_length,
-                 'queue_arn': queue_attribs['Attributes']['QueueArn'],
-                 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                 'status': 0}
-    dbc.insert('queue_status', queue_rec)
-    copy_id = dbc.run()
+    if queue_length > 0:
+        queue_rec = {'queue_name': queue_name, 'queue_length': queue_length,
+                     'queue_arn': queue_attribs['Attributes']['QueueArn'],
+                     'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                     'status': 0}
+        dbc.insert('queue_status', queue_rec)
+        dbc.run()
 
 def queue_monitor():
     ssm_id = os.getenv('SSM_ID')

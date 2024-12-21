@@ -167,10 +167,10 @@ def process_backups():
                     db_client.update('queues', queue_data)
                     db_client.run()
             if task_list:
-                job_list = []
                 for task in task_list:
                     upload_map = create_upload_map(task['content_length'])
                     position = 1
+                    job_list = []
                     for entry in upload_map:
                         percentage = str(round(((entry[1] - entry[0]) * 100 / task['content_length']), 2))
                         byte_range = f'bytes={entry[0]}-{entry[1]}'
@@ -195,6 +195,7 @@ def process_backups():
                     upload_id = s3_client.create_multipart_upload(task['target_bucket'],
                                                                   task['target_key'])
                     for job in job_list:
+                        print(f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | upload_id: {upload_id} | part: {job["part"]}')
                         copy_source = {'Bucket': job["source_bucket"],
                                        'Key': job["source_key"]}
                         response = s3_client.upload_part_copy(copy_source, job['target_bucket'], job['target_key'],
@@ -211,7 +212,7 @@ def process_backups():
                                                                           multipart_upload_block, upload_id)
                     copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
                                  'etag': complete_upload['etag'].replace('"', ''),
-                                 'upload_id': upload_id, 'status': 2, }
+                                 'upload_id': upload_id, 'status': 3, }
                     if 'VersionId' in complete_upload:
                         copy_data['version_id'] = complete_upload['VersionId']
                     if 'ServerSideEncryption' in complete_upload:
@@ -232,6 +233,7 @@ def process_backups():
                     db_client.update('object_copies', copy_data)
                     db_client.run()
                     s3_client.rm_object(task['source_bucket'], task['source_key'])
+                    del job_list
             db_client.close()
         else:
             pass

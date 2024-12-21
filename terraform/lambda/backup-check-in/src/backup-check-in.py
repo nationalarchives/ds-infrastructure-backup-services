@@ -42,6 +42,7 @@ def process_object(event_data):
     # find any entry already in progress
     select_where = f'object_key = "{obj_key}" AND (status = 1 OR status = 2)'
     found_records = check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'], select_where)
+    print(found_records)
     if len(found_records) > 0:
         checkin_status = 5
     # find already
