@@ -21,7 +21,7 @@ module "s3-tna-backup-drop-zone" {
         #            "ap_path" = "github-backup",
         #            "actions" = [
         #                "s3:PutObject",
-        #            ]
+        #            ],
         #            "role_arns" = [
         #                "arn:aws:iam::846769538626:role/digital-files-backup"
         #            ]
@@ -31,7 +31,7 @@ module "s3-tna-backup-drop-zone" {
         #            "ap_path" = "tna-services-bkup-github",
         #            "actions" = [
         #                "s3:PutObject",
-        #            ]
+        #            ],
         #            "role_arns" = [
         #                "arn:aws:iam::846769538626:role/digital-files-backup"
         #            ]
@@ -99,7 +99,7 @@ module "s3-tna-backup-intake" {
                 "s3:PutObject",
             ],
             "role_arns" = [
-                "arn:aws:iam::846769538626:role/mysql-main-prime-role"
+                "arn:aws:iam::846769538626:role/mysql-main-prime-role",
             ]
         },
     ]
