@@ -7,7 +7,9 @@
 				${jsonencode({
 			        "AWS": [for arn in role_arns : "${arn}"],
 		        })},
-			"Action": ${jsonencode({[for action in actions : "${action}"]})},
+			"Action": ${jsonencode({
+			    [for action in actions : "${action}"],
+			})},
 			"Resource": "arn:aws:s3:eu-west-2:637423167251:accesspoint/${ap_name}/object/${ap_path}/*"
 		}
 	]
