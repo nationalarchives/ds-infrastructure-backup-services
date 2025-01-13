@@ -1,16 +1,16 @@
-module "ec2-da-sftp-x-posts" {
-    source = "./instances/da-sftp-x-posts"
-
-    vpc_id = local.vpc_info.id
-
-    image_id      = data.aws_ami.da_sftp_x_posts.id
-    instance_type = "t3a.micro"
-    key_name      = "da-x-post-backup-eu-west-2"
-    subnet_id     = local.public_subnet_a_info.id
-    volume_size   = 200
-
-    default_tags = local.default_tags
-}
+#module "ec2-da-sftp-x-posts" {
+#    source = "./instances/da-sftp-x-posts"
+#
+#    vpc_id = local.vpc_info.id
+#
+#    image_id      = data.aws_ami.da_sftp_x_posts.id
+#    instance_type = "t3a.micro"
+#    key_name      = "da-x-post-backup-eu-west-2"
+#    subnet_id     = local.public_subnet_a_info.id
+#    volume_size   = 200
+#
+#    default_tags = local.default_tags
+#}
 
 module "ec2-service-backups" {
     source = "./instances/service-backups"
@@ -27,17 +27,17 @@ module "ec2-service-backups" {
     default_tags = local.default_tags
 }
 
-module "ec2-shared-lb" {
-    source = "./instances/shared-load-balancer"
-
-    vpc_id = local.vpc_info.id
-    subnet_id = local.public_subnet_a_info.id
-
-    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.backup_intake_instance_id
-    cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
-
-    tags = local.default_tags
-}
+#module "ec2-shared-lb" {
+#    source = "./instances/shared-load-balancer"
+#
+#    vpc_id = local.vpc_info.id
+#    subnet_id = local.public_subnet_a_info.id
+#
+#    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.backup_intake_instance_id
+#    cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
+#
+#    tags = local.default_tags
+#}
 
 module "ec2-backup-drop-zone" {
     source = "./instances/backup-drop-zone"
