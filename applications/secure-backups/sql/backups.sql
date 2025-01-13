@@ -117,6 +117,7 @@ CREATE TABLE `backups`.`ap_targets` (
 INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("github-backup", "tna-external-services-backup", 1, "968803923593", NOW(), 1);
 INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("ds-databases-backup", "tna-databases-backup",1, "968803923593", NOW(), 1);
 INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, "968803923593", NOW(), 1);
+INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, created_at, status) VALUES ("digital-services", "tna-databases-backup", 0, "968803923593", NOW(), 1);
 
 CREATE TABLE `backups`.`part_uploads` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

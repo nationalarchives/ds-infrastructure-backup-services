@@ -82,7 +82,7 @@ resource "aws_lambda_function" "backup_check_in" {
     })
 }
 
-resource "aws_lambda_function_event_invoke_config" "example" {
+resource "aws_lambda_function_event_invoke_config" "backup_check_in" {
     function_name                = aws_lambda_function.backup_check_in.function_name
     maximum_event_age_in_seconds = 300
     maximum_retry_attempts       = 0

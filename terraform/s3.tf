@@ -51,6 +51,13 @@ module "s3-tna-backup-drop-zone" {
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role"
             ]
         },
+        {
+            "ap_name" = "digital-services",
+            "ap_path" = "digital-services",
+            "role_arns" = [
+                "arn:aws:iam::968803923593:role/lambda-backup-check-in-execution-role"
+            ]
+        },
     ]
 
     default_tags = local.default_tags
