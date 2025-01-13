@@ -41,7 +41,7 @@ module "s3-tna-backup-drop-zone" {
             "ap_path" = "tna-external-services-backup",
             "actions" = [
                 "s3:PutObject",
-            ]
+            ],
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/digital-files-backup",
             ]
@@ -51,7 +51,7 @@ module "s3-tna-backup-drop-zone" {
             "ap_path" = "ds-digital-files-backup",
             "actions" = [
                 "s3:PutObject",
-            ]
+            ],
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/digital-files-backup",
             ]
@@ -61,7 +61,7 @@ module "s3-tna-backup-drop-zone" {
             "ap_path" = "digital-services/ds-bkup-databases",
             "actions" = [
                 "s3:PutObject",
-            ]
+            ],
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role",
             ]
@@ -75,7 +75,7 @@ module "s3-tna-backup-drop-zone" {
                 "s3:ListMultipartUploadParts",
                 "s3:ListMultipartUploadParts",
                 "s3:AbortMultipartUpload",
-            ]
+            ],
             "role_arns" = [
                 "arn:aws:iam::968803923593:role/lambda-s3-backup-monitor-role",
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role",
@@ -97,7 +97,7 @@ module "s3-tna-backup-intake" {
             "ap_path" = "digital-services",
             "actions" = [
                 "s3:PutObject",
-            ]
+            ],
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role"
             ]
