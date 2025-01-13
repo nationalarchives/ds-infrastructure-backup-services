@@ -16,23 +16,32 @@ module "s3-tna-backup-drop-zone" {
     tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
 
     bkup_drop_zone_access_points = [
-        {
-            "ap_name" = "github-backup",
-            "ap_path" = "github-backup",
-            "role_arns" = [
-                "arn:aws:iam::846769538626:role/digital-files-backup"
-            ]
-        },
-        {
-            "ap_name" = "tna-services-bkup-github",
-            "ap_path" = "tna-services-bkup-github",
-            "role_arns" = [
-                "arn:aws:iam::846769538626:role/digital-files-backup"
-            ]
-        },
+        #        {
+        #            "ap_name" = "github-backup",
+        #            "ap_path" = "github-backup",
+        #            "actions" = [
+        #                "s3:PutObject",
+        #            ]
+        #            "role_arns" = [
+        #                "arn:aws:iam::846769538626:role/digital-files-backup"
+        #            ]
+        #        },
+        #        {
+        #            "ap_name" = "tna-services-bkup-github",
+        #            "ap_path" = "tna-services-bkup-github",
+        #            "actions" = [
+        #                "s3:PutObject",
+        #            ]
+        #            "role_arns" = [
+        #                "arn:aws:iam::846769538626:role/digital-files-backup"
+        #            ]
+        #        },
         {
             "ap_name" = "tna-external-services-backup",
             "ap_path" = "tna-external-services-backup",
+            "actions" = [
+                "s3:PutObject",
+            ]
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/digital-files-backup"
             ]
@@ -40,6 +49,9 @@ module "s3-tna-backup-drop-zone" {
         {
             "ap_name" = "ds-live-digital-files-backup",
             "ap_path" = "ds-digital-files-backup",
+            "actions" = [
+                "s3:PutObject",
+            ]
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/digital-files-backup"
             ]
@@ -47,6 +59,9 @@ module "s3-tna-backup-drop-zone" {
         {
             "ap_name" = "ds-bkup-databases",
             "ap_path" = "digital-services/ds-bkup-databases",
+            "actions" = [
+                "s3:PutObject",
+            ]
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role"
             ]
@@ -54,8 +69,16 @@ module "s3-tna-backup-drop-zone" {
         {
             "ap_name" = "digital-services",
             "ap_path" = "digital-services",
+            "actions" = [
+                "s3:PutObject",
+                "s3:PutObjectAcl",
+                "s3:ListMultipartUploadParts",
+                "s3:ListMultipartUploadParts",
+                "s3:AbortMultipartUpload",
+            ]
             "role_arns" = [
-                "arn:aws:iam::968803923593:role/lambda-backup-check-in-execution-role"
+                "arn:aws:iam::846769538626:role/mysql-main-prime-role",
+                "arn:aws:iam::968803923593:role/lambda-backup-check-in-execution-role",
             ]
         },
     ]
@@ -121,7 +144,7 @@ module "s3-tna-external-services-backup" {
     source = "./s3/tna-external-services-backup"
 
     tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
-    default_tags = local.default_tags
+    default_tags             = local.default_tags
 }
 
 #import {
