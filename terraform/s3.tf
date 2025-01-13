@@ -95,6 +95,9 @@ module "s3-tna-backup-intake" {
         {
             "ap_name" = "ds-backup-target",
             "ap_path" = "digital-services",
+            "actions" = [
+                "s3:PutObject",
+            ]
             "role_arns" = [
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role"
             ]
