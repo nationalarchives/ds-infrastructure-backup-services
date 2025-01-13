@@ -12,20 +12,20 @@
 #    default_tags = local.default_tags
 #}
 
-module "ec2-service-backups" {
-    source = "./instances/service-backups"
-
-    vpc_id = local.vpc_info.id
-
-    image_id      = data.aws_ami.service_backups.id
-    instance_type = "t3a.micro"
-    key_name      = "service-backups-eu-west-2"
-    subnet_id     = local.private_subnet_a_info.id
-    volume_size   = 20
-    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
-
-    default_tags = local.default_tags
-}
+#module "ec2-service-backups" {
+#    source = "./instances/service-backups"
+#
+#    vpc_id = local.vpc_info.id
+#
+#    image_id      = data.aws_ami.service_backups.id
+#    instance_type = "t3a.micro"
+#    key_name      = "service-backups-eu-west-2"
+#    subnet_id     = local.private_subnet_a_info.id
+#    volume_size   = 20
+#    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
+#
+#    default_tags = local.default_tags
+#}
 
 module "ec2-shared-lb" {
     source = "./instances/shared-load-balancer"
