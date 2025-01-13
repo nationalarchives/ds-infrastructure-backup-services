@@ -3,15 +3,14 @@
 	"Statement": [
 		{
 			"Effect": "Allow",
-			"Principal": {
+			"Principal":
             ${jsonencode({
-                "AWS": [[for arn in role_arns : "${arn}"]]
-            })}
-            ),
-			"Action": [
-            ${jsonencode({
+                "AWS": [for arn in role_arns : "${arn}"]
+            })},
+			"Action":
+            ${jsonencode(
                 [for act in actions : "${act}"]
-            })}],
+            )},
 			"Resource": "arn:aws:s3:eu-west-2:637423167251:accesspoint/${ap_name}/object/${ap_path}/*"
 		}
 	]
