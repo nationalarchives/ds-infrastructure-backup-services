@@ -43,7 +43,7 @@ module "s3-tna-backup-drop-zone" {
                 "s3:PutObject",
             ]
             "role_arns" = [
-                "arn:aws:iam::846769538626:role/digital-files-backup"
+                "arn:aws:iam::846769538626:role/digital-files-backup",
             ]
         },
         {
@@ -53,7 +53,7 @@ module "s3-tna-backup-drop-zone" {
                 "s3:PutObject",
             ]
             "role_arns" = [
-                "arn:aws:iam::846769538626:role/digital-files-backup"
+                "arn:aws:iam::846769538626:role/digital-files-backup",
             ]
         },
         {
@@ -63,7 +63,7 @@ module "s3-tna-backup-drop-zone" {
                 "s3:PutObject",
             ]
             "role_arns" = [
-                "arn:aws:iam::846769538626:role/mysql-main-prime-role"
+                "arn:aws:iam::846769538626:role/mysql-main-prime-role",
             ]
         },
         {
