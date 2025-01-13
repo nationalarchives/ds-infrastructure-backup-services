@@ -77,8 +77,8 @@ module "s3-tna-backup-drop-zone" {
                 "s3:AbortMultipartUpload",
             ]
             "role_arns" = [
+                "arn:aws:iam::968803923593:role/lambda-s3-backup-monitor-role",
                 "arn:aws:iam::846769538626:role/mysql-main-prime-role",
-                "arn:aws:iam::968803923593:role/lambda-backup-check-in-execution-role",
             ]
         },
     ]
