@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from dateutil.tz import tzutc
 from urllib.parse import unquote_plus
-from private_tools import Database, Queue, Secrets, s3_object
+from private_tools import Database, Queue, Secrets, Bucket
 from private_tools import set_random_id, get_parameters, deconstruct_path
 
 
@@ -25,7 +25,7 @@ def process_object(event_data):
     db_secrets_values = json.loads(db_secrets.get_str())
     check_in_db = Database(db_secrets_values)
 
-    s3_obj = s3_object(region=parameters['aws_region'])
+    s3_obj = Bucket(region=parameters['aws_region'])
     obj_key = unquote_plus(event_data['object']['key'])
     obj_info = s3_obj.info(bucket=event_data['bucket']['name'], key=obj_key)
     if obj_info == None:
