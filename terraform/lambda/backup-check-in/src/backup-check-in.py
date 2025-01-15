@@ -49,7 +49,7 @@ def process_object(event_data):
     # find already
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
                    'object_name': object_name, 'etag': obj_info['etag'],
-                   'object_size': obj_info['object_size'], 'object_type': obj_info['content_type'],
+                   'object_size': obj_info['content_length'], 'object_type': obj_info['content_type'],
                    'last_modified': obj_info['last_modified'], 'received_ts': received_ts,
                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': checkin_status}
     if 'retain_until_date' in obj_info:
