@@ -21,12 +21,12 @@ def process_object(event_data):
     parameters = get_parameters(ssm_id, 'eu-west-2')
 
     db_secrets = Secrets(parameters['asm_id'])
-    db_secrets_values = json.loads(db_secrets.get_str())
+    db_secrets_values = json.loads(db_secrets.get_secrets())
     check_in_db = Database(db_secrets_values)
 
     s3_obj = Bucket(region=parameters['aws_region'])
     obj_key = unquote_plus(event_data['object']['key'])
-    obj_info = s3_obj.info(bucket=event_data['bucket']['name'], key=obj_key)
+    obj_info = s3_obj.get_object_info(bucket=event_data['bucket']['name'], key=obj_key)
     if obj_info == None:
         checkin_status = 8
     else:
