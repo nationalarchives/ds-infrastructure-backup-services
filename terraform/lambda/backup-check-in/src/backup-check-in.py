@@ -43,7 +43,6 @@ def process_object(event_data):
     check_in_db.where(f'object_key = "{obj_key}" AND (status = 1 OR status = 2)')
     check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'])
     found_records = check_in_db.run()
-    print(found_records)
     if len(found_records) > 0:
         checkin_status = 5
     # find already
@@ -96,6 +95,7 @@ def process_object(event_data):
         }}
         '''
         sqs_results = queue.add(sqs_body, set_random_id())
+        print(sqs_results)
         queue_data = {'message_id': sqs_results['MessageId'],
                       'sequence_number': sqs_results['SequenceNumber']}
         if 'MD5OfMessageBody' in sqs_results:
