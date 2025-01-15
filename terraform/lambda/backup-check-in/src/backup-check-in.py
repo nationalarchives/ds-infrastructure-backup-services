@@ -27,8 +27,8 @@ def process_object(event_data):
     s3_obj = Bucket(region=parameters['aws_region'])
     obj_key = unquote_plus(event_data['object']['key'])
     obj_info = s3_obj.get_object_info(bucket=event_data['bucket']['name'], key=obj_key)
-    if obj_info == None:
-        checkin_status = 8
+    if obj_info is None:
+        checkin_status = 9
     else:
         checkin_status = 0
     object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
@@ -39,13 +39,12 @@ def process_object(event_data):
     check_in_db.where(f'object_key = "{obj_key}" AND status = 0')
     check_in_db.update('object_checkins', upd_fields)
     check_in_db.run()
-    # find any entry already in progress
-    check_in_db.where(f'object_key = "{obj_key}" AND (status = 1 OR status = 2)')
+    # find any entry in progress
+    check_in_db.where(f'object_key = "{obj_key}" AND status = 1')
     check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'])
     found_records = check_in_db.run()
     if len(found_records) > 0:
         checkin_status = 5
-    # find already
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
                    'object_name': object_name, 'etag': obj_info['etag'],
                    'object_size': obj_info['content_length'], 'object_type': obj_info['content_type'],
@@ -95,7 +94,6 @@ def process_object(event_data):
         }}
         '''
         sqs_results = queue.add(sqs_body, set_random_id())
-        print(sqs_results)
         queue_data = {'message_id': sqs_results['MessageId'],
                       'sequence_number': sqs_results['SequenceNumber']}
         if 'MD5OfMessageBody' in sqs_results:
@@ -104,19 +102,19 @@ def process_object(event_data):
             queue_data['md5_of_message_attributes'] = sqs_results['MD5OfMessageAttributes']
         if 'MD5OfMessageSystemAttributes' in sqs_results:
             queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
+        queue_data['received_ts'] = datetime.now().timestamp()
+        queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        queue_data['status'] = checkin_status
+        queue_data['checkin_id'] = checkin_id
+        check_in_db.insert('queues', queue_data)
+        queue_id = check_in_db.run()
+        checkin_status = 2
+        object_data = {'queue_id': queue_id, 'status': checkin_status,
+                       'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                       'finished_ts': datetime.now().timestamp()}
     else:
-        queue_data = {'message_id': None, 'sequence_number': None}
-    queue_data['received_ts'] = datetime.now().timestamp()
-    queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    queue_data['status'] = checkin_status
-    queue_data['checkin_id'] = checkin_id
-    print(queue_data)
-    check_in_db.insert('queues', queue_data)
-    queue_id = check_in_db.run()
-    object_data = {'queue_id': queue_id,
-                   'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                   'finished_ts': datetime.now().timestamp(),
-                   'status': 1}
+        object_data = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                       'finished_ts': datetime.now().timestamp(), }
     check_in_db.where(f'id = {str(checkin_id)}')
     check_in_db.update('object_checkins', object_data)
     check_in_db.run()
