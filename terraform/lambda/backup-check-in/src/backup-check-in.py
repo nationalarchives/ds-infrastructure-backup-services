@@ -110,6 +110,7 @@ def process_object(event_data):
     queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     queue_data['status'] = checkin_status
     queue_data['checkin_id'] = checkin_id
+    print(queue_data)
     check_in_db.insert('queues', queue_data)
     queue_id = check_in_db.run()
     object_data = {'queue_id': queue_id,
