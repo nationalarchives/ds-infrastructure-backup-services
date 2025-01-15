@@ -1,3 +1,4 @@
+import math
 import random
 import string
 import re
@@ -7,7 +8,8 @@ import json
 from datetime import datetime
 
 
-def size_converter(value: int=0, start: str='B', end: str='GB', precision: int=2, long_names: bool=False, base: int=1024):
+def size_converter(value: int = 0, start: str = 'B', end: str = 'GB', precision: int = 2, long_names: bool = False,
+                   base: int = 1024):
     units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     units_long = ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Exabyte', 'Zettabyte',
                   'Yottabyte']
@@ -59,14 +61,17 @@ def deconstruct_path(object_key):
         object_key = object_key[1:]
     path_elements = object_key.split('/')
     object_name = path_elements[-1]
+    location_filters = []
     if len(path_elements) > 1:
         ap_name = path_elements[0]
         location = "/".join(path_elements[:-1])
+        for x in range(1, len(path_elements)):
+            location_filters.append("/".join(path_elements[0:x]))
     else:
         ap_name = ''
         location = ''
     return {'object_key': object_key, 'object_name': object_name,
-            'access_point': ap_name, 'location': location}
+            'access_point': ap_name, 'location': location, 'location_filters': location_filters}
 
 
 def get_parameters(name: str, aws_region: str):
@@ -88,32 +93,53 @@ def get_parameters(name: str, aws_region: str):
     return params
 
 
-def create_upload_map(total_size: int, max_block_size: int=104857600):
+def create_upload_map(total_size: int):
     upload_map = []
-    part_count = -(-total_size // max_block_size)
-    if part_count <= 1:
-        upload_map = [[0, (total_size - 1)]]
+    if total_size < 104857601:
+        # up to 100MB - set part size to 5MB
+        block_size = 5242880
+    elif total_size < 1073741825:
+        # up to 1GB - set part size to 100MB
+        block_size = 104857600
+    elif total_size < 53687091201:
+        # up to 50GB - set part size to 200MB
+        block_size = 214748365
+    elif total_size < 107374182401:
+        # up to 100GB - set part size to 410MB
+        block_size =  429496730
+    elif total_size < 1099511627778:
+        # up to 1TB - set part size to 4GB
+        block_size =  4398046512
+    elif total_size < 2748779069441:
+        # up to 2.5TB - set part size to 10GB
+        block_size = 10995116278
     else:
-        part_size = -(-total_size // part_count)
-        to_transfer_total = total_size
+        block_size = 10995116278
+    part_count = math.ceil(-(-total_size / block_size))
+    low_part_count = math.floor(-(-total_size / block_size))
+    last_part_size = total_size - (low_part_count * block_size)
+    if part_count <= 1:
+        upload_map = [[0, (total_size - 1), total_size]]
+    else:
+        transfer_total = 0
+        last_part_no = part_count - 1
+        range_from = 0
+        range_to = 0
         for i in range(part_count):
-            if i > 0:
-                if upload_map[i-1][2] < part_size:
-                    transfer_size = upload_map[i-1][2]
-                else:
-                    transfer_size = part_size
-                range_from = upload_map[i-1][1] + 1
+            if i == last_part_no:
+                transfer_size = last_part_size
                 range_to = range_from + transfer_size - 1
-                to_transfer_total -= transfer_size
+                transfer_total += transfer_size
             else:
-                range_from = 0
-                range_to = part_size - 1
-                to_transfer_total = total_size - part_size
-            upload_map.append([range_from, range_to, to_transfer_total])
+                range_to = range_from + block_size - 1
+                transfer_total += block_size
+                transfer_size = block_size
+            upload_map.append([range_from, range_to, transfer_size])
+            range_from = range_to + 1
     return upload_map
 
 
-def process_obj_name(name: str, add_ts: int=1):
+def process_obj_name(name: str, add_ts: int = 1):
     if add_ts == 1:
         tn_split = name.split('.')
         if len(tn_split) > 1:

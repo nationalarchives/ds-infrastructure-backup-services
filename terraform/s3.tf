@@ -71,9 +71,6 @@ module "s3-tna-backup-drop-zone" {
             "ap_path" = "digital-services",
             "actions" = [
                 "s3:PutObject",
-                "s3:PutObjectAcl",
-                "s3:ListMultipartUploadParts",
-                "s3:ListMultipartUploadParts",
                 "s3:AbortMultipartUpload",
             ],
             "role_arns" = [

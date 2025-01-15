@@ -37,11 +37,13 @@ def process_object(event_data):
     # neutralise older entries if the object is already in the list but not queued or in progress
     upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                   'finished_ts': datetime.now().timestamp(), 'status': 4}
-    upd_where = f'object_key = "{obj_key}" AND status = 0'
-    check_in_db.update('object_checkins', upd_fields, upd_where)
+    check_in_db.where(f'object_key = "{obj_key}" AND status = 0')
+    check_in_db.update('object_checkins', upd_fields)
+    check_in_db.run()
     # find any entry already in progress
-    select_where = f'object_key = "{obj_key}" AND (status = 1 OR status = 2)'
-    found_records = check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'], select_where)
+    check_in_db.where(f'object_key = "{obj_key}" AND (status = 1 OR status = 2)')
+    check_in_db.select('object_checkins', ['id', 'etag', 'object_key', 'status'])
+    found_records = check_in_db.run()
     print(found_records)
     if len(found_records) > 0:
         checkin_status = 5
@@ -75,7 +77,8 @@ def process_object(event_data):
         checkin_rec['sse_customer_key_md5'] = obj_info['sse_customer_key_md5']
     if 'sse_kms_key_id' in obj_info:
         checkin_rec['sse_kms_key_id'] = obj_info['sse_kms_key_id']
-    checkin_id = check_in_db.insert('object_checkins', checkin_rec)
+    check_in_db.insert('object_checkins', checkin_rec)
+    checkin_id = check_in_db.run()
     if checkin_status == 0:
         obj_info['checkin_id'] = checkin_id
         size_str = str(obj_info['object_size'])
@@ -108,11 +111,13 @@ def process_object(event_data):
     queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     queue_data['status'] = checkin_status
     queue_data['checkin_id'] = checkin_id
-    queue_id = check_in_db.insert('queues', queue_data)
+    check_in_db.insert('queues', queue_data)
+    queue_id = check_in_db.run()
     object_data = {'queue_id': queue_id,
                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                    'finished_ts': datetime.now().timestamp(),
                    'status': 1}
-    where_clause = 'id = ' + str(checkin_id)
-    check_in_db.update('object_checkins', object_data, where_clause)
+    check_in_db.where(f'id = {str(checkin_id)}')
+    check_in_db.update('object_checkins', object_data)
+    check_in_db.run()
     check_in_db.close()

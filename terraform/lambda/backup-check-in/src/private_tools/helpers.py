@@ -1,13 +1,19 @@
+import math
 import random
 import string
+import re
 import boto3
 import botocore.exceptions
 import re
 import json
+from datetime import datetime
 
-def size_converter(value=0, start='B', end='GB', precision=2, long_names=False, base=1024):
+
+def size_converter(value: int = 0, start: str = 'B', end: str = 'GB', precision: int = 2, long_names: bool = False,
+                   base: int = 1024):
     units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-    units_long = ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Exabyte', 'Zettabyte', 'Yottabyte']
+    units_long = ['Byte', 'Kilobyte', 'Megabyte', 'Gigabyte', 'Terabyte', 'Petabyte', 'Exabyte', 'Zettabyte',
+                  'Yottabyte']
     start_index = units.index(start.upper())
     end_index = units.index(end.upper())
     if start_index == end_index:
@@ -18,7 +24,7 @@ def size_converter(value=0, start='B', end='GB', precision=2, long_names=False, 
             output_unit = start.upper() if not long_names else ' ' + units_long[start_index]
             return '{:.{precision}f}{unit}'.format(value, precision=precision, unit=output_unit)
     elif start_index < end_index:
-        result = value / pow(base,(end_index - start_index))
+        result = value / pow(base, (end_index - start_index))
         output_unit = end.upper() if not long_names else ' ' + units_long[end_index]
         return '{:.{precision}f}{unit}'.format(result, precision=precision, unit=output_unit)
     elif start_index > end_index:
@@ -44,16 +50,29 @@ def find_value_dict(k: str, a: dict = {}):
     return [a[key] for key in a if key.casefold() == k]
 
 
-def deconstruct_path(object_key):
-    return {'object_key': object_key, 'object_name': object_key.split('/')[-1],
-            'location': "/".join(object_key.split('/')[:-1])}
-
-
 def sub_json(text: str, re_set):
     prepared_dict = text
     for step in re_set:
         prepared_dict = re.sub(step['re_compile'], step['replace_with'], prepared_dict)
     return prepared_dict
+
+
+def deconstruct_path(object_key):
+    if object_key.startswith('/'):
+        object_key = object_key[1:]
+    path_elements = object_key.split('/')
+    object_name = path_elements[-1]
+    location_filters = []
+    if len(path_elements) > 1:
+        ap_name = path_elements[0]
+        location = "/".join(path_elements[:-1])
+        for x in range(1, len(path_elements)):
+            location_filters.append("/".join(path_elements[0:x]))
+    else:
+        ap_name = ''
+        location = ''
+    return {'object_key': object_key, 'object_name': object_name,
+            'access_point': ap_name, 'location': location, 'location_filters': location_filters}
 
 
 def get_parameters(name: str, aws_region: str):
@@ -73,3 +92,61 @@ def get_parameters(name: str, aws_region: str):
     for k, v in values.items():
         params.update({k: v})
     return params
+
+
+def create_upload_map(total_size: int):
+    upload_map = []
+    if total_size < 104857601:
+        # up to 100MB - set part size to 5MB
+        block_size = 5242880
+    elif total_size < 1073741825:
+        # up to 1GB - set part size to 100MB
+        block_size = 104857600
+    elif total_size < 53687091201:
+        # up to 50GB - set part size to 200MB
+        block_size = 214748365
+    elif total_size < 107374182401:
+        # up to 100GB - set part size to 410MB
+        block_size =  429496730
+    elif total_size < 1099511627778:
+        # up to 1TB - set part size to 4GB
+        block_size =  4398046512
+    elif total_size < 2748779069441:
+        # up to 2.5TB - set part size to 10GB
+        block_size = 10995116278
+    else:
+        block_size = 10995116278
+    part_count = math.ceil(-(-total_size / block_size))
+    low_part_count = math.floor(-(-total_size / block_size))
+    last_part_size = total_size - (low_part_count * block_size)
+    if part_count <= 1:
+        upload_map = [[0, (total_size - 1), total_size]]
+    else:
+        transfer_total = 0
+        last_part_no = part_count - 1
+        range_from = 0
+        range_to = 0
+        for i in range(part_count):
+            if i == last_part_no:
+                transfer_size = last_part_size
+                range_to = range_from + transfer_size - 1
+                transfer_total += transfer_size
+            else:
+                range_to = range_from + block_size - 1
+                transfer_total += block_size
+                transfer_size = block_size
+            upload_map.append([range_from, range_to, transfer_size])
+            range_from = range_to + 1
+    return upload_map
+
+
+def process_obj_name(name: str, add_ts: int = 1):
+    if add_ts == 1:
+        tn_split = name.split('.')
+        if len(tn_split) > 1:
+            target_name = f'{".".join(tn_split[:-1])}_{str(datetime.now().timestamp()).replace(".", "_")}.{"".join(tn_split[-1:])}'
+        else:
+            target_name = f'{name}_{str(datetime.now().timestamp()).replace(".", "_")}'
+    else:
+        target_name = name
+    return target_name

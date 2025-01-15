@@ -81,6 +81,9 @@ class Database:
     def where(self, clause: str) -> None:
         self.clause = clause
 
+    def order_by(self, order: str) -> None:
+        self.order = order
+
     def join_left(self, tbl_name: str, on: str) -> None:
         self.left_join = f'LEFT JOIN {tbl_name} ON ({on})'
 
