@@ -6,7 +6,7 @@
 			"Principal": {
                 "AWS": ${role_arns}
             },
-			"Action": ${jsonencode({[for act in actions : "${act}"]}),
+			"Action": "${actions}",
 			"Resource": "arn:aws:s3:eu-west-2:637423167251:accesspoint/${ap_name}/object/${ap_path}/*"
 		}
 	]
