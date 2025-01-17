@@ -3,10 +3,11 @@
 	"Statement": [
 		{
 			"Effect": "Allow",
-			"Principal":
+			"Principal": {
             ${jsonencode({
                 "AWS": [for arn in role_arns : "${arn}"]
-            })},
+            })}
+            },
 			"Action":
             ${jsonencode(
                 [for act in actions : "${act}"]
