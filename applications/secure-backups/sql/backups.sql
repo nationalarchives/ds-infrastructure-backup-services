@@ -39,7 +39,7 @@ CREATE TABLE `backups`.`object_checkins`
     `object_type`            VARCHAR(256) NULL,
     `kms_key_arn`            VARCHAR(2048) NULL,
     `source_account_id`      VARCHAR(12) NULL,
-    `etag`                   VARCHAR(256)  NOT NULL,
+    `etag`                   VARCHAR(256) NULL,
     `expires_string`         VARCHAR(256) NULL,
     `checksum_crc32`         CHAR(8) NULL,
     `checksum_crc32c`        CHAR(10) NULL,
