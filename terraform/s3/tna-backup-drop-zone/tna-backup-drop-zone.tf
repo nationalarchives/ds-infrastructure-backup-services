@@ -93,8 +93,8 @@ resource "aws_s3control_access_point_policy" "drop_zone_ap_policy" {
     policy = templatefile("${path.root}/s3/templates/backup-drop-zone-access-point-policy.json", {
         ap_name   = each.value.ap_name,
         ap_path   = each.value.ap_path,
-        actions   = jsonencode(each.value.actions),
-        role_arns = jsonencode(each.value.role_arns)
+        actions   = "${jsonencode(each.value.actions)}",
+        role_arns = "${jsonencode(each.value.role_arns)}"
     })
 }
 
