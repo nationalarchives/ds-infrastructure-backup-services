@@ -83,6 +83,23 @@ module "s3-tna-backup-drop-zone" {
     default_tags = local.default_tags
 }
 
+module "s3-bv-digital-services" {
+    source = "./s3/bv-digital-services"
+
+    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
+    default_tags             = local.default_tags
+}
+
+module "s3-bv-ds-digital-files" {
+    source = "./s3/bv-ds-digital-files"
+
+    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
+    default_tags             = local.default_tags
+}
+
+
+# ------------------------------------------------
+
 module "s3-tna-backup-intake" {
     source = "./s3/tna-backup-intake"
 
@@ -132,13 +149,13 @@ module "s3-tna-service-backup" {
     default_tags = local.default_tags
 }
 
-module "s3-ds-live-digital-files-backup" {
-    source = "./s3/ds-live-digital-files-backup"
-
-    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
-
-    default_tags = local.default_tags
-}
+#module "s3-ds-live-digital-files-backup" {
+#    source = "./s3/ds-live-digital-files-backup"
+#
+#    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
+#
+#    default_tags = local.default_tags
+#}
 
 module "s3-tna-external-services-backup" {
     source = "./s3/tna-external-services-backup"

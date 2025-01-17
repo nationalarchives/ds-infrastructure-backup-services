@@ -50,7 +50,6 @@ module "ec2-backup-drop-zone" {
     vpc_id    = local.vpc_info.id
     subnet_id = local.private_subnet_a_info.id
 
-
     tags = local.default_tags
 }
 
