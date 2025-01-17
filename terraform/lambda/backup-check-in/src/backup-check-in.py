@@ -16,6 +16,7 @@ def lambda_handler(event, context):
 
 
 def process_object(event_data):
+    print('process starts')
     received_ts = datetime.now().timestamp()
     ssm_id = os.getenv('SSM_ID')
     parameters = get_parameters(ssm_id, 'eu-west-2')
@@ -35,6 +36,7 @@ def process_object(event_data):
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 9}
         check_in_db.insert('object_checkins', checkin_rec)
         checkin_id = check_in_db.run()
+        check_in_db.close()
         print(f"object doesn't exist - object_checkins id: {checkin_id}")
         return
     object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
@@ -55,7 +57,8 @@ def process_object(event_data):
                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 5}
         check_in_db.insert('object_checkins', checkin_rec)
         checkin_id = check_in_db.run()
-        print(f'object entry alread in db: {event_data["bucket"]["name"]}/{obj_key}/{object_name}')
+        check_in_db.close()
+        print(f'object entry already in db: {checkin_id}:{event_data["bucket"]["name"]}/{obj_key}/{object_name}')
         return
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
                    'object_name': object_name, 'etag': obj_info['etag'],
