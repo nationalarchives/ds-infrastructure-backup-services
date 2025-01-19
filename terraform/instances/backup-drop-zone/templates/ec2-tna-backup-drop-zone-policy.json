@@ -9,7 +9,8 @@
             "Resource": [
                 "arn:aws:s3:::tna-backup-drop-zone",
                 "arn:aws:s3:::tna-backup-vault"
-            ]
+            ],
+            "Sid": "DropZoneListBucket"
         },
         {
             "Effect": "Allow",
@@ -22,7 +23,8 @@
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-drop-zone/*"
-            ]
+            ],
+            "Sid": "DropZoneS3Access"
         },
         {
             "Effect": "Allow",
@@ -34,7 +36,20 @@
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-vault/*"
-            ]
+            ],
+            "Sid": "DropZoneS3AccessDefaultBackupVault"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::bv-digital-services/*",
+                "arn:aws:s3:::bv-ds-digital-files/*"
+            ],
+            "Sid": "DropZoneS3WriteAccessBackupVaults"
         },
         {
             "Action": [
@@ -43,14 +58,16 @@
             "Effect": "Allow",
             "Resource": [
                 "arn:aws:secretsmanager:eu-west-2:637423167251:secret:application/lambda/backup-check-in-dCsJNp"
-            ]
+            ],
+            "Sid": "DropZoneASMRead"
         },
         {
             "Action": [
                 "ssm:GetParameter"
             ],
             "Effect": "Allow",
-            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in"
+            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in",
+            "Sid": "DropZoneSSMRead"
         },
         {
             "Effect": "Allow",
@@ -63,7 +80,8 @@
             ],
             "Resource": [
                 "arn:aws:sqs:eu-west-2:637423167251:backup-check-in-queue.fifo"
-            ]
+            ],
+            "Sid": "DropZoneSQSAccess"
         }
     ]
 }

@@ -1,11 +1,24 @@
 #
 setup of user
 #
-CREATE USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT, UPDATE, SELECT on backups.* TO 'checkin_user'@'localhost' WITH GRANT OPTION;
-CREATE USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT, UPDATE, SELECT on backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
+CREATE
+USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT,
+UPDATE,
+SELECT
+on backups.* TO 'checkin_user'@'localhost'
+WITH GRANT
+OPTION;
+CREATE
+USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT,
+UPDATE,
+SELECT
+on backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0'
+WITH GRANT
+OPTION;
+FLUSH
+PRIVILEGES;
 
 #
 set up of database
@@ -107,12 +120,12 @@ CREATE TABLE `backups`.`object_copies`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `backups`.`ap_targets`
+CREATE TABLE `backups`.`target_endpoints`
 (
     `id`                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `access_point`      VARCHAR(1024) NOT NULL,
     `target_bucket`     VARCHAR(63)   NOT NULL,
-    `target_location`   VARCHAR(1024) NOT NULL,
+    `target_location`   VARCHAR(1024) NULL,
     `name_processing`   TINYINT UNSIGNED DEFAULT 0,
     `source_account_id` VARCHAR(12) NULL,
     `cost_centre`       VARCHAR(80) NULL,
@@ -121,17 +134,17 @@ CREATE TABLE `backups`.`ap_targets`
     `created_at`        DATETIME NULL,
     `updated_at`        DATETIME NULL,
     `status`            TINYINT UNSIGNED NULL,
-    PRIMARY KEY (`id`),
-    INDEX(`access_point`)
+    PRIMARY KEY (`id`)
 );
 
-INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, cost_centre, created_at, status)
+INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+                              status)
 VALUES ("github-backup", "tna-external-services-backup", 1, "968803923593", "Digital Services", NOW(), 1);
-INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, cost_centre, created_at, status)
-VALUES ("ds-databases-backup", "tna-databases-backup", 1, "968803923593", "Digital Services", NOW(), 1);
-INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, cost_centre, created_at, status)
+INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+                              status)
 VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, "968803923593", "Digital Services", NOW(), 1);
-INSERT INTO ap_targets (access_point, bucket, name_processing, source_account_id, cost_centre, created_at, status)
+INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+                              status)
 VALUES ("digital-services", "bv-digital-services", 0, "968803923593", "Digital Services", NOW(), 1);
 
 CREATE TABLE `backups`.`part_uploads`
