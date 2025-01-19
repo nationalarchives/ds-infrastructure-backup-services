@@ -39,8 +39,6 @@ def process_object(event_data):
         check_in_db.close()
         print(f"object doesn't exist - object_checkins id: {checkin_id}")
         return
-    object_path = deconstruct_path(unquote_plus(event_data['object']['key']))
-    object_name = object_path['object_name']
     # neutralise older entries if the object is already in the list but not queued or in progress
     upd_fields = {'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                   'finished_ts': datetime.now().timestamp(), 'status': 4}
@@ -109,21 +107,19 @@ def process_object(event_data):
     '''
     sqs_results = queue.add(sqs_body, set_random_id())
     queue_data = {'message_id': sqs_results['MessageId'],
-                  'sequence_number': sqs_results['SequenceNumber']}
+                  'checkin_id': checkin_id, 'status': 0,
+                  'sequence_number': sqs_results['SequenceNumber'],
+                  'received_ts': datetime.now().timestamp(),
+                  'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     if 'MD5OfMessageBody' in sqs_results:
         queue_data['md5_of_message_body'] = sqs_results['MD5OfMessageBody']
     if 'MD5OfMessageAttributes' in sqs_results:
         queue_data['md5_of_message_attributes'] = sqs_results['MD5OfMessageAttributes']
     if 'MD5OfMessageSystemAttributes' in sqs_results:
         queue_data['md5_of_message_system_attributes'] = sqs_results['MD5OfMessageSystemAttributes']
-    queue_data['received_ts'] = datetime.now().timestamp()
-    queue_data['created_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    queue_data['status'] = 0
-    queue_data['checkin_id'] = checkin_id
     check_in_db.insert('queues', queue_data)
     queue_id = check_in_db.run()
-    checkin_status = 2
-    object_data = {'queue_id': queue_id, 'status': checkin_status,
+    object_data = {'queue_id': queue_id,
                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                    'finished_ts': datetime.now().timestamp()}
     check_in_db.where(f'id = {str(checkin_id)}')

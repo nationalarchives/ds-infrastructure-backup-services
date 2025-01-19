@@ -29,13 +29,17 @@ def process_backups():
     default_source_account_id = account
     while signal_handler.can_run():
         # read sqs queue, update DB and create file copying queue for multi processing
-        queue_response = queue_client.receive_message(10)
         if signal_handler.shutdown_requested:
             sys.exit(0)
+        queue_response = queue_client.receive_message(1)
+        print(queue_response)
+        print(type(queue_response))
         if 'Messages' in queue_response:
+            print('Message ingest')
             task_list = []
             db_client = Database(db_secrets_vals)
             for message in queue_response['Messages']:
+                print('message processing')
                 message_body = json.loads(sub_json(message['Body'], regex_set))
                 checkin_id = message_body['checkin_id']
                 # read queue entry
@@ -43,16 +47,19 @@ def process_backups():
                 db_client.where(f'message_id = "{message["MessageId"]}"')
                 queue_rec = db_client.fetch()
                 if queue_rec is None:
+                    print('message id not found in db')
                     del queue_rec
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
                     continue
                 elif queue_rec['status'] > 0:
+                    print('message status is greater than 0')
                     del queue_rec
                     # remove from queue
                     queue_client.delete_message(message['ReceiptHandle'])
                     continue
                 else:
+                    print('message start')
                     # update queue record
                     queue_data = {'status': 1, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     db_client.where(f'checkin_id = {checkin_id}')
@@ -63,8 +70,10 @@ def process_backups():
                     db_client.where(f'id = {checkin_id}')
                     checkin_rec = db_client.fetch()
                     if checkin_rec is None:
+                        print('intake checkin not found')
                         queue_status = 8
                     elif checkin_rec['status'] > 1:
+                        print('intake status is greater than 1')
                         queue_status = 5
                         queue_client.delete_message(message['ReceiptHandle'])
                         queue_data = {'status': queue_status,
@@ -75,8 +84,10 @@ def process_backups():
                         db_client.run()
                     else:
                         # get object data
+                        print(f"1- {checkin_rec['bucket']} {checkin_rec['object_key']}")
                         obj_info = s3_client.get_object_info(bucket=checkin_rec['bucket'],
                                                              key=checkin_rec['object_key'])
+                        print(f"2 - {obj_info}")
                         if obj_info is None:
                             queue_client.delete_message(message['ReceiptHandle'])
                             queue_data = {'status': 8, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -92,12 +103,26 @@ def process_backups():
                             db_client.where(f'id = {checkin_id}')
                             db_client.update('object_checkins', checkin_data)
                             db_client.run()
+                            ap_rec_fields = ['source_bucket', 'source_location', 'target_endpoint', 'target_location',
+                                             'storage_class', 'expiration_period', 'retention_period', 'legal_hold',
+                                             'lock_mode', 'compress']
+                            db_client.select('target_endpoints', ap_rec_fields)
+                            # create location query
                             object_name_parts = deconstruct_path(checkin_rec['object_key'])
-                            db_client.select('ap_targets',
-                                             ['access_point', 'bucket', 'source_account_id', 'name_processing',
-                                              'kms_key_arn'])
-                            db_client.where(f'access_point = "{object_name_parts["access_point"]}"')
+                            print(f"3 - {object_name_parts}")
+                            source_bucket = checkin_rec['bucket']
+                            if len(object_name_parts["location_filters"]) > 0:
+                                lfilter = ""
+                                for filter in object_name_parts["location_filters"]:
+                                    lfilter = lfilter + f'source_location = "{filter}" OR '
+                                lfilter = lfilter[0:-4]
+                                print(f"4 - {lfilter}")
+                                db_client.where(f'source_bucket = "{source_bucket}" AND ({lfilter})')
+                                db_client.order_by('length(source_location) DESC')
+                            else:
+                                db_client.where(f'source_bucket = "{source_bucket}" AND source_location IS NULL')
                             ap_rec = db_client.fetch()
+                            print(f"5- {ap_rec['bucket']}")
                             if ap_rec:
                                 s3_target = ap_rec['bucket']
                                 name_processing = ap_rec['name_processing']
@@ -108,6 +133,7 @@ def process_backups():
                                 name_processing = 1
                                 kms_key_arn = None
                                 source_account_id = default_source_account_id
+                            print(f"6 - {s3_target}")
                             # check of any changes
                             # write to table copies
                             target_name = process_obj_name(checkin_rec["object_name"], name_processing)
@@ -166,6 +192,7 @@ def process_backups():
                     db_client.where(f'checkin_id = {checkin_id}')
                     db_client.update('queues', queue_data)
                     db_client.run()
+            print(f"7 - {task_list}")
             if task_list:
                 for task in task_list:
                     upload_map = create_upload_map(task['content_length'])
@@ -198,8 +225,8 @@ def process_backups():
                         print(f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | upload_id: {upload_id} | part: {job["part"]}')
                         copy_source = {'Bucket': job["source_bucket"],
                                        'Key': job["source_key"]}
-                        response = s3_client.upload_part_copy(copy_source, job['target_bucket'], job['target_key'],
-                                                              job['byte_range'], upload_id, job['part'])
+                        response = s3_client.upload_part_copy(copy_src=copy_source, endpoint=job['target_bucket'], target_key=job['target_key'],
+                                                              copy_source_range=job['byte_range'], upload_id=upload_id, part_number=job['part'])
                         multipart_upload_block['Parts'].append(response)
                         job_data = {'status': 2, 'finished_ts': datetime.now().timestamp()}
                         db_client.where(f'id = {job["part_upload_id"]}')
@@ -236,7 +263,8 @@ def process_backups():
                     del job_list
             db_client.close()
         else:
-            pass
+            print('picked up non backup message from queue:')
+            print(queue_response)
         del queue_response
 
 
