@@ -1,6 +1,20 @@
-resource "aws_iam_policy" "ec2_tna_backup_drop_zone_policy" {
-    name        = "tna-backup-drop-zone-policy"
-    description = "allowing to process intake of backups between s3 buckets for ec2"
+resource "aws_iam_policy" "ec2_s3_access" {
+    name        = "drop-zone-ec2-s3-access-policy"
+    description = "drop-zone access to all s3 buckets"
 
-    policy = file("${path.module}/templates/ec2-tna-backup-drop-zone-policy.json")
+    policy = file("${path.module}/templates/ec2-s3-access-policy.json")
+}
+
+resource "aws_iam_policy" "ec2_asm_ssm_access" {
+    name        = "drop-zone-ec2-asm-ssm-access-policy"
+    description = "drop-zone access to secrets and parameters"
+
+    policy = file("${path.module}/templates/ec2-asm-ssm-access-policy.json")
+}
+
+resource "aws_iam_policy" "ec2_sqs_access" {
+    name        = "drop-zone-ec2-sqs-access-policy"
+    description = "drop-zone access to sqs"
+
+    policy = file("${path.module}/templates/ec2-asm-ssm-access-policy.json")
 }

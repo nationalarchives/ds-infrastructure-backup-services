@@ -1,0 +1,23 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:secretsmanager:eu-west-2:637423167251:secret:application/lambda/backup-check-in-dCsJNp"
+            ],
+            "Sid": "DropZoneASMRead"
+        },
+        {
+            "Action": [
+                "ssm:GetParameter"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in",
+            "Sid": "DropZoneSSMRead"
+        }
+    ]
+}
