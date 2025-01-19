@@ -25,15 +25,15 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm" {
 
 resource "aws_iam_role_policy_attachment" "ec2_asm_ssm" {
     role       = aws_iam_role.ec2_drop_zone_role.name
-    policy_arn = aws_iam_policy.ec2_asm_ssm_access
+    policy_arn = aws_iam_policy.ec2_asm_ssm_access.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_sqs" {
     role       = aws_iam_role.ec2_drop_zone_role.name
-    policy_arn = aws_iam_policy.ec2_sqs_access
+    policy_arn = aws_iam_policy.ec2_sqs_access.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_s3" {
     role       = aws_iam_role.ec2_drop_zone_role.name
-    policy_arn = aws_iam_policy.ec2_s3_access
+    policy_arn = aws_iam_policy.ec2_s3_access.arn
 }
