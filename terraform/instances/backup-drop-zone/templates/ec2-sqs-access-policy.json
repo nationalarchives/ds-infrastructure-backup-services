@@ -11,7 +11,8 @@
                 "sqs:SetQueueAttributes"
             ],
             "Resource": [
-                "arn:aws:sqs:eu-west-2:637423167251:backup-check-in-queue.fifo"
+                "arn:aws:sqs:eu-west-2:637423167251:backup-check-in-queue.fifo",
+                "arn:aws:sqs:eu-west-2:637423167251:backup-check-in-dl-queue.fifo"
             ],
             "Sid": "DropZoneSQSAccess"
         }
