@@ -33,7 +33,7 @@ module "ec2-shared-lb" {
     vpc_id = local.vpc_info.id
     subnet_id = local.public_subnet_a_info.id
 
-    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.backup_intake_instance_id
+    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.drop_zone_instance_id
     cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
 
     tags = local.default_tags
