@@ -16,5 +16,5 @@ resource "aws_iam_policy" "ec2_sqs_access" {
     name        = "drop-zone-ec2-sqs-access-policy"
     description = "drop-zone access to sqs"
 
-    policy = file("${path.module}/templates/ec2-asm-ssm-access-policy.json")
+    policy = file("${path.module}/templates/ec2-sqs-access-policy.json")
 }
