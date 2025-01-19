@@ -2,7 +2,7 @@ resource "aws_launch_template" "backup_drop_zone" {
     name = "backup-intake"
 
     iam_instance_profile {
-        arn = aws_iam_instance_profile.ec2_tna_backup_drop_zone_profile.arn
+        arn = aws_iam_instance_profile.ec2_drop_zone_profile.arn
     }
 
     image_id                = var.image_id
