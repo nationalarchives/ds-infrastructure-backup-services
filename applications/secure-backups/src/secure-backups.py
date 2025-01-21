@@ -32,8 +32,6 @@ def process_backups():
         if signal_handler.shutdown_requested:
             sys.exit(0)
         queue_response = queue_client.receive_message(1)
-        print(queue_response)
-        print(type(queue_response))
         if 'Messages' in queue_response:
             print('Message ingest')
             task_list = []
@@ -46,17 +44,16 @@ def process_backups():
                 db_client.select('queues', ['id', 'message_id', 'status'])
                 db_client.where(f'message_id = "{message["MessageId"]}"')
                 queue_rec = db_client.fetch()
+                queue_client.delete_message(message['ReceiptHandle'])
                 if queue_rec is None:
                     print('message id not found in db')
                     del queue_rec
                     # remove from queue
-                    queue_client.delete_message(message['ReceiptHandle'])
                     continue
                 elif queue_rec['status'] > 0:
                     print('message status is greater than 0')
                     del queue_rec
                     # remove from queue
-                    queue_client.delete_message(message['ReceiptHandle'])
                     continue
                 else:
                     print('message start')
@@ -78,7 +75,6 @@ def process_backups():
                         continue
                     elif checkin_rec['status'] > 1:
                         print('intake status is greater than 1')
-                        queue_client.delete_message(message['ReceiptHandle'])
                         db_client.where(f'id = {queue_rec["id"]}')
                         db_client.update('queues', {'status': 5, 'finished_ts': datetime.now().timestamp(),
                                                     'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
@@ -91,7 +87,6 @@ def process_backups():
                                                              key=checkin_rec['object_key'])
                         print(f"2 - {obj_info}")
                         if obj_info is None:
-                            queue_client.delete_message(message['ReceiptHandle'])
                             db_client.where(f'checkin_id = {checkin_id}')
                             db_client.update('queues', {'status': 8,
                                                         'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
@@ -178,8 +173,6 @@ def process_backups():
                             db_client.where(f'id = {checkin_rec["id"]}')
                             db_client.update('object_checkins', {'copy_id': copy_id, 'status': 3,
                                                                  'finished_ts': datetime.now().timestamp()})
-                            # remove from queue
-                            queue_client.delete_message(message['ReceiptHandle'])
                             # add mp queue
                             task_list.append({'checkin_id': checkin_rec['id'], 'copy_id': copy_id,
                                               'source_bucket': checkin_rec['bucket'],
@@ -266,9 +259,6 @@ def process_backups():
                     s3_client.rm_object(task['source_bucket'], task['source_key'])
                     del job_list
             db_client.close()
-        else:
-            print('picked up non backup message from queue:')
-            print(queue_response)
         del queue_response
 
 
