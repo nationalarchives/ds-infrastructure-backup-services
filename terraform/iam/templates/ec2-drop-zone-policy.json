@@ -63,9 +63,7 @@
                 "sqs:GetQueueUrl",
                 "sqs:SetQueueAttributes"
             ],
-            "Resource": [
-                ${queue_arns}
-            ]
+            "Resource": ${queue_arns}
         }
     ],
     "Version": "2012-10-17"
