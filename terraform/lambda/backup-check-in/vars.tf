@@ -13,7 +13,6 @@ variable "region" {}
 variable "bucket_arn" {}
 variable "bucket_name" {}
 
-variable "queue_url" {}
 variable "queue_arn" {}
 variable "ssm_id" {}
 

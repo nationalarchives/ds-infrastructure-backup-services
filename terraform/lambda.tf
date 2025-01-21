@@ -15,7 +15,6 @@ module "lambda-backup-check-in" {
 
     security_group_ids = []
 
-    queue_url = module.sqs-backup-check-in.backup_check_in_queue_url
     queue_arn = module.sqs-backup-check-in.backup_check_in_queue_arn
     ssm_id    = "/application/backup/secure-backups"
 

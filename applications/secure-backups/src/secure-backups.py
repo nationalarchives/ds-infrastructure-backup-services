@@ -32,6 +32,8 @@ def process_backups():
         if signal_handler.shutdown_requested:
             sys.exit(0)
         queue_response = queue_client.receive_message(1)
+        print('receive_message')
+        print(queue_response)
         if 'Messages' in queue_response:
             print('Message ingest')
             task_list = []
@@ -121,16 +123,18 @@ def process_backups():
                             ap_rec = db_client.fetch()
                             print(f"5 - access point entry {ap_rec['access_point_entry']}")
                             print(f"5.5 - target dir {checkin_rec['object_key'][len(ap_rec['access_point_entry'])+1:]}")
-                            target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry'])+1:]}"
-                            target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             if ap_rec:
                                 target_bucket = ap_rec['target_bucket']
                                 name_processing = ap_rec['name_processing']
                                 source_account_id = ap_rec['source_account_id']
+                                target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
+                                target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             else:
                                 target_bucket = default_target_bucket
                                 name_processing = 1
                                 source_account_id = default_source_account_id
+                                target_destination = object_key_parts['location     ']
+                                target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             print(f"6 - {target_bucket}")
                             # check of any changes
                             # write to table copies
