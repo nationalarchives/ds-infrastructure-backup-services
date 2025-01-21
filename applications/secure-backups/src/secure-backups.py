@@ -61,9 +61,9 @@ def process_backups():
                 else:
                     print('message start')
                     # update queue record
-                    queue_data = {'status': 1, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     db_client.where(f'checkin_id = {checkin_id}')
-                    db_client.update('queues', queue_data)
+                    db_client.update('queues', {'status': 1,
+                                                'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                     db_client.run()
                     # read checkin entry
                     db_client.select('object_checkins', ['*'])
@@ -71,17 +71,19 @@ def process_backups():
                     checkin_rec = db_client.fetch()
                     if checkin_rec is None:
                         print('intake checkin not found')
-                        queue_status = 8
+                        db_client.where(f'id = {queue_rec["id"]}')
+                        db_client.update('queues', {'status': 8, 'finished_ts': datetime.now().timestamp(),
+                                                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+                        db_client.run()
+                        continue
                     elif checkin_rec['status'] > 1:
                         print('intake status is greater than 1')
-                        queue_status = 5
                         queue_client.delete_message(message['ReceiptHandle'])
-                        queue_data = {'status': queue_status,
-                                      'finished_ts': datetime.now().timestamp(),
-                                      'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                         db_client.where(f'id = {queue_rec["id"]}')
-                        db_client.update('queues', queue_data)
+                        db_client.update('queues', {'status': 5, 'finished_ts': datetime.now().timestamp(),
+                                                    'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                         db_client.run()
+                        continue
                     else:
                         # get object data
                         print(f"1- {checkin_rec['bucket']} {checkin_rec['object_key']}")
@@ -90,107 +92,108 @@ def process_backups():
                         print(f"2 - {obj_info}")
                         if obj_info is None:
                             queue_client.delete_message(message['ReceiptHandle'])
-                            queue_data = {'status': 8, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'checkin_id = {checkin_id}')
-                            db_client.update('queues', queue_data)
+                            db_client.update('queues', {'status': 8,
+                                                        'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                             db_client.run()
-                            checkin_data = {'status': 9, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'id = {checkin_id}')
-                            db_client.update('object_checkins', checkin_data)
+                            db_client.update('object_checkins', {'status': 9,
+                                                                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                             db_client.run()
+                            continue
                         else:
-                            checkin_data = {'status': 2, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             db_client.where(f'id = {checkin_id}')
-                            db_client.update('object_checkins', checkin_data)
+                            db_client.update('object_checkins', {'status': 2,
+                                                                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
                             db_client.run()
-                            ap_rec_fields = ['source_bucket', 'source_location', 'target_endpoint', 'target_location',
+                            ap_rec_fields = ['access_point', 'access_point_entry', 'target_bucket', 'target_location',
                                              'storage_class', 'expiration_period', 'retention_period', 'legal_hold',
                                              'lock_mode', 'compress']
                             db_client.select('target_endpoints', ap_rec_fields)
                             # create location query
-                            object_name_parts = deconstruct_path(checkin_rec['object_key'])
-                            print(f"3 - {object_name_parts}")
-                            source_bucket = checkin_rec['bucket']
-                            if len(object_name_parts["location_filters"]) > 0:
+                            object_key_parts = deconstruct_path(checkin_rec['object_key'])
+                            print(f"3 - {object_key_parts}")
+                            if len(object_key_parts["location_filters"]) > 0:
                                 lfilter = ""
-                                for filter in object_name_parts["location_filters"]:
-                                    lfilter = lfilter + f'source_location = "{filter}" OR '
+                                for filter in object_key_parts["location_filters"]:
+                                    lfilter = lfilter + f'access_point_entry = "{filter}" OR '
                                 lfilter = lfilter[0:-4]
                                 print(f"4 - {lfilter}")
-                                db_client.where(f'source_bucket = "{source_bucket}" AND ({lfilter})')
-                                db_client.order_by('length(source_location) DESC')
+                                db_client.where(f'{lfilter}')
+                                db_client.order_by('length(access_point) DESC')
                             else:
-                                db_client.where(f'source_bucket = "{source_bucket}" AND source_location IS NULL')
+                                db_client.where(f'access_point IS NULL')
                             ap_rec = db_client.fetch()
-                            print(f"5- {ap_rec['bucket']}")
+                            print(f"5 - access point entry {ap_rec['access_point_entry']}")
+                            print(f"5.5 - target dir {checkin_rec['object_key'][len(ap_rec['access_point_entry'])+1:]}")
+                            target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry'])+1:]}"
+                            target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             if ap_rec:
-                                s3_target = ap_rec['bucket']
+                                target_bucket = ap_rec['target_bucket']
                                 name_processing = ap_rec['name_processing']
-                                kms_key_arn = ap_rec['kms_key_arn']
                                 source_account_id = ap_rec['source_account_id']
                             else:
-                                s3_target = default_target_bucket
+                                target_bucket = default_target_bucket
                                 name_processing = 1
-                                kms_key_arn = None
                                 source_account_id = default_source_account_id
-                            print(f"6 - {s3_target}")
+                            print(f"6 - {target_bucket}")
                             # check of any changes
                             # write to table copies
                             target_name = process_obj_name(checkin_rec["object_name"], name_processing)
-                            object_copy = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
-                                           'object_name': target_name, 'source_name': checkin_rec['object_name'],
-                                           'access_point': object_name_parts["access_point"],
-                                           'object_size': obj_info['content_length'],
-                                           'object_type': obj_info['content_type'],
-                                           'source_account_id': source_account_id,
-                                           'etag': obj_info['etag'].replace('"', ''),
-                                           'object_key': checkin_rec['object_key'], 'bucket': s3_target,
-                                           'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                           'status': 0, 'percentage': '0.00', 'received_ts': datetime.now().timestamp()}
-                            if kms_key_arn:
-                                object_copy['kms_key_arn'] = kms_key_arn
+                            obj_cp_rec = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
+                                          'source_name': checkin_rec['object_name'],
+                                          'source_account_id': source_account_id,
+                                          'access_point': ap_rec["access_point"],
+                                          'target_bucket': target_bucket,
+                                          'target_name': target_name,
+                                          'target_key': target_key,
+                                          'target_size': obj_info['content_length'],
+                                          'target_type': obj_info['content_type'],
+                                          'etag': obj_info['etag'].replace('"', ''),
+                                          'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                          'status': 0, 'percentage': '0.00', 'received_ts': datetime.now().timestamp()}
                             if 'retain_until_date' in obj_info:
-                                object_copy['retain_until_date'] = checkin_rec['retain_until_date']
+                                obj_cp_rec['retain_until_date'] = checkin_rec['retain_until_date']
                             if 'lock_mode' in obj_info:
-                                object_copy['lock_mode'] = checkin_rec['lock_mode']
+                                obj_cp_rec['lock_mode'] = checkin_rec['lock_mode']
                             if 'legal_hold' in obj_info:
-                                object_copy['legal_hold'] = checkin_rec['legal_hold']
+                                obj_cp_rec['legal_hold'] = checkin_rec['legal_hold']
                             if 'checksum_crc32' in obj_info:
-                                object_copy['checksum_crc32'] = checkin_rec['checksum_crc32']
+                                obj_cp_rec['checksum_crc32'] = checkin_rec['checksum_crc32']
                             if 'checksum_crc32c' in obj_info:
-                                object_copy['checksum_crc32c'] = checkin_rec['checksum_crc32c']
+                                obj_cp_rec['checksum_crc32c'] = checkin_rec['checksum_crc32c']
                             if 'checksum_sha1' in obj_info:
-                                object_copy['checksum_sha1'] = checkin_rec['checksum_sha1']
+                                obj_cp_rec['checksum_sha1'] = checkin_rec['checksum_sha1']
                             if 'sse_customer_algorithm' in obj_info:
-                                object_copy['sse_customer_algorithm'] = checkin_rec['sse_customer_algorithm']
+                                obj_cp_rec['sse_customer_algorithm'] = checkin_rec['sse_customer_algorithm']
                             if 'checksum_sha256' in obj_info:
-                                object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
+                                obj_cp_rec['checksum_sha256'] = checkin_rec['checksum_sha256']
                             if 'checksum_sha256' in obj_info:
-                                object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
+                                obj_cp_rec['checksum_sha256'] = checkin_rec['checksum_sha256']
                             if 'checksum_sha256' in obj_info:
-                                object_copy['checksum_sha256'] = checkin_rec['checksum_sha256']
-                            db_client.insert('object_copies', object_copy)
+                                obj_cp_rec['checksum_sha256'] = checkin_rec['checksum_sha256']
+                            db_client.insert('object_copies', obj_cp_rec)
                             copy_id = db_client.run()
                             # update checkin record
-                            checkin_upd = {'copy_id': copy_id, 'status': 3, 'finished_ts': datetime.now().timestamp()}
                             db_client.where(f'id = {checkin_rec["id"]}')
-                            db_client.update('object_checkins', checkin_upd)
+                            db_client.update('object_checkins', {'copy_id': copy_id, 'status': 3,
+                                                                 'finished_ts': datetime.now().timestamp()})
                             # remove from queue
                             queue_client.delete_message(message['ReceiptHandle'])
                             # add mp queue
                             task_list.append({'checkin_id': checkin_rec['id'], 'copy_id': copy_id,
                                               'source_bucket': checkin_rec['bucket'],
                                               'source_key': checkin_rec['object_key'],
-                                              'access_point': object_name_parts['access_point'],
-                                              'target_bucket': s3_target,
-                                              'target_key': f'{object_name_parts["location"]}/{target_name}'.lstrip('/'),
+                                              'access_point_entry': ap_rec['access_point_entry'],
+                                              'target_bucket': target_bucket,
+                                              'target_key': target_key,
                                               'content_length': obj_info['content_length'],
-                                              'source_account_id': source_account_id, 'kms_key_arn': kms_key_arn})
+                                              'source_account_id': source_account_id})
                     del checkin_rec
                     # update queue record
-                    queue_data = {'status': 2, 'finished_ts': datetime.now().timestamp()}
                     db_client.where(f'checkin_id = {checkin_id}')
-                    db_client.update('queues', queue_data)
+                    db_client.update('queues', {'status': 2,
+                                                'finished_ts': datetime.now().timestamp()})
                     db_client.run()
             print(f"7 - {task_list}")
             if task_list:
@@ -199,20 +202,18 @@ def process_backups():
                     position = 1
                     job_list = []
                     for entry in upload_map:
-                        percentage = str(round(((entry[1] - entry[0]) * 100 / task['content_length']), 2))
+                        percentage = str(round((entry[2] * 100 / task['content_length']), 2))
                         byte_range = f'bytes={entry[0]}-{entry[1]}'
                         part_upload_data = {'checkin_id': task['checkin_id'], 'copy_id': task['copy_id'],
                                             'source_bucket': task['source_bucket'], 'source_key': task['source_key'],
-                                            'access_point': task['access_point'],
+                                            'access_point_entry': task['access_point_entry'],
                                             'target_bucket': task['target_bucket'],
                                             'target_key': task["target_key"],
-                                            'content_length': task['content_length'], 'percentage': percentage,
+                                            'content_length': entry[2], 'percentage': percentage,
                                             'byte_range': byte_range, 'part': position,
                                             'source_account_id': task["source_account_id"],
                                             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                             'status': 0}
-                        if 'kms_key_arn' in task and task['kms_key_arn']:
-                            part_upload_data['kms_key_arn'] = task['kms_key_arn']
                         db_client.insert('part_uploads', part_upload_data)
                         part_upload_id = db_client.run()
                         part_upload_data['part_upload_id'] = part_upload_id
@@ -222,11 +223,14 @@ def process_backups():
                     upload_id = s3_client.create_multipart_upload(task['target_bucket'],
                                                                   task['target_key'])
                     for job in job_list:
-                        print(f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | upload_id: {upload_id} | part: {job["part"]}')
+                        print(
+                            f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | upload_id: {upload_id} | part: {job["part"]}')
                         copy_source = {'Bucket': job["source_bucket"],
                                        'Key': job["source_key"]}
-                        response = s3_client.upload_part_copy(copy_src=copy_source, endpoint=job['target_bucket'], target_key=job['target_key'],
-                                                              copy_source_range=job['byte_range'], upload_id=upload_id, part_number=job['part'])
+                        response = s3_client.upload_part_copy(copy_src=copy_source, endpoint=job['target_bucket'],
+                                                              target_key=job['target_key'],
+                                                              copy_source_range=job['byte_range'], upload_id=upload_id,
+                                                              part_number=job['part'])
                         multipart_upload_block['Parts'].append(response)
                         job_data = {'status': 2, 'finished_ts': datetime.now().timestamp()}
                         db_client.where(f'id = {job["part_upload_id"]}')

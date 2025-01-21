@@ -1,24 +1,11 @@
 #
 setup of user
 #
-CREATE
-USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT,
-UPDATE,
-SELECT
-on backups.* TO 'checkin_user'@'localhost'
-WITH GRANT
-OPTION;
-CREATE
-USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT,
-UPDATE,
-SELECT
-on backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0'
-WITH GRANT
-OPTION;
-FLUSH
-PRIVILEGES;
+CREATE USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'localhost' WITH GRANT OPTION;
+CREATE USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
 #
 set up of database
@@ -30,6 +17,7 @@ CREATE TABLE `backups`.`object_checkins`
     `id`                     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `queue_id`               BIGINT UNSIGNED NULL,
     `copy_id`                BIGINT UNSIGNED NULL,
+    `compressor_id`          BIGINT UNSIGNED NULL,
     `bucket`                 VARCHAR(63)   NOT NULL,
     `object_key`             VARCHAR(1024) NOT NULL,
     `object_name`            VARCHAR(1024) NOT NULL,
@@ -86,13 +74,16 @@ CREATE TABLE `backups`.`object_copies`
     `id`                     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `queue_id`               BIGINT UNSIGNED NULL,
     `checkin_id`             BIGINT UNSIGNED NULL,
-    `object_name`            VARCHAR(1024) NOT NULL,
+    `compressor_id`          BIGINT UNSIGNED NULL,
     `source_name`            VARCHAR(1024) NOT NULL,
-    `bucket`                 VARCHAR(63)   NOT NULL,
-    `access_point`           VARCHAR(50) NULL,
-    `object_key`             VARCHAR(1024) NOT NULL,
-    `object_size`            BIGINT NULL,
-    `object_type`            VARCHAR(256) NULL,
+    `source_account_id`      VARCHAR(40) NULL,
+    `access_point`           VARCHAR(50)   NOT NULL,
+    `target_bucket`          VARCHAR(63)   NOT NULL,
+    `target_name`            VARCHAR(1024) NOT NULL,
+    `target_key`             VARCHAR(1024) NOT NULL,
+    `target_size`            BIGINT NULL,
+    `target_type`            VARCHAR(256) NULL,
+    `compress`               TINYINT UNSIGNED NULL,
     `upload_id`              VARCHAR(256) NULL,
     `version_id`             VARCHAR(256) NULL,
     `kms_key_arn`            VARCHAR(2048) NULL,
@@ -122,30 +113,35 @@ CREATE TABLE `backups`.`object_copies`
 
 CREATE TABLE `backups`.`target_endpoints`
 (
-    `id`                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `access_point`      VARCHAR(1024) NOT NULL,
-    `target_bucket`     VARCHAR(63)   NOT NULL,
-    `target_location`   VARCHAR(1024) NULL,
-    `name_processing`   TINYINT UNSIGNED DEFAULT 0,
-    `source_account_id` VARCHAR(12) NULL,
-    `cost_centre`       VARCHAR(80) NULL,
-    `kms_key_arn`       VARCHAR(2048) NULL,
-    `storage_class`     VARCHAR(80) NULL,
-    `created_at`        DATETIME NULL,
-    `updated_at`        DATETIME NULL,
-    `status`            TINYINT UNSIGNED NULL,
+    `id`                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `access_point`       VARCHAR(1024) NOT NULL,
+    `access_point_entry` VARCHAR(1024) NOT NULL,
+    `target_bucket`      VARCHAR(63)   NOT NULL,
+    `target_location`    VARCHAR(1024) NULL,
+    `name_processing`    TINYINT UNSIGNED DEFAULT 0,
+    `source_account_id`  VARCHAR(12) NULL,
+    `cost_centre`        VARCHAR(80) NULL,
+    `kms_key_arn`        VARCHAR(2048) NULL,
+    `storage_class`      VARCHAR(80) NULL,
+    `created_at`         DATETIME NULL,
+    `updated_at`         DATETIME NULL,
+    `status`             TINYINT UNSIGNED NULL,
     PRIMARY KEY (`id`)
 );
 
-INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+INSERT INTO target_endpoints (access_point, access_point_entry, target_bucket, name_processing, source_account_id,
+                              cost_centre, created_at,
                               status)
-VALUES ("github-backup", "tna-external-services-backup", 1, "968803923593", "Digital Services", NOW(), 1);
-INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+VALUES ("services", "services", "tna-external-services-backup", 1, "968803923593", "Digital Services", NOW(), 1);
+INSERT INTO target_endpoints (access_point, access_point_entry, target_bucket, name_processing, source_account_id,
+                              cost_centre, created_at,
                               status)
-VALUES ("ds-digital-files-backup", "ds-digital-files-backup", 0, "968803923593", "Digital Services", NOW(), 1);
-INSERT INTO target_endpoints (access_point, target_bucket, name_processing, source_account_id, cost_centre, created_at,
+VALUES ("ds-digital-files-backup", "ds-digital-files-backup", "ds-digital-files-backup", 0, "968803923593",
+        "Digital Services", NOW(), 1);
+INSERT INTO target_endpoints (access_point, access_point_entry, target_bucket, name_processing, source_account_id,
+                              cost_centre, created_at,
                               status)
-VALUES ("digital-services", "bv-digital-services", 0, "968803923593", "Digital Services", NOW(), 1);
+VALUES ("digital-services", "digital-services", "bv-digital-services", 0, "968803923593", "Digital Services", NOW(), 1);
 
 CREATE TABLE `backups`.`part_uploads`
 (
@@ -195,6 +191,19 @@ CREATE TABLE `backups`.`object_tags`
     `tag_value`   VARCHAR(256) NULL,
     `tag_type`    VARCHAR(25)   NOT NULL,
     `created_at`  DATETIME NULL,
+    `status`      TINYINT UNSIGNED NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `backups`.`object_compressions`
+(
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `checkin_id`  BIGINT UNSIGNED NOT NULL,
+    `copy_id`     BIGINT UNSIGNED NULL,
+    `received_ts` FLOAT NULL,
+    `finished_ts` FLOAT NULL,
+    `created_at`  DATETIME NULL,
+    `updated_at`  DATETIME NULL,
     `status`      TINYINT UNSIGNED NULL,
     PRIMARY KEY (`id`)
 );
