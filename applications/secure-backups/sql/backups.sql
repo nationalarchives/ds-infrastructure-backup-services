@@ -1,11 +1,24 @@
 #
 setup of user
 #
-CREATE USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'localhost' WITH GRANT OPTION;
-CREATE USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
+CREATE
+USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT,
+UPDATE,
+SELECT
+ON backups.* TO 'checkin_user'@'localhost'
+WITH GRANT
+OPTION;
+CREATE
+USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT,
+UPDATE,
+SELECT
+ON backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0'
+WITH GRANT
+OPTION;
+FLUSH
+PRIVILEGES;
 
 #
 set up of database
@@ -122,6 +135,11 @@ CREATE TABLE `backups`.`target_endpoints`
     `cost_centre`        VARCHAR(80) NULL,
     `kms_key_arn`        VARCHAR(2048) NULL,
     `storage_class`      VARCHAR(80) NULL,
+    `expiration_period`  VARCHAR(20) NULL,
+    `retention_period`   VARCHAR(20) NULL,
+    `legal_hold`         CHAR(3) NULL,
+    `lock_mode`          VARCHAR(20) NULL,
+    `compress`           TINYINT UNSIGNED NULL,
     `created_at`         DATETIME NULL,
     `updated_at`         DATETIME NULL,
     `status`             TINYINT UNSIGNED NULL,
