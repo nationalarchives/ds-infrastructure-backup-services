@@ -69,7 +69,7 @@ resource "aws_lambda_function" "backup_check_in" {
 
     environment {
         variables = {
-            SSM_ID = "/application/lambda/backup-check-in"
+            SSM_ID = var.ssm_id
         }
     }
 

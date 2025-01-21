@@ -17,7 +17,7 @@ module "lambda-backup-check-in" {
 
     queue_url = module.sqs-backup-check-in.backup_check_in_queue_url
     queue_arn = module.sqs-backup-check-in.backup_check_in_queue_arn
-    asm_id    = "application/backup/secure-backups"
+    ssm_id    = "/application/backup/secure-backups"
 
     runtime   = "python3.12"
     layers = [
