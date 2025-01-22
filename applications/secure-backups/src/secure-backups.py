@@ -123,13 +123,15 @@ def process_backups():
                             ap_rec = db_client.fetch()
                             if ap_rec:
                                 access_point = ap_rec['access_point']
+                                access_point_entry = ap_rec['access_point_entry']
                                 target_bucket = ap_rec['target_bucket']
                                 name_processing = ap_rec['name_processing']
                                 source_account_id = ap_rec['source_account_id']
                                 target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
                                 target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             else:
-                                access_point = "not given"
+                                access_point = "none"
+                                access_point_entry = "none"
                                 target_bucket = default_target_bucket
                                 name_processing = 1
                                 source_account_id = default_source_account_id
@@ -182,7 +184,7 @@ def process_backups():
                             task_list.append({'checkin_id': checkin_rec['id'], 'copy_id': copy_id,
                                               'source_bucket': checkin_rec['bucket'],
                                               'source_key': checkin_rec['object_key'],
-                                              'access_point_entry': ap_rec['access_point_entry'],
+                                              'access_point_entry': access_point_entry,
                                               'target_bucket': target_bucket,
                                               'target_key': target_key,
                                               'content_length': obj_info['content_length'],
