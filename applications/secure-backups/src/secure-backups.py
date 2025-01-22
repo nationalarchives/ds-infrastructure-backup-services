@@ -105,7 +105,7 @@ def process_backups():
                             db_client.run()
                             ap_rec_fields = ['access_point', 'access_point_entry', 'target_bucket', 'target_location',
                                              'storage_class', 'expiration_period', 'retention_period', 'legal_hold',
-                                             'lock_mode', 'compress']
+                                             'lock_mode', 'name_processing', 'source_account_id', 'compress']
                             db_client.select('target_endpoints', ap_rec_fields)
                             # create location query
                             object_key_parts = deconstruct_path(checkin_rec['object_key'])
@@ -121,28 +121,29 @@ def process_backups():
                             else:
                                 db_client.where(f'access_point IS NULL')
                             ap_rec = db_client.fetch()
-                            print(f"5 - access point entry {ap_rec['access_point_entry']}")
-                            print(f"5.5 - target dir {checkin_rec['object_key'][len(ap_rec['access_point_entry'])+1:]}")
                             if ap_rec:
+                                access_point = ap_rec['access_point']
                                 target_bucket = ap_rec['target_bucket']
                                 name_processing = ap_rec['name_processing']
                                 source_account_id = ap_rec['source_account_id']
                                 target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
                                 target_key = f"{target_destination}/{object_key_parts['object_name']}"
                             else:
+                                access_point = "not given"
                                 target_bucket = default_target_bucket
                                 name_processing = 1
                                 source_account_id = default_source_account_id
-                                target_destination = object_key_parts['location     ']
+                                target_destination = object_key_parts['location']
                                 target_key = f"{target_destination}/{object_key_parts['object_name']}"
-                            print(f"6 - {target_bucket}")
+                            print(f"5 - {target_bucket} - {target_destination}")
+                            print(f"6 - {target_key}")
                             # check of any changes
                             # write to table copies
                             target_name = process_obj_name(checkin_rec["object_name"], name_processing)
                             obj_cp_rec = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
                                           'source_name': checkin_rec['object_name'],
                                           'source_account_id': source_account_id,
-                                          'access_point': ap_rec["access_point"],
+                                          'access_point': access_point,
                                           'target_bucket': target_bucket,
                                           'target_name': target_name,
                                           'target_key': target_key,
