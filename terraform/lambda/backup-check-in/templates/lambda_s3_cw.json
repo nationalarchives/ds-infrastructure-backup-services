@@ -15,7 +15,7 @@
             "Action": [
                 "ssm:GetParameter"
             ],
-            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/lambda/backup-check-in"
+            "Resource": "arn:aws:ssm:eu-west-2:637423167251:parameter/application/backup/secure-backups"
         },
         {
             "Action": [
