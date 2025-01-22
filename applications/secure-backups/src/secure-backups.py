@@ -184,7 +184,7 @@ def process_backups():
                             task_list.append({'checkin_id': checkin_rec['id'], 'copy_id': copy_id,
                                               'source_bucket': checkin_rec['bucket'],
                                               'source_key': checkin_rec['object_key'],
-                                              'access_point_entry': access_point_entry,
+                                              'access_point': access_point,
                                               'target_bucket': target_bucket,
                                               'target_key': target_key,
                                               'content_length': obj_info['content_length'],
@@ -206,7 +206,7 @@ def process_backups():
                         byte_range = f'bytes={entry[0]}-{entry[1]}'
                         part_upload_data = {'checkin_id': task['checkin_id'], 'copy_id': task['copy_id'],
                                             'source_bucket': task['source_bucket'], 'source_key': task['source_key'],
-                                            'access_point_entry': task['access_point_entry'],
+                                            'access_point': task['access_point'],
                                             'target_bucket': task['target_bucket'],
                                             'target_key': task["target_key"],
                                             'content_length': entry[2], 'percentage': percentage,
@@ -224,7 +224,7 @@ def process_backups():
                                                                   task['target_key'])
                     for job in job_list:
                         print(
-                            f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | upload_id: {upload_id} | part: {job["part"]}')
+                            f'sb: {job["source_bucket"]} | so: {job["source_key"]} tb: {job["target_bucket"]} | to: {job["target_key"]} | bytes: {job["byte_range"]} | part: {job["part"]}')
                         copy_source = {'Bucket': job["source_bucket"],
                                        'Key': job["source_key"]}
                         response = s3_client.upload_part_copy(copy_src=copy_source, endpoint=job['target_bucket'],
