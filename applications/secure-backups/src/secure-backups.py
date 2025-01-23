@@ -7,6 +7,7 @@ from private_tools import SignalHandler, SQSHandler, Database
 from private_tools import Secrets, Bucket
 from private_tools import sub_json, deconstruct_path, get_parameters
 from private_tools import create_upload_map, process_obj_name, extract_checksum_details
+from private_tools import find_value_dict
 
 
 def process_backups():
@@ -148,34 +149,23 @@ def process_backups():
                                     target_key = target_name
                             # check of any changes
                             # write to table copies
-                            obj_cp_rec = {
-                                'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
-                                'source_name': checkin_rec['object_name'],
-                                'source_account_id': source_account_id,
-                                'access_point': access_point,
-                                'target_bucket': target_bucket,
-                                'target_name': target_name,
-                                'target_key': target_key,
-                                'target_size': obj_info['content_length'],
-                                'target_type': obj_info['content_type'],
-                                'etag': obj_info['etag'].replace('"', ''),
-                                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                'status': 0, 'percentage': '0.00', 'received_ts': datetime.now().timestamp()}
-                            if 'storage_class' in obj_info:
-                                obj_cp_rec['storage_class'] = obj_info['storage_class']
-                            if 'expiration_period' in obj_info:
-                                obj_cp_rec['expiration_period'] = obj_info['expiration_period']
-                            if 'retention_period' in obj_info:
-                                obj_cp_rec['retention_period'] = obj_info['retention_period']
-                            if 'lock_mode' in obj_info:
-                                obj_cp_rec['lock_mode'] = obj_info['lock_mode']
-                            if 'legal_hold' in obj_info:
-                                obj_cp_rec['legal_hold'] = obj_info['legal_hold']
-                            if checkin_rec['checksum_encoding'] is not None:
-                                obj_cp_rec['checksum_encoding'] = checkin_rec['checksum_encoding']
-                                obj_cp_rec['checksum'] = checkin_rec['checksum']
-                            if checkin_rec['sse_customer_algorithm'] is not None:
-                                obj_cp_rec['sse_customer_algorithm'] = checkin_rec['sse_customer_algorithm']
+                            obj_cp_rec = {'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
+                                          'source_name': checkin_rec['object_name'],
+                                          'source_account_id': source_account_id, 'access_point': access_point,
+                                          'target_bucket': target_bucket, 'target_name': target_name,
+                                          'target_key': target_key, 'target_size': obj_info['content_length'],
+                                          'target_type': obj_info['content_type'],
+                                          'etag': obj_info['etag'].replace('"', ''),
+                                          'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0,
+                                          'percentage': '0.00', 'received_ts': datetime.now().timestamp(),
+                                          'storage_class': find_value_dict('storage_class', obj_info),
+                                          'expiration_period': find_value_dict('expiration_period', obj_info),
+                                          'retention_period': find_value_dict('retention_period', obj_info),
+                                          'lock_mode': find_value_dict('lock_mode', obj_info),
+                                          'legal_hold': find_value_dict('legal_hold', obj_info),
+                                          'checksum_encoding': checkin_rec['checksum_encoding'],
+                                          'checksum': checkin_rec['checksum'],
+                                          'sse_customer_algorithm': checkin_rec['sse_customer_algorithm']}
                             db_client.insert('object_copies', obj_cp_rec)
                             copy_id = db_client.run()
                             # update checkin record
@@ -206,18 +196,12 @@ def process_backups():
                                 target_endpoint=target_bucket,
                                 target_key=target_key,
                                 metadata=obj_info['metablock'])
-                            copy_data = {
-                                'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
-                                'etag': sng_copy['etag'].replace('"', ''), 'upload_id': upload_id,
-                                'status': 3, }
-                            if 'VersionId' in sng_copy:
-                                copy_data['version_id'] = sng_copy['VersionId']
-                            if 'ServerSideEncryption' in sng_copy:
-                                copy_data['server_side_encryption'] = sng_copy['ServerSideEncryption']
-                            if 'SSEKMSKeyId' in sng_copy:
-                                copy_data['sse_kms_key_id'] = sng_copy['SSEKMSKeyId']
-                            if 'Expiration' in sng_copy:
-                                copy_data['expiration'] = sng_copy['Expiration']
+                            copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
+                                         'upload_id': upload_id, 'status': 3,
+                                         'version_id': find_value_dict('VersionId', sng_copy),
+                                         'server_side_encryption': find_value_dict('ServerSideEncryption', sng_copy),
+                                         'sse_kms_key_id': find_value_dict('SSEKMSKeyId', sng_copy),
+                                         'expiration': find_value_dict('Expiration', sng_copy)}
                             checksum = extract_checksum_details(sng_copy)
                             if checksum is not None:
                                 copy_data['checksum_encoding'] = checksum['checksum_encoding']
@@ -281,18 +265,13 @@ def process_backups():
                             if copy_parts_ok:
                                 complete_upload = s3_client.complete_multipart_upload(
                                     task['target_bucket'], task['target_key'], multipart_upload_block, upload_id)
-                                copy_data = {
-                                    'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
-                                    'etag': complete_upload['etag'].replace('"', ''), 'upload_id': upload_id,
-                                    'status': 3, }
-                                if 'VersionId' in complete_upload:
-                                    copy_data['version_id'] = complete_upload['VersionId']
-                                if 'ServerSideEncryption' in complete_upload:
-                                    copy_data['server_side_encryption'] = complete_upload['ServerSideEncryption']
-                                if 'SSEKMSKeyId' in complete_upload:
-                                    copy_data['sse_kms_key_id'] = complete_upload['SSEKMSKeyId']
-                                if 'Expiration' in complete_upload:
-                                    copy_data['expiration'] = complete_upload['Expiration']
+                                copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
+                                             'etag': complete_upload['etag'].replace('"', ''), 'upload_id': upload_id,
+                                             'status': 3, 'version_id': find_value_dict('VersionId', complete_upload),
+                                             'server_side_encryption': find_value_dict('ServerSideEncryption',
+                                                                                       complete_upload),
+                                             'sse_kms_key_id': find_value_dict('SSEKMSKeyId', complete_upload),
+                                             'v': find_value_dict('Expiration', complete_upload)}
                                 checksum = extract_checksum_details(complete_upload)
                                 if checksum is not None:
                                     copy_data['checksum_encoding'] = checksum['checksum_encoding']
