@@ -41,12 +41,18 @@ def set_random_id(length: int = 64):
 
 def find_key_dict(k: str, a: dict = {}):
     k = k.casefold()
-    return [key for key in a if key.casefold() == k]
+    for key in a:
+        if key in k:
+            return key
+    return None
 
 
 def find_value_dict(k: str, a: dict = {}):
     k = k.casefold()
-    return [a[key] for key in a if key.casefold() == k]
+    for key in a:
+        if key.casefold() == k:
+            return a[key]
+    return None
 
 
 def sub_json(text: str, re_set):

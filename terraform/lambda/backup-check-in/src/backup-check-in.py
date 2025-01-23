@@ -62,17 +62,16 @@ def process_object(event_data):
     checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key, 'object_name': object_name,
                    'etag': obj_info['etag'], 'object_size': obj_info['content_length'],
                    'object_type': obj_info['content_type'], 'last_modified': obj_info['last_modified'],
-                   'received_ts': received_ts, 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
-    checkin_rec['storage_class'] = find_value_dict("storage_class", obj_info)
-    checkin_rec['expiration_period'] = find_value_dict('expiration_period', obj_info)
-    checkin_rec['retention_period'] = find_value_dict('retention_period', obj_info)
-    checkin_rec['lock_mode'] = find_value_dict('lock_mode', obj_info)
-    checkin_rec['legal_hold'] = find_value_dict('legal_hold', obj_info)
-    checkin_rec['serverside_encryption'] = find_value_dict('serverside_encryption', obj_info)
-    checkin_rec['sse_customer_algorithm'] = find_value_dict('sse_customer_algorithm', obj_info)
-    checkin_rec['sse_customer_key_md5'] = find_value_dict('sse_customer_key_md5', obj_info)
-    checkin_rec['sse_kms_key_id'] = find_value_dict('sse_kms_key_id', obj_info)
-    print(checkin_rec)
+                   'received_ts': received_ts, 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0,
+                   'storage_class': find_value_dict("storage_class", obj_info),
+                   'expiration_period': find_value_dict('expiration_period', obj_info),
+                   'retention_period': find_value_dict('retention_period', obj_info),
+                   'lock_mode': find_value_dict('lock_mode', obj_info),
+                   'legal_hold': find_value_dict('legal_hold', obj_info),
+                   'serverside_encryption': find_value_dict('serverside_encryption', obj_info),
+                   'sse_customer_algorithm': find_value_dict('sse_customer_algorithm', obj_info),
+                   'sse_customer_key_md5': find_value_dict('sse_customer_key_md5', obj_info),
+                   'sse_kms_key_id': find_value_dict('sse_kms_key_id', obj_info)}
     check_in_db.insert('object_checkins', checkin_rec)
     checkin_id = check_in_db.run()
     obj_info['checkin_id'] = checkin_id
