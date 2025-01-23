@@ -167,3 +167,18 @@ def calc_timedelta(timevalue):
         if nd is not None:
             end = datetime(int(nd.strftime('%Y')), int(nd.strftime('%m')), int(nd.strftime('%d'))).strftime('%Y-%m-%d %H:%M:%S')
     return end
+
+
+def extract_checksum_details(dataset: dict = None):
+    if dataset is not None:
+        if 'ChecksumCRC32' in dataset:
+            return {'checksum_encoding': 'ChecksumCRC32', 'checksum': dataset['ChecksumCRC32']}
+        if 'ChecksumCRC32C' in dataset:
+            return {'checksum_encoding': 'ChecksumCRC32C', 'checksum': dataset['ChecksumCRC32C']}
+        if 'ChecksumSHA1' in dataset:
+            return {'checksum_encoding': 'ChecksumSHA1', 'checksum': dataset['ChecksumSHA1']}
+        if 'ChecksumSHA256' in dataset:
+            return {'checksum_encoding': 'ChecksumSHA256', 'checksum': dataset['ChecksumSHA256']}
+        if 'ChecksumCRC64NVME' in dataset:
+            return {'checksum_encoding': 'ChecksumCRC64NVME', 'checksum': dataset['ChecksumCRC64NVME']}
+    return None

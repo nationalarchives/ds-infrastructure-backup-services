@@ -65,7 +65,6 @@ def process_object(event_data):
                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
     if 'retain_until_date' in obj_info:
         checkin_rec['retain_until_date'] = obj_info['retain_until_date']
-    if 'lock_mode' in obj_info:
         checkin_rec['lock_mode'] = obj_info['lock_mode']
     if 'legal_hold' in obj_info:
         checkin_rec['legal_hold'] = obj_info['legal_hold']

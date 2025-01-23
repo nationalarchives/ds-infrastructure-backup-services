@@ -1,6 +1,6 @@
 import boto3
 import botocore.exceptions
-from .helpers import find_value_dict, find_key_dict, calc_timedelta
+from .helpers import find_value_dict, find_key_dict, calc_timedelta, extract_checksum_details
 
 
 class Bucket:
@@ -9,7 +9,8 @@ class Bucket:
                                    region_name=region)
         self.legal_holds = ['ON', 'OFF']
         self.lock_modes = ['GOVERNANCE', 'COMPLIANCE']
-        self.storage_classes = ['STANDARD', 'STANDARD_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE', 'GLACIER_IR']
+        self.storage_classes = ['STANDARD', 'STANDARD_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE',
+                                'GLACIER_IR']
 
     def get_object_info(self, *, bucket: str, key: str):
         try:
@@ -49,14 +50,10 @@ class Bucket:
                 obj_info['lock_mode'] = obj_get['Metadata']['lock_mode']
             if find_value_dict("legal_hold", obj_get['Metadata']):
                 obj_info['legal_hold'] = obj_get['Metadata']['legal_hold']
-        if 'ChecksumCRC32' in obj_info:
-            obj_info['checksum_crc32'] = obj_attr['ChecksumCRC32']
-        if 'ChecksumCRC32C' in obj_info:
-            obj_info['checksum_crc32c'] = obj_attr['ChecksumCRC32C']
-        if 'ChecksumSHA1' in obj_info:
-            obj_info['checksum_sha1'] = obj_attr['ChecksumSHA1']
-        if 'ChecksumSHA256' in obj_info:
-            obj_info['checksum_sha256'] = obj_attr['ChecksumSHA256']
+        checksum = extract_checksum_details(obj_attr)
+        if checksum is not None:
+            obj_info['checksum_encoding'] = checksum['checksum_encoding']
+            obj_info['checksum'] = checksum['checksum']
         if 'SSECustomerAlgorithm' in obj_info:
             obj_info['sse_customer_algorithm'] = obj_attr['SSECustomerAlgorithm']
         if 'SSECustomerKeyMD5' in obj_info:
@@ -96,7 +93,7 @@ class Bucket:
             'ObjectLockLegalHoldStatus': legal_hold.upper(),
             'ObjectLockMode': lock_mode.upper()
         }
-        param_set = {k:v for k, v in params.items() if v is not None}
+        param_set = {k: v for k, v in params.items() if v is not None}
         try:
             response = self.client.create_multipart_upload(**param_set)
         except botocore.exceptions.ClientError as error:
@@ -132,7 +129,7 @@ class Bucket:
     def complete_multipart_upload(self, endpoint: str, target_key: str, parts: dict, upload_id: str, ):
         try:
             response = self.client.complete_multipart_upload(Bucket=endpoint, Key=target_key,
-                                                         MultipartUpload=parts, UploadId=upload_id)
+                                                             MultipartUpload=parts, UploadId=upload_id)
         except botocore.exceptions.ClientError as error:
             print(f'S3 - create part upload {error.response["Error"]["Code"]}')
             return None
@@ -166,7 +163,7 @@ class Bucket:
     def copy_object(self, copy_source: dict, target_endpoint: str, target_key: str,
                     storage_class: str = None, expiration_period: str = None,
                     retention_period: str = None, legal_hold: str = 'OFF',
-                    lock_mode: str = None, metadata: dict = None, content_type: str = None,):
+                    lock_mode: str = None, metadata: dict = None, content_type: str = None, ):
         if storage_class is None or storage_class.upper() not in self.storage_classes:
             storage_class = 'GLACIER'
         if legal_hold is not None:
@@ -191,7 +188,8 @@ class Bucket:
             'ObjectLockLegalHoldStatus': legal_hold,
             'ObjectLockMode': lock_mode
         }
-        param_set = {k:v for k, v in params.items() if v is not None}
+        print(params)
+        param_set = {k: v for k, v in params.items() if v is not None}
         try:
             response = self.client.copy_object(**param_set)
         except botocore.exceptions.ClientError as error:
