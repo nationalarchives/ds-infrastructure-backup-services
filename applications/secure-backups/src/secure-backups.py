@@ -128,25 +128,26 @@ def process_backups():
                             ap_rec = db_client.fetch()
                             print(ap_rec)
                             if ap_rec:
-                                access_point = ap_rec['access_point']
-                                target_bucket = ap_rec['target_bucket']
-                                target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
-                                target_key = target_destination
                                 name_processing = ap_rec['name_processing']
                                 source_account_id = ap_rec['source_account_id']
+                                access_point = ap_rec['access_point']
+                                target_bucket = ap_rec['target_bucket']
+                                target_name = process_obj_name(checkin_rec['object_name'], name_processing)
+                                target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
+                                target_key = target_destination
                             else:
+                                name_processing = 1
+                                source_account_id = default_source_account_id
                                 access_point = "not defined"
                                 target_bucket = default_target_bucket
                                 target_destination = object_key_parts['location']
+                                target_name = process_obj_name(checkin_rec['object_name'], name_processing)
                                 if len(target_destination) > 0:
-                                    target_key = f"{target_destination}/{object_key_parts['object_name']}"
+                                    target_key = f"{target_destination}/target_name"
                                 else:
-                                    target_key = object_key_parts['object_name']
-                                name_processing = 1
-                                source_account_id = default_source_account_id
+                                    target_key = target_name
                             # check of any changes
                             # write to table copies
-                            target_name = process_obj_name(checkin_rec["object_name"], name_processing)
                             obj_cp_rec = {
                                 'queue_id': queue_rec['id'], 'checkin_id': checkin_rec['id'],
                                 'source_name': checkin_rec['object_name'],
@@ -161,19 +162,19 @@ def process_backups():
                                 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                 'status': 0, 'percentage': '0.00', 'received_ts': datetime.now().timestamp()}
                             if 'storage_class' in obj_info:
-                                obj_cp_rec['storage_class'] = checkin_rec['storage_class']
+                                obj_cp_rec['storage_class'] = obj_info['storage_class']
                             if 'expiration_period' in obj_info:
-                                obj_cp_rec['expiration_period'] = checkin_rec['expiration_period']
+                                obj_cp_rec['expiration_period'] = obj_info['expiration_period']
                             if 'retention_period' in obj_info:
-                                obj_cp_rec['retention_period'] = checkin_rec['retention_period']
+                                obj_cp_rec['retention_period'] = obj_info['retention_period']
                             if 'lock_mode' in obj_info:
-                                obj_cp_rec['lock_mode'] = checkin_rec['lock_mode']
+                                obj_cp_rec['lock_mode'] = obj_info['lock_mode']
                             if 'legal_hold' in obj_info:
-                                obj_cp_rec['legal_hold'] = checkin_rec['legal_hold']
-                            if 'checksum_encoding' in obj_info:
+                                obj_cp_rec['legal_hold'] = obj_info['legal_hold']
+                            if checkin_rec['checksum_encoding'] is not None:
                                 obj_cp_rec['checksum_encoding'] = checkin_rec['checksum_encoding']
                                 obj_cp_rec['checksum'] = checkin_rec['checksum']
-                            if 'sse_customer_algorithm' in obj_info:
+                            if checkin_rec['sse_customer_algorithm'] is not None:
                                 obj_cp_rec['sse_customer_algorithm'] = checkin_rec['sse_customer_algorithm']
                             db_client.insert('object_copies', obj_cp_rec)
                             copy_id = db_client.run()

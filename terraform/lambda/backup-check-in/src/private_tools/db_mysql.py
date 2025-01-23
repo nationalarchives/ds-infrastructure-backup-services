@@ -41,7 +41,8 @@ class Database:
     def insert(self, tbl_name: str, data_set: dict) -> None:
         name_list = '('
         val_list = '('
-        for k, v in data_set.items():
+        field_set = {k: v for k, v in data_set.items() if v is not None}
+        for k, v in field_set.items():
             name_list += k + ', '
             if isinstance(v, str):
                 val_list += '"' + v + '", '
@@ -56,7 +57,8 @@ class Database:
 
     def update(self, tbl_name: str, data_set: dict) -> None:
         set_list = ''
-        for k, v in data_set.items():
+        field_set = {k: v for k, v in data_set.items() if v is not None}
+        for k, v in field_set.items():
             if isinstance(v, str):
                 if v[0] == '@':
                     set_list += f'{k} = {v[1:]}, '

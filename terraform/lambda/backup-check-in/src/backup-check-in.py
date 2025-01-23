@@ -63,21 +63,16 @@ def process_object(event_data):
                    'object_size': obj_info['content_length'], 'object_type': obj_info['content_type'],
                    'last_modified': obj_info['last_modified'], 'received_ts': received_ts,
                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
-    if 'retain_until_date' in obj_info:
-        checkin_rec['retain_until_date'] = obj_info['retain_until_date']
+    if 'storage_class' in obj_info:
+        checkin_rec['storage_class'] = obj_info['storage_class']
+    if 'expiration_period' in obj_info:
+        checkin_rec['expiration_period'] = obj_info['expiration_period']
+    if 'retention_period' in obj_info:
+        checkin_rec['retention_period'] = obj_info['retention_period']
+    if 'lock_mode' in obj_info:
         checkin_rec['lock_mode'] = obj_info['lock_mode']
     if 'legal_hold' in obj_info:
         checkin_rec['legal_hold'] = obj_info['legal_hold']
-    if 'checksum_crc32' in obj_info:
-        checkin_rec['checksum_crc32'] = obj_info['checksum_crc32']
-    if 'checksum_crc32c' in obj_info:
-        checkin_rec['checksum_crc32c'] = obj_info['checksum_crc32c']
-    if 'checksum_sha1' in obj_info:
-        checkin_rec['checksum_sha1'] = obj_info['checksum_sha1']
-    if 'checksum_sha256' in obj_info:
-        checkin_rec['checksum_sha256'] = obj_info['checksum_sha256']
-    if 'expires_string' in obj_info:
-        checkin_rec['expires_string'] = obj_info['expires_string']
     if 'serverside_encryption' in obj_info:
         checkin_rec['serverside_encryption'] = obj_info['serverside_encryption']
     if 'sse_customer_algorithm' in obj_info:

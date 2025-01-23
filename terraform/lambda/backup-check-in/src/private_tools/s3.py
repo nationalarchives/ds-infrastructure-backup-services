@@ -11,12 +11,15 @@ class Bucket:
         self.lock_modes = ['GOVERNANCE', 'COMPLIANCE']
         self.storage_classes = ['STANDARD', 'STANDARD_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE',
                                 'GLACIER_IR']
+        self.std_legal_hold = "ON"
+        self.std_lock_mode = "GOVERNANCE"
+        self.std_storage_class = "STANDARD_IA"
 
     def get_object_info(self, *, bucket: str, key: str):
         try:
             obj_get = self.client.get_object(Bucket=bucket, Key=key, Range='bytes=0-0')
-            obj_attr = self.client.get_object_attributes(Bucket=bucket, Key=key,
-                                                         ObjectAttributes=['Checksum', 'StorageClass', 'ObjectSize'])
+            obj_attr = self.client.get_object_attributes(
+                Bucket=bucket, Key=key, ObjectAttributes=['Checksum', 'StorageClass', 'ObjectSize'])
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'NoSuchKey':
                 print('S3 - NoSuchKey')
@@ -26,12 +29,11 @@ class Bucket:
                 print('S3 - unknown error')
             print(error.response['Error']['Code'])
             return None
-        obj_info = {'bucket_name': bucket, 'object_key': key,
-                    'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'content_length': obj_attr['ObjectSize'],
-                    'etag': obj_get['ETag'].replace('"', ''),
-                    'content_type': obj_get['ContentType'],
-                    'serverside_encryption': obj_get['ServerSideEncryption'], }
+        obj_info = {
+            'bucket_name': bucket, 'object_key': key,
+            'last_modified': obj_get['LastModified'].strftime('%Y-%m-%d %H:%M:%S'),
+            'content_length': obj_attr['ObjectSize'], 'etag': obj_get['ETag'].replace('"', ''),
+            'content_type': obj_get['ContentType'], 'serverside_encryption': obj_get['ServerSideEncryption'], }
         if "ExpiresString" in obj_get:
             obj_info['expires_string'] = obj_get['ExpiresString']
         if "VersionId" in obj_get:
@@ -40,16 +42,11 @@ class Bucket:
             obj_info['version_id'] = None
         if "Metadata" in obj_get:
             obj_info['metablock'] = obj_get['Metadata']
-            if find_value_dict("storage_class", obj_get['Metadata']):
-                obj_info['storage_class'] = obj_get['Metadata']['storage_class']
-            if find_value_dict("expiration_period", obj_get['Metadata']):
-                obj_info['expiration_period'] = obj_get['Metadata']['expiration_period']
-            if find_value_dict("retention_period", obj_get['Metadata']):
-                obj_info['retention_period'] = obj_get['Metadata']['retention_period']
-            if find_value_dict("lock_mode", obj_get['Metadata']):
-                obj_info['lock_mode'] = obj_get['Metadata']['lock_mode']
-            if find_value_dict("legal_hold", obj_get['Metadata']):
-                obj_info['legal_hold'] = obj_get['Metadata']['legal_hold']
+            obj_info['storage_class'] = find_value_dict("storage_class", obj_get['Metadata'])
+            obj_info['expiration_period'] = find_value_dict("expiration_period", obj_get['Metadata'])
+            obj_info['retention_period'] = find_value_dict("retention_period", obj_get['Metadata'])
+            obj_info['lock_mode'] = find_value_dict("lock_mode", obj_get['Metadata'])
+            obj_info['legal_hold'] = find_value_dict("legal_hold", obj_get['Metadata'])
         checksum = extract_checksum_details(obj_attr)
         if checksum is not None:
             obj_info['checksum_encoding'] = checksum['checksum_encoding']
@@ -75,21 +72,17 @@ class Bucket:
                                 retention_period: str = None, legal_hold: str = 'OFF',
                                 lock_mode: str = None, ):
         if storage_class is None or storage_class.upper() not in self.storage_classes:
-            storage_class = 'GLACIER'
+            storage_class = self.std_storage_class
         if legal_hold is None or legal_hold.upper() not in self.legal_holds:
-            legal_hold = 'ON'
+            legal_hold = self.std_legal_hold
         if lock_mode is not None and lock_mode.upper() not in self.lock_modes:
-            lock_mode = 'GOVERNANCE'
-        expires = calc_timedelta(expiration_period)
-        retention = calc_timedelta(retention_period)
+            lock_mode = self.std_lock_mode
+        expires = calc_timedelta(expiration_period) if expiration_period is not None else None
+        retention = calc_timedelta(retention_period) if retention_period is not None else None
         params = {
-            'Bucket': endpoint,
-            'Key': object_key,
-            'Metadata': metadata,
-            'ContentType': content_type,
-            'StorageClass': storage_class.upper(),
-            'Expires': expires,
-            'ObjectLockRetainUntilDate': retention,
+            'Bucket': endpoint, 'Key': object_key, 'Metadata': metadata,
+            'ContentType': content_type, 'StorageClass': storage_class.upper(),
+            'Expires': expires, 'ObjectLockRetainUntilDate': retention,
             'ObjectLockLegalHoldStatus': legal_hold.upper(),
             'ObjectLockMode': lock_mode.upper()
         }
@@ -116,18 +109,10 @@ class Bucket:
             return None
         return_value = {'ETag': response['CopyPartResult']['ETag'],
                         'PartNumber': part_number}
-        if 'checksum_encoding' in response['CopyPartResult']:
-            obj_cp_rec['checksum_encoding'] = checkin_rec['checksum_encoding']
-            obj_cp_rec['checksum'] = checkin_rec['checksum']
-
-        if find_key_dict('ChecksumCRC32', response['CopyPartResult']):
-            return_value['ChecksumCRC32'] = response['CopyPartResult']['ChecksumCRC32']
-        if find_key_dict('ChecksumCRC32C', response['CopyPartResult']):
-            return_value['ChecksumCRC32C'] = response['CopyPartResult']['ChecksumCRC32C']
-        if find_key_dict('ChecksumSHA1', response['CopyPartResult']):
-            return_value['ChecksumSHA1'] = response['CopyPartResult']['ChecksumSHA1']
-        if find_key_dict('ChecksumSHA256', response['CopyPartResult']):
-            return_value['ChecksumSHA256'] = response['CopyPartResult']['ChecksumSHA256']
+        checksum = extract_checksum_details(response['CopyPartResult'])
+        if checksum is not None:
+            return_value['checksum_encoding'] = checksum['checksum_encoding']
+            return_value['checksum'] = checksum['checksum']
         return return_value
 
     def complete_multipart_upload(self, endpoint: str, target_key: str, parts: dict, upload_id: str, ):
@@ -140,20 +125,13 @@ class Bucket:
         return_value = {'location': response['Location'], 'bucket': response['Bucket'],
                         'object_key': response['Key'], 'etag': response['ETag'],
                         'server_side_encryption': response['ServerSideEncryption']}
-        if find_key_dict('VersionId', response):
-            return_value['version_id'] = response['VersionId']
-        if find_key_dict('Expiration', response):
-            return_value['expiration'] = response['Expiration']
-        if find_key_dict('SSEKMSKeyId', response):
-            return_value['sse_kmd_key_id'] = response['SSEKMSKeyId']
-        if find_key_dict('ChecksumCRC32', response):
-            return_value['ChecksumCRC32'] = response['ChecksumCRC32']
-        if find_key_dict('ChecksumCRC32C', response):
-            return_value['ChecksumCRC32C'] = response['ChecksumCRC32C']
-        if find_key_dict('ChecksumSHA1', response):
-            return_value['ChecksumSHA1'] = response['ChecksumSHA1']
-        if find_key_dict('ChecksumSHA256', response):
-            return_value['ChecksumSHA256'] = response['ChecksumSHA256']
+        return_value['version_id'] = find_value_dict('VersionId', response)
+        return_value['expiration'] = find_value_dict('Expiration', response)
+        return_value['sse_kmd_key_id'] = find_value_dict('SSEKMSKeyId', response)
+        checksum = extract_checksum_details(response)
+        if checksum is not None:
+            return_value['checksum_encoding'] = checksum['checksum_encoding']
+            return_value['checksum'] = checksum['checksum']
         return return_value
 
     def abort_multipart_upload(self, endpoint: str, target_key: str, upload_id: str, ):
