@@ -4,6 +4,7 @@ from datetime import datetime
 from urllib.parse import unquote_plus
 from private_tools import Database, Queue, Secrets, Bucket
 from private_tools import set_random_id, get_parameters, deconstruct_path
+from private_tools import find_value_dict
 
 
 def lambda_handler(event, context):
@@ -58,29 +59,20 @@ def process_object(event_data):
         check_in_db.close()
         print(f'object entry already in db: {checkin_id}:{event_data["bucket"]["name"]}/{obj_key}/{object_name}')
         return
-    checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key,
-                   'object_name': object_name, 'etag': obj_info['etag'],
-                   'object_size': obj_info['content_length'], 'object_type': obj_info['content_type'],
-                   'last_modified': obj_info['last_modified'], 'received_ts': received_ts,
-                   'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
-    if 'storage_class' in obj_info:
-        checkin_rec['storage_class'] = obj_info['storage_class']
-    if 'expiration_period' in obj_info:
-        checkin_rec['expiration_period'] = obj_info['expiration_period']
-    if 'retention_period' in obj_info:
-        checkin_rec['retention_period'] = obj_info['retention_period']
-    if 'lock_mode' in obj_info:
-        checkin_rec['lock_mode'] = obj_info['lock_mode']
-    if 'legal_hold' in obj_info:
-        checkin_rec['legal_hold'] = obj_info['legal_hold']
-    if 'serverside_encryption' in obj_info:
-        checkin_rec['serverside_encryption'] = obj_info['serverside_encryption']
-    if 'sse_customer_algorithm' in obj_info:
-        checkin_rec['sse_customer_algorithm'] = obj_info['sse_customer_algorithm']
-    if 'sse_customer_key_md5' in obj_info:
-        checkin_rec['sse_customer_key_md5'] = obj_info['sse_customer_key_md5']
-    if 'sse_kms_key_id' in obj_info:
-        checkin_rec['sse_kms_key_id'] = obj_info['sse_kms_key_id']
+    checkin_rec = {'bucket': event_data['bucket']['name'], 'object_key': obj_key, 'object_name': object_name,
+                   'etag': obj_info['etag'], 'object_size': obj_info['content_length'],
+                   'object_type': obj_info['content_type'], 'last_modified': obj_info['last_modified'],
+                   'received_ts': received_ts, 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'status': 0}
+    checkin_rec['storage_class'] = find_value_dict("storage_class", obj_info)
+    checkin_rec['expiration_period'] = find_value_dict('expiration_period', obj_info)
+    checkin_rec['retention_period'] = find_value_dict('retention_period', obj_info)
+    checkin_rec['lock_mode'] = find_value_dict('lock_mode', obj_info)
+    checkin_rec['legal_hold'] = find_value_dict('legal_hold', obj_info)
+    checkin_rec['serverside_encryption'] = find_value_dict('serverside_encryption', obj_info)
+    checkin_rec['sse_customer_algorithm'] = find_value_dict('sse_customer_algorithm', obj_info)
+    checkin_rec['sse_customer_key_md5'] = find_value_dict('sse_customer_key_md5', obj_info)
+    checkin_rec['sse_kms_key_id'] = find_value_dict('sse_kms_key_id', obj_info)
+    print(checkin_rec)
     check_in_db.insert('object_checkins', checkin_rec)
     checkin_id = check_in_db.run()
     obj_info['checkin_id'] = checkin_id
