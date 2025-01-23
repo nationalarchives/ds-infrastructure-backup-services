@@ -5,8 +5,6 @@
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
-                "s3:PutObjectRetention",
-				"s3:PutObjectLegalHold",
 				"s3:BypassGovernanceRetention"
             ],
             "Resource": [
@@ -21,7 +19,9 @@
                 "s3:GetObject",
                 "s3:GetObjectAttributes",
                 "s3:PutObject",
-                "s3:DeleteObject"
+                "s3:DeleteObject",
+                "s3:PutObjectRetention",
+				"s3:PutObjectLegalHold"
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-drop-zone/*"
@@ -44,8 +44,6 @@
         {
             "Effect": "Allow",
             "Action": [
-                "s3:PutObjectRetention",
-				"s3:PutObjectLegalHold",
 				"s3:BypassGovernanceRetention"
             ],
             "Resource": [
@@ -58,7 +56,9 @@
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
-                "s3:PutObjectAcl"
+                "s3:PutObjectAcl",
+                "s3:PutObjectRetention",
+				"s3:PutObjectLegalHold"
             ],
             "Resource": [
                 "arn:aws:s3:::bv-digital-services/*",
