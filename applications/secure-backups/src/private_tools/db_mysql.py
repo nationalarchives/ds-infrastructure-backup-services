@@ -41,15 +41,15 @@ class Database:
     def insert(self, tbl_name: str, data_set: dict) -> None:
         name_list = '('
         val_list = '('
-        field_set = {k: v for k, v in data_set.items() if v is not None}
-        for k, v in field_set.items():
-            name_list += k + ', '
-            if isinstance(v, str):
-                val_list += '"' + v + '", '
-            elif isinstance(v, int):
-                val_list += str(v) + ', '
-            elif isinstance(v, float):
-                val_list += str(v) + ', '
+        for k, v in data_set.items():
+            if v is not None:
+                name_list += k + ', '
+                if isinstance(v, str):
+                    val_list += '"' + v + '", '
+                elif isinstance(v, int):
+                    val_list += str(v) + ', '
+                elif isinstance(v, float):
+                    val_list += str(v) + ', '
         name_list = name_list[:-2] + ')'
         val_list = val_list[:-2] + ')'
         self.sql_stmt = f'INSERT INTO {tbl_name} {name_list} VALUES {val_list}'
@@ -57,17 +57,17 @@ class Database:
 
     def update(self, tbl_name: str, data_set: dict) -> None:
         set_list = ''
-        field_set = {k: v for k, v in data_set.items() if v is not None}
-        for k, v in field_set.items():
-            if isinstance(v, str):
-                if v[0] == '@':
-                    set_list += f'{k} = {v[1:]}, '
-                else:
-                    set_list += f'{k} = "{v}", '
-            elif isinstance(v, int):
-                set_list += f'{k} = {v}, '
-            elif isinstance(v, float):
-                set_list += f'{k} = {v}, '
+        for k, v in data_set.items():
+            if v is not None:
+                if isinstance(v, str):
+                    if v[0] == '@':
+                        set_list += f'{k} = {v[1:]}, '
+                    else:
+                        set_list += f'{k} = "{v}", '
+                elif isinstance(v, int):
+                    set_list += f'{k} = {v}, '
+                elif isinstance(v, float):
+                    set_list += f'{k} = {v}, '
         set_list = set_list[:-2]
         self.sql_stmt = f'UPDATE {tbl_name} SET {set_list}'
         self.cmd = 'update'
