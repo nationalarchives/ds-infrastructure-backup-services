@@ -5,7 +5,7 @@
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
-				"s3:BypassGovernanceRetention"
+                "s3:BypassGovernanceRetention"
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-drop-zone",
@@ -44,17 +44,6 @@
         {
             "Effect": "Allow",
             "Action": [
-				"s3:BypassGovernanceRetention"
-            ],
-            "Resource": [
-                "arn:aws:s3:::bv-digital-services",
-                "arn:aws:s3:::bv-ds-digital-files"
-            ],
-            "Sid": "DropZoneS3WriteAccessBackupVaults"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
                 "s3:PutObject",
                 "s3:PutObjectAcl",
                 "s3:PutObjectRetention",
@@ -69,15 +58,13 @@
         {
             "Effect": "Allow",
             "Action": [
-                "s3:PutObject",
-                "s3:PutObjectAcl",
-                "s3:PutObjectLegalHold"
+                "s3:BypassGovernanceRetention"
             ],
             "Resource": [
-                "arn:aws:s3:::bv-digital-services/*",
-                "arn:aws:s3:::bv-ds-digital-files/*"
+                "arn:aws:s3:::bv-digital-services",
+                "arn:aws:s3:::bv-ds-digital-files"
             ],
-            "Sid": "DropZoneS3WriteAccessBackupVaults"
+            "Sid": "DropZoneS3LockModeAccessBackupVaults"
         }
     ]
 }
