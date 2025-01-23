@@ -169,10 +169,14 @@ class Bucket:
                     lock_mode: str = None, metadata: dict = None, content_type: str = None,):
         if storage_class is None or storage_class.upper() not in self.storage_classes:
             storage_class = 'GLACIER'
-        if legal_hold is None or legal_hold.upper() not in self.legal_holds:
-            legal_hold = 'ON'
-        if lock_mode is not None and lock_mode.upper() not in self.lock_modes:
-            lock_mode = 'GOVERNANCE'
+        if legal_hold is not None:
+            legal_hold = legal_hold.upper()
+            if legal_hold not in self.legal_holds:
+                legal_hold = 'ON'
+        if lock_mode is not None:
+            lock_mode = lock_mode.upper()
+            if lock_mode not in self.lock_modes:
+                lock_mode = 'GOVERNANCE'
         expires = calc_timedelta(expiration_period)
         retention = calc_timedelta(retention_period)
         params = {
@@ -184,8 +188,8 @@ class Bucket:
             'StorageClass': storage_class.upper(),
             'Expires': expires,
             'ObjectLockRetainUntilDate': retention,
-            'ObjectLockLegalHoldStatus': legal_hold.upper(),
-            'ObjectLockMode': lock_mode.upper()
+            'ObjectLockLegalHoldStatus': legal_hold,
+            'ObjectLockMode': lock_mode
         }
         param_set = {k:v for k, v in params.items() if v is not None}
         try:

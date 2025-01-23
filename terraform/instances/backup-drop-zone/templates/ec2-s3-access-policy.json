@@ -29,10 +29,9 @@
         {
             "Effect": "Allow",
             "Action": [
-                "s3:GetObject",
-                "s3:GetObjectAttributes",
                 "s3:PutObject",
-                "s3:PutObjectAcl"
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold"
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-vault/*"
@@ -43,7 +42,8 @@
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
-                "s3:PutObjectAcl"
+                "s3:PutObjectAcl",
+                "s3:PutObjectLegalHold"
             ],
             "Resource": [
                 "arn:aws:s3:::bv-digital-services/*",
