@@ -6,7 +6,7 @@ from .copier import TransferBox
 from .s3 import Bucket
 from .helpers import find_key_dict, set_random_id, size_converter, sub_json
 from .helpers import deconstruct_path, get_parameters, find_value_dict
-from .helpers import create_upload_map, process_obj_name
+from .helpers import create_upload_map, process_obj_name, calc_timedelta
 
 __all__ = [
     'SignalHandler',
@@ -23,5 +23,6 @@ __all__ = [
     'deconstruct_path',
     'get_parameters',
     'create_upload_map',
-    'process_obj_name'
+    'process_obj_name',
+    'calc_timedelta'
 ]

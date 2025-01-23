@@ -1,12 +1,15 @@
 import boto3
 import botocore.exceptions
-from .helpers import find_value_dict, find_key_dict
+from .helpers import find_value_dict, find_key_dict, calc_timedelta
 
 
 class Bucket:
     def __init__(self, region: str = 'eu-west-2'):
         self.client = boto3.client('s3',
                                    region_name=region)
+        self.legal_holds = ['ON', 'OFF']
+        self.lock_modes = ['GOVERNANCE', 'COMPLIANCE']
+        self.storage_classes = ['STANDARD', 'STANDARD_IA', 'INTELLIGENT_TIERING', 'GLACIER', 'DEEP_ARCHIVE', 'GLACIER_IR']
 
     def get_object_info(self, *, bucket: str, key: str):
         try:
@@ -70,11 +73,32 @@ class Bucket:
         return response['TagSet']
 
     def create_multipart_upload(self, endpoint: str, object_key: str, expires: str = None,
-                                metadata: dict = None, content_type: str = None):
+                                metadata: dict = None, content_type: str = None,
+                                storage_class: str = None, expiration_period: str = None,
+                                retention_period: str = None, legal_hold: str = 'OFF',
+                                lock_mode: str = None, ):
+        if storage_class is None or storage_class.upper() not in self.storage_classes:
+            storage_class = 'GLACIER'
+        if legal_hold is None or legal_hold.upper() not in self.legal_holds:
+            legal_hold = 'ON'
+        if lock_mode is not None and lock_mode.upper() not in self.lock_modes:
+            lock_mode = 'GOVERNANCE'
+        expires = calc_timedelta(expiration_period)
+        retention = calc_timedelta(retention_period)
+        params = {
+            'Bucket': endpoint,
+            'Key': object_key,
+            'Metadata': metadata,
+            'ContentType': content_type,
+            'StorageClass': storage_class.upper(),
+            'Expires': expires,
+            'ObjectLockRetainUntilDate': retention,
+            'ObjectLockLegalHoldStatus': legal_hold.upper(),
+            'ObjectLockMode': lock_mode.upper()
+        }
+        param_set = {k:v for k, v in params.items() if v is not None}
         try:
-            response = self.client.create_multipart_upload(Bucket=endpoint, Key=object_key,
-                                                       Metadata=metadata, Expires=expires,
-                                                       ContentType=content_type, )
+            response = self.client.create_multipart_upload(**param_set)
         except botocore.exceptions.ClientError as error:
             print(f'S3 - create part upload {error.response["Error"]["Code"]}')
             return None
@@ -139,10 +163,33 @@ class Bucket:
             return None
         return response
 
-    def copy_object(self, copy_source: dict, target_endpoint: str, target_key: str):
+    def copy_object(self, copy_source: dict, target_endpoint: str, target_key: str,
+                    storage_class: str = None, expiration_period: str = None,
+                    retention_period: str = None, legal_hold: str = 'OFF',
+                    lock_mode: str = None, metadata: dict = None, content_type: str = None,):
+        if storage_class is None or storage_class.upper() not in self.storage_classes:
+            storage_class = 'GLACIER'
+        if legal_hold is None or legal_hold.upper() not in self.legal_holds:
+            legal_hold = 'ON'
+        if lock_mode is not None and lock_mode.upper() not in self.lock_modes:
+            lock_mode = 'GOVERNANCE'
+        expires = calc_timedelta(expiration_period)
+        retention = calc_timedelta(retention_period)
+        params = {
+            'CopySource': copy_source,
+            'Bucket': target_endpoint,
+            'Key': target_key,
+            'Metadata': metadata,
+            'ContentType': content_type,
+            'StorageClass': storage_class.upper(),
+            'Expires': expires,
+            'ObjectLockRetainUntilDate': retention,
+            'ObjectLockLegalHoldStatus': legal_hold.upper(),
+            'ObjectLockMode': lock_mode.upper()
+        }
+        param_set = {k:v for k, v in params.items() if v is not None}
         try:
-            response = self.client.copy_object(CopySource=copy_source,
-                                               Bucket=target_endpoint, Key=target_key)
+            response = self.client.copy_object(**param_set)
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == 'ObjectNotInActiveTierError':
                 print('S3 - ObjectNotInActiveTierError')

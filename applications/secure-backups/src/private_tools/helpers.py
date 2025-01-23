@@ -6,7 +6,7 @@ import boto3
 import botocore.exceptions
 import json
 from datetime import datetime
-
+from datetime import timedelta
 
 def size_converter(value: int = 0, start: str = 'B', end: str = 'GB', precision: int = 2, long_names: bool = False,
                    base: int = 1024):
@@ -149,3 +149,21 @@ def process_obj_name(name: str, add_ts: int = 1):
     else:
         target_name = name
     return target_name
+
+
+def calc_timedelta(timevalue):
+    end = None
+    if timevalue is not None:
+        today = datetime.now()
+        nd = None
+        if timevalue[0].lower() == 'd':
+            nd = today + timedelta(days=int(timevalue[1:]))
+        elif timevalue[0].lower() == 'm':
+            nd = today + timedelta(days=int(timevalue[1:]) * 7)
+        elif timevalue[0].lower() == 'm':
+            nd = today + timedelta(days=int(timevalue[1:]) * 30)
+        elif timevalue[0].lower() == 'y':
+            nd = today + timedelta(days=int(timevalue[1:]) * 365)
+        if nd is not None:
+            end = datetime(int(nd.strftime('%Y')), int(nd.strftime('%m')), int(nd.strftime('%d'))).strftime('%Y-%m-%d %H:%M:%S')
+    return end
