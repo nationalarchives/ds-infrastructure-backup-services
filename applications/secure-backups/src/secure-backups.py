@@ -179,7 +179,6 @@ def process_backups():
                                 'target_bucket': target_bucket, 'target_key': target_key,
                                 'content_length': obj_info['content_length'],
                                 'source_account_id': source_account_id})
-                    del checkin_rec
                     # update queue record
                     db_client.where(f'checkin_id = {checkin_id}')
                     db_client.update('queues', {'status': 2,
@@ -197,8 +196,7 @@ def process_backups():
                                 target_key=target_key,
                                 metadata=obj_info['metablock'])
                             copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
-                                         'upload_id': upload_id, 'status': 3,
-                                         'version_id': find_value_dict('VersionId', sng_copy),
+                                         'status': 3, 'version_id': find_value_dict('VersionId', sng_copy),
                                          'server_side_encryption': find_value_dict('ServerSideEncryption', sng_copy),
                                          'sse_kms_key_id': find_value_dict('SSEKMSKeyId', sng_copy),
                                          'expiration': find_value_dict('Expiration', sng_copy)}
@@ -293,6 +291,7 @@ def process_backups():
                         if remove_source:
                             s3_client.rm_object(checkin_rec['bucket'], checkin_rec['object_key'])
                             remove_source = False
+                del checkin_rec
             del task_list
             db_client.close()
         del queue_response
