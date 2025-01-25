@@ -33,9 +33,7 @@ def process_backups():
         if signal_handler.shutdown_requested:
             sys.exit(0)
         queue_response = queue_client.receive_message(1)
-        print(queue_response)
         if 'Messages' in queue_response:
-            print('start process')
             task_list = []
             db_client = Database(db_secrets_vals)
             for message in queue_response['Messages']:
@@ -57,7 +55,6 @@ def process_backups():
                     # remove from queue
                     continue
                 else:
-                    print('update queue record')
                     # update queue record
                     db_client.where(f'checkin_id = {checkin_id}')
                     db_client.update('queues', {'status': 1,
@@ -84,7 +81,6 @@ def process_backups():
                         db_client.run()
                         continue
                     else:
-                        print('get object data')
                         # get object data
                         obj_info = s3_client.get_object_info(
                             bucket=checkin_rec['bucket'], key=checkin_rec['object_key'])
@@ -100,7 +96,6 @@ def process_backups():
                             db_client.run()
                             continue
                         else:
-                            print('get target details')
                             db_client.where(f'id = {checkin_id}')
                             db_client.update('object_checkins', {
                                 'status': 2, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
@@ -127,7 +122,6 @@ def process_backups():
                             else:
                                 db_client.where(f'access_point IS NULL')
                             ap_rec = db_client.fetch()
-                            print(ap_rec)
                             if ap_rec:
                                 name_processing = ap_rec['name_processing']
                                 source_account_id = ap_rec['source_account_id']
@@ -178,6 +172,7 @@ def process_backups():
                                 'source_key': checkin_rec['object_key'], 'access_point': access_point,
                                 'target_bucket': target_bucket, 'target_key': target_key,
                                 'content_length': obj_info['content_length'],
+                                'content_type': obj_info['content_type'],
                                 'source_account_id': source_account_id})
                     # update queue record
                     db_client.where(f'checkin_id = {checkin_id}')
@@ -188,13 +183,11 @@ def process_backups():
                     remove_source = False
                     for task in task_list:
                         if task['content_length'] < 5242881:
-                            print('single copy')
                             # 5MB single copy - S3 part minimum
                             sng_copy = s3_client.copy_object(
                                 copy_source={'Bucket': task['source_bucket'], 'Key': task['source_key']},
-                                target_endpoint=target_bucket,
-                                target_key=target_key,
-                                metadata=obj_info['metablock'])
+                                target_endpoint=target_bucket, target_key=target_key,
+                                content_type=task['content_type'], metadata=obj_info['metablock'])
                             copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
                                          'status': 3, 'version_id': find_value_dict('VersionId', sng_copy),
                                          'server_side_encryption': find_value_dict('ServerSideEncryption', sng_copy),
@@ -233,7 +226,10 @@ def process_backups():
                                 job_list.append(part_upload_data)
                                 position += 1
                             multipart_upload_block = {'Parts': []}
-                            upload_id = s3_client.create_multipart_upload(target_bucket, target_key)
+                            upload_id = s3_client.create_multipart_upload(endpoint=target_bucket,
+                                                                          object_key=target_key,
+                                                                          content_type=task['content_type'],
+                                                                          metadata=task['metablock'])
                             copy_parts_ok = True
                             for job in job_list:
                                 print(
@@ -262,7 +258,8 @@ def process_backups():
                                     db_client.run()
                             if copy_parts_ok:
                                 complete_upload = s3_client.complete_multipart_upload(
-                                    task['target_bucket'], task['target_key'], multipart_upload_block, upload_id)
+                                    endpoint=task['target_bucket'], target_key=task['target_key'],
+                                    parts=multipart_upload_block, upload_id=upload_id)
                                 copy_data = {'percentage': '100.00', 'finished_ts': datetime.now().timestamp(),
                                              'etag': complete_upload['etag'].replace('"', ''), 'upload_id': upload_id,
                                              'status': 3, 'version_id': find_value_dict('VersionId', complete_upload),

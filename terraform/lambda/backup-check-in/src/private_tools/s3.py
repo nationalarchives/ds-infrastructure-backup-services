@@ -47,6 +47,8 @@ class Bucket:
             obj_info['retention_period'] = find_value_dict("retention_period", obj_get['Metadata'])
             obj_info['lock_mode'] = find_value_dict("lock_mode", obj_get['Metadata'])
             obj_info['legal_hold'] = find_value_dict("legal_hold", obj_get['Metadata'])
+        else:
+            obj_info['metablock'] = None
         checksum = extract_checksum_details(obj_attr)
         if checksum is not None:
             obj_info['checksum_encoding'] = checksum['checksum_encoding']
@@ -66,25 +68,16 @@ class Bucket:
             response = self.client.get_object_tags(Bucket=bucket, Key=key)
         return response['TagSet']
 
-    def create_multipart_upload(self, endpoint: str, object_key: str, expires: str = None,
-                                metadata: dict = None, content_type: str = None,
-                                storage_class: str = None, expiration_period: str = None,
-                                retention_period: str = None, legal_hold: str = 'OFF',
-                                lock_mode: str = None, ):
-        if storage_class is None or storage_class.upper() not in self.storage_classes:
-            storage_class = self.std_storage_class
-        if legal_hold is None or legal_hold.upper() not in self.legal_holds:
-            legal_hold = self.std_legal_hold
-        if lock_mode is not None and lock_mode.upper() not in self.lock_modes:
-            lock_mode = self.std_lock_mode
-        expires = calc_timedelta(expiration_period) if expiration_period is not None else None
-        retention = calc_timedelta(retention_period) if retention_period is not None else None
+    def create_multipart_upload(self, endpoint: str, object_key: str,
+                                metadata: dict = None, content_type: str = None, ):
+        locking_params = self.metadata_block_excerpt(metadata)
+
         params = {
             'Bucket': endpoint, 'Key': object_key, 'Metadata': metadata,
-            'ContentType': content_type, 'StorageClass': storage_class.upper(),
-            'Expires': expires, 'ObjectLockRetainUntilDate': retention,
-            'ObjectLockLegalHoldStatus': legal_hold.upper(),
-            'ObjectLockMode': lock_mode.upper()
+            'ContentType': content_type, 'StorageClass': locking_params['storage_class'],
+            'Expires': locking_params['expires'], 'ObjectLockRetainUntilDate': locking_params['retention'],
+            'ObjectLockLegalHoldStatus': locking_params['legal_hold'],
+            'ObjectLockMode': locking_params['lock_mode']
         }
         param_set = {k: v for k, v in params.items() if v is not None}
         try:
@@ -122,12 +115,11 @@ class Bucket:
         except botocore.exceptions.ClientError as error:
             print(f'S3 - create part upload {error.response["Error"]["Code"]}')
             return None
-        return_value = {'location': response['Location'], 'bucket': response['Bucket'],
-                        'object_key': response['Key'], 'etag': response['ETag'],
-                        'server_side_encryption': response['ServerSideEncryption']}
-        return_value['version_id'] = find_value_dict('VersionId', response)
-        return_value['expiration'] = find_value_dict('Expiration', response)
-        return_value['sse_kmd_key_id'] = find_value_dict('SSEKMSKeyId', response)
+        return_value = {'location': response['Location'], 'bucket': response['Bucket'], 'object_key': response['Key'],
+                        'etag': response['ETag'], 'server_side_encryption': response['ServerSideEncryption'],
+                        'version_id': find_value_dict('VersionId', response),
+                        'expiration': find_value_dict('Expiration', response),
+                        'sse_kmd_key_id': find_value_dict('SSEKMSKeyId', response)}
         checksum = extract_checksum_details(response)
         if checksum is not None:
             return_value['checksum_encoding'] = checksum['checksum_encoding']
@@ -143,32 +135,20 @@ class Bucket:
         return response
 
     def copy_object(self, copy_source: dict, target_endpoint: str, target_key: str,
-                    storage_class: str = None, expiration_period: str = None,
-                    retention_period: str = None, legal_hold: str = 'OFF',
-                    lock_mode: str = None, metadata: dict = None, content_type: str = None, ):
-        if storage_class is None or storage_class.upper() not in self.storage_classes:
-            storage_class = 'GLACIER'
-        if legal_hold is not None:
-            legal_hold = legal_hold.upper()
-            if legal_hold not in self.legal_holds:
-                legal_hold = 'ON'
-        if lock_mode is not None:
-            lock_mode = lock_mode.upper()
-            if lock_mode not in self.lock_modes:
-                lock_mode = 'GOVERNANCE'
-        expires = calc_timedelta(expiration_period)
-        retention = calc_timedelta(retention_period)
+                    metadata: dict = None, content_type: str = None, ):
+        locking_params = self.metadata_block_excerpt(metadata)
+
         params = {
             'CopySource': copy_source,
             'Bucket': target_endpoint,
             'Key': target_key,
             'Metadata': metadata,
             'ContentType': content_type,
-            'StorageClass': storage_class.upper(),
-            'Expires': expires,
-            'ObjectLockRetainUntilDate': retention,
-            'ObjectLockLegalHoldStatus': legal_hold,
-            'ObjectLockMode': lock_mode
+            'StorageClass': locking_params['storage_class'],
+            'Expires': locking_params['expires'],
+            'ObjectLockRetainUntilDate': locking_params['retention'],
+            'ObjectLockLegalHoldStatus': locking_params['legal_hold'],
+            'ObjectLockMode': locking_params['lock_mode']
         }
         print(params)
         param_set = {k: v for k, v in params.items() if v is not None}
@@ -186,3 +166,49 @@ class Bucket:
         response = self.client.delete_object(Bucket=bucket,
                                              Key=key)
         return response
+
+    def metadata_block_excerpt(self, meta_block: dict = None) -> dict:
+        if meta_block is None:
+            return {
+                'storage_class': 'GLACIER',
+                'legal_hold': 'ON',
+                'lock_mode': None,
+                'expires': calc_timedelta('d90'),
+                'retention': None
+            }
+        else:
+            return_val = {}
+            if 'storage_class' in meta_block:
+                if meta_block['storage_class'] is None or meta_block[
+                    'storage_class'].upper() not in self.storage_classes:
+                    return_val['storage_class'] = self.std_storage_class
+                else:
+                    return_val['storage_class'] = meta_block['storage_class'].upper()
+            else:
+                return_val['storage_class'] = self.std_storage_class
+            if 'legal_hold' in meta_block:
+                if meta_block['legal_hold'] is not None:
+                    return_val['legal_hold'] = meta_block['legal_hold'].upper() if meta_block[
+                                                                                       'legal_hold'].upper() not in self.legal_holds else self.std_legal_hold
+                else:
+                    return_val['legal_hold'] = self.std_legal_hold
+            else:
+                return_val['legal_hold'] = 'OFF'
+            if 'lock_mode' in meta_block:
+                if meta_block['lock_mode'] is not None:
+                    return_val['lock_mode'] = meta_block['lock_mode'].upper() if meta_block[
+                                                                                     'lock_mode'].upper() not in self.lock_modes else self.std_lock_mode
+                else:
+                    return_val['lock_mode'] = None
+            else:
+                return_val['lock_mode'] = None
+            if 'expiration_period' in meta_block:
+                return_val['expires'] = calc_timedelta(meta_block['expiration_period']) if meta_block[
+                                                                                               'expiration_period'] is not None else None
+            else:
+                return_val['expires'] = None
+            if 'retention_period' in meta_block:
+                return_val['retention'] = calc_timedelta(meta_block['retention_period']) if meta_block[
+                                                                                                'retention_period'] is not None else None
+            else:
+                return_val['retention'] = None
