@@ -212,3 +212,5 @@ class Bucket:
                                                                                                 'retention_period'] is not None else None
             else:
                 return_val['retention'] = None
+        return_val = {k: v for k, v in return_val.items() if v is not None}
+        return return_val

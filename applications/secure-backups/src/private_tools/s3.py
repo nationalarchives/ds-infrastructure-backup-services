@@ -68,16 +68,16 @@ class Bucket:
             response = self.client.get_object_tags(Bucket=bucket, Key=key)
         return response['TagSet']
 
-    def create_multipart_upload(self, endpoint: str, object_key: str,
+    def create_multipart_upload(self, endpoint: str, target_key: str,
                                 metadata: dict = None, content_type: str = None, ):
         locking_params = self.metadata_block_excerpt(metadata)
-
         params = {
-            'Bucket': endpoint, 'Key': object_key, 'Metadata': metadata,
-            'ContentType': content_type, 'StorageClass': locking_params['storage_class'],
-            'Expires': locking_params['expires'], 'ObjectLockRetainUntilDate': locking_params['retention'],
-            'ObjectLockLegalHoldStatus': locking_params['legal_hold'],
-            'ObjectLockMode': locking_params['lock_mode']
+            'Bucket': endpoint, 'Key': target_key, 'Metadata': metadata, 'ContentType': content_type,
+            'StorageClass': find_value_dict('storage_class', locking_params),
+            'Expires': calc_timedelta(find_value_dict('expires', locking_params)),
+            'ObjectLockRetainUntilDate': calc_timedelta(find_value_dict('retention', locking_params)),
+            'ObjectLockLegalHoldStatus': find_value_dict('legal_hold', locking_params),
+            'ObjectLockMode': find_value_dict('lock_mode', locking_params),
         }
         param_set = {k: v for k, v in params.items() if v is not None}
         try:
@@ -139,15 +139,13 @@ class Bucket:
         locking_params = self.metadata_block_excerpt(metadata)
         params = {
             'CopySource': copy_source,
-            'Bucket': target_endpoint,
-            'Key': target_key,
+            'Bucket': target_endpoint, 'Key': target_key, 'ContentType': content_type,
             'Metadata': metadata,
-            'ContentType': content_type,
-            'StorageClass': locking_params['storage_class'],
-            'Expires': locking_params['expires'],
-            'ObjectLockRetainUntilDate': locking_params['retention'],
-            'ObjectLockLegalHoldStatus': locking_params['legal_hold'],
-            'ObjectLockMode': locking_params['lock_mode']
+            'StorageClass': find_value_dict('storage_class', locking_params),
+            'Expires': calc_timedelta(find_value_dict('expires', locking_params)),
+            'ObjectLockRetainUntilDate': calc_timedelta(find_value_dict('retention', locking_params)),
+            'ObjectLockLegalHoldStatus': find_value_dict('legal_hold', locking_params),
+            'ObjectLockMode': find_value_dict('lock_mode', locking_params),
         }
         print(params)
         param_set = {k: v for k, v in params.items() if v is not None}
@@ -210,4 +208,5 @@ class Bucket:
                                                                                                 'retention_period'] is not None else None
             else:
                 return_val['retention'] = None
+        return_val = {k: v for k, v in return_val.items() if v is not None}
         return return_val

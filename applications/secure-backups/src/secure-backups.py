@@ -109,7 +109,7 @@ def process_backups():
                             # create location query
                             object_key_parts = deconstruct_path(checkin_rec['object_key'])
                             if checkin_rec['bucket'] is not None:
-                                bucket_filter = f'source_bucket = {checkin_rec["bucket"]} AND'
+                                bucket_filter = f'source_bucket = "{checkin_rec["bucket"]}" AND '
                             else:
                                 bucket_filter = ''
                             if len(object_key_parts["location_filters"]) > 0:
@@ -184,6 +184,8 @@ def process_backups():
                     for task in task_list:
                         if task['content_length'] < 5242881:
                             # 5MB single copy - S3 part minimum
+                            print(
+                                f'sb: {task["source_bucket"]} | so: {task["source_key"]} tb: {target_bucket} | to: {target_key} | size: {task["content_length"]}')
                             sng_copy = s3_client.copy_object(
                                 copy_source={'Bucket': task['source_bucket'], 'Key': task['source_key']},
                                 target_endpoint=target_bucket, target_key=target_key,
@@ -202,6 +204,10 @@ def process_backups():
                             db_client.run()
                             remove_source = True
                         else:
+                            upload_id = s3_client.create_multipart_upload(endpoint=target_bucket,
+                                                                          target_key=target_key,
+                                                                          content_type=task['content_type'],
+                                                                          metadata=obj_info['metablock'])
                             upload_map = create_upload_map(task['content_length'])
                             position = 1
                             job_list = []
@@ -226,10 +232,6 @@ def process_backups():
                                 job_list.append(part_upload_data)
                                 position += 1
                             multipart_upload_block = {'Parts': []}
-                            upload_id = s3_client.create_multipart_upload(endpoint=target_bucket,
-                                                                          object_key=target_key,
-                                                                          content_type=task['content_type'],
-                                                                          metadata=task['metablock'])
                             copy_parts_ok = True
                             for job in job_list:
                                 print(
