@@ -17,7 +17,6 @@ def lambda_handler(event, context):
 
 
 def process_object(event_data):
-    print('process starts')
     received_ts = datetime.now().timestamp()
     ssm_id = os.getenv('SSM_ID')
     parameters = get_parameters(ssm_id, 'eu-west-2')
@@ -91,6 +90,7 @@ def process_object(event_data):
     }}
     '''
     sqs_results = queue.add(sqs_body, set_random_id())
+    print(f'object added to queue: {checkin_id}')
     queue_data = {'message_id': sqs_results['MessageId'],
                   'checkin_id': checkin_id, 'status': 0,
                   'sequence_number': sqs_results['SequenceNumber'],
