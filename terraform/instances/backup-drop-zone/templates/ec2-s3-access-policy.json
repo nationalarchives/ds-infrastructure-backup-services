@@ -9,7 +9,8 @@
             ],
             "Resource": [
                 "arn:aws:s3:::tna-backup-drop-zone",
-                "arn:aws:s3:::tna-backup-vault"
+                "arn:aws:s3:::tna-backup-vault",
+                "arn:aws:s3:::tna-backup-tooling"
             ],
             "Sid": "DropZoneListBucket"
         },
@@ -24,7 +25,8 @@
 				"s3:PutObjectLegalHold"
             ],
             "Resource": [
-                "arn:aws:s3:::tna-backup-drop-zone/*"
+                "arn:aws:s3:::tna-backup-drop-zone/*",
+                "arn:aws:s3:::tna-backup-tooling/*"
             ],
             "Sid": "DropZoneS3Access"
         },
