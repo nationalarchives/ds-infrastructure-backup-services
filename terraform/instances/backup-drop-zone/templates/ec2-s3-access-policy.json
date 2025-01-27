@@ -53,7 +53,8 @@
             ],
             "Resource": [
                 "arn:aws:s3:::bv-digital-services/*",
-                "arn:aws:s3:::bv-ds-digital-files/*"
+                "arn:aws:s3:::bv-ds-digital-files/*",
+                "arn:aws:s3:::bv-tna-external-services/*"
             ],
             "Sid": "DropZoneS3WriteAccessBackupVaults"
         },
@@ -64,7 +65,8 @@
             ],
             "Resource": [
                 "arn:aws:s3:::bv-digital-services",
-                "arn:aws:s3:::bv-ds-digital-files"
+                "arn:aws:s3:::bv-ds-digital-files",
+                "arn:aws:s3:::bv-tna-external-services"
             ],
             "Sid": "DropZoneS3LockModeAccessBackupVaults"
         }

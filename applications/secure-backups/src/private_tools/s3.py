@@ -83,7 +83,10 @@ class Bucket:
         try:
             response = self.client.create_multipart_upload(**param_set)
         except botocore.exceptions.ClientError as error:
-            print(f'S3 - create part upload {error.response["Error"]["Code"]}')
+            print(f'S3 - error creating multipart upload {error.response["Error"]["Code"]}')
+            return None
+        if response['UploadId'] is None:
+            print(f'S3 - error creating multipart upload error {endpoint} - {target_key}')
             return None
         return response['UploadId']
 

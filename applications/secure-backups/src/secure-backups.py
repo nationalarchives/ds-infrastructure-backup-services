@@ -208,6 +208,13 @@ def process_backups():
                                                                           target_key=target_key,
                                                                           content_type=task['content_type'],
                                                                           metadata=obj_info['metablock'])
+                            if upload_id is None:
+                                db_client.where(f'id = {checkin_id}')
+                                db_client.update('object_checkins', {
+                                    'status': 7, 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+                                db_client.run()
+                                # send notification
+                                continue
                             upload_map = create_upload_map(task['content_length'])
                             position = 1
                             job_list = []

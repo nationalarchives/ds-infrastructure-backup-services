@@ -97,6 +97,13 @@ module "s3-bv-ds-digital-files" {
     default_tags             = local.default_tags
 }
 
+module "s3-bv-tna-external-services" {
+    source = "./s3/bv-tna-external-services"
+
+    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
+    default_tags             = local.default_tags
+}
+
 
 # ------------------------------------------------
 
