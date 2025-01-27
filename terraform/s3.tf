@@ -16,26 +16,6 @@ module "s3-tna-backup-drop-zone" {
     tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
 
     bkup_drop_zone_access_points = [
-        #        {
-        #            "ap_name" = "github-backup",
-        #            "ap_path" = "github-backup",
-        #            "actions" = [
-        #                "s3:PutObject",
-        #            ],
-        #            "role_arns" = [
-        #                "arn:aws:iam::846769538626:role/digital-files-backup"
-        #            ]
-        #        },
-        #        {
-        #            "ap_name" = "tna-services-bkup-github",
-        #            "ap_path" = "tna-services-bkup-github",
-        #            "actions" = [
-        #                "s3:PutObject",
-        #            ],
-        #            "role_arns" = [
-        #                "arn:aws:iam::846769538626:role/digital-files-backup"
-        #            ]
-        #        },
         {
             "ap_name" = "tna-external-services-backup",
             "ap_path" = "tna-external-services-backup",
@@ -43,7 +23,7 @@ module "s3-tna-backup-drop-zone" {
                 "s3:PutObject",
             ],
             "role_arns" = [
-                "arn:aws:iam::846769538626:role/digital-files-backup"
+                "arn:aws:iam::637423167251:role/ec2-tna-service-backup-role"
             ]
         },
         {
@@ -155,47 +135,3 @@ module "s3-tna-service-backup" {
 
     default_tags = local.default_tags
 }
-
-#module "s3-ds-live-digital-files-backup" {
-#    source = "./s3/ds-live-digital-files-backup"
-#
-#    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
-#
-#    default_tags = local.default_tags
-#}
-
-module "s3-tna-external-services-backup" {
-    source = "./s3/tna-external-services-backup"
-
-    tna_backup_inventory_arn = module.s3-tna-backup-inventory.tna_backup_inventory_arn
-    default_tags             = local.default_tags
-}
-
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket.ds_live_digital_files_backup
-#  id = "ds-live-digital-files-backup"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_ownership_controls.ds_live_digital_files_backup
-#  id = "ds-live-digital-files-backup"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_server_side_encryption_configuration.ds_live_digital_files_backup
-#  id = "ds-live-digital-files-backup"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_public_access_block.ds_live_digital_files_backup
-#  id = "ds-live-digital-files-backupe"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_access_point.backup_access_point["ds-backup-target"]
-#  id = "637423167251:ds-backup-target"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3control_access_point_policy.ap_policy["ds-backup-target"]
-#  id = "arn:aws:s3:eu-west-2:637423167251:accesspoint/ds-backup-target"
-#}
-#import {
-#  to = module.s3-ds-live-digital-files-backup.aws_s3_bucket_policy.tna_backup_intake_access_from_another_account
-#  id = "ds-live-digital-files-backup"
-#}
