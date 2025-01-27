@@ -5,8 +5,8 @@ variable "tna_backup_inventory_arn" {}
 # backup vault collecting backups for Digital Services
 # retention settings
 # ------------------------------------------------------------------------------
-resource "aws_s3_bucket" "bv_tna_external_services" {
-    bucket = "bv-tna-external-services"
+resource "aws_s3_bucket" "bv_digital_services" {
+    bucket = "bv-digital-services"
 
     force_destroy       = false
     object_lock_enabled = true
@@ -14,21 +14,21 @@ resource "aws_s3_bucket" "bv_tna_external_services" {
     tags = merge(
         var.default_tags,
         {
-            Name = "bv-tna-external-services"
+            Name = "bv-digital-services"
         }
     )
 }
 
-resource "aws_s3_bucket_ownership_controls" "bv_tna_external_services" {
-    bucket = aws_s3_bucket.bv_tna_external_services.id
+resource "aws_s3_bucket_ownership_controls" "bv_digital_services" {
+    bucket = aws_s3_bucket.bv_digital_services.id
 
     rule {
         object_ownership = "BucketOwnerEnforced"
     }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "bv_tna_external_services" {
-    bucket = aws_s3_bucket.bv_tna_external_services.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "bv_digital_services" {
+    bucket = aws_s3_bucket.bv_digital_services.id
 
     rule {
         apply_server_side_encryption_by_default {
@@ -38,8 +38,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bv_tna_external_s
     }
 }
 
-resource "aws_s3_bucket_public_access_block" "bv_tna_external_services" {
-    bucket = aws_s3_bucket.bv_tna_external_services.id
+resource "aws_s3_bucket_public_access_block" "bv_digital_services" {
+    bucket = aws_s3_bucket.bv_digital_services.id
 
     block_public_acls       = false
     block_public_policy     = false
@@ -47,16 +47,16 @@ resource "aws_s3_bucket_public_access_block" "bv_tna_external_services" {
     restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_versioning" "bv_tna_external_services" {
-    bucket = aws_s3_bucket.bv_tna_external_services.id
+resource "aws_s3_bucket_versioning" "bv_digital_services" {
+    bucket = aws_s3_bucket.bv_digital_services.id
 
     versioning_configuration {
         status = "Enabled"
     }
 }
 
-resource "aws_s3_bucket_inventory" "bv_tna_external_services" {
-    bucket = aws_s3_bucket.bv_tna_external_services.id
+resource "aws_s3_bucket_inventory" "bv_digital_services" {
+    bucket = aws_s3_bucket.bv_digital_services.id
     name   = "EntireBucketWeekly"
 
     included_object_versions = "All"

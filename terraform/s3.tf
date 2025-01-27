@@ -37,16 +37,6 @@ module "s3-tna-backup-drop-zone" {
             ]
         },
         {
-            "ap_name" = "ds-bkup-databases",
-            "ap_path" = "digital-services/ds-bkup-databases",
-            "actions" = [
-                "s3:PutObject",
-            ],
-            "role_arns" = [
-                "arn:aws:iam::846769538626:role/mysql-main-prime-role"
-            ]
-        },
-        {
             "ap_name" = "digital-services",
             "ap_path" = "digital-services",
             "actions" = [
