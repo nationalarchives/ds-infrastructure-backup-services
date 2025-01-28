@@ -17,8 +17,8 @@ module "s3-tna-backup-drop-zone" {
 
     bkup_drop_zone_access_points = [
         {
-            "ap_name" = "tna-external-services-backup",
-            "ap_path" = "tna-external-services-backup",
+            "ap_name" = "tna-external-services",
+            "ap_path" = "tna-external-services",
             "actions" = [
                 "s3:PutObject",
             ],

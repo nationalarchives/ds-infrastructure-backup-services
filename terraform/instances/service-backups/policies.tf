@@ -1,6 +1,13 @@
-resource "aws_iam_policy" "ec2_tna_service_backup_policy" {
-    name        = "tna_service_backup_policy"
-    description = "access to tna_service_backup s3 for ec2"
+resource "aws_iam_policy" "s3_access_policy" {
+    name        = "tna-services-backup-s3-access-policy"
+    description = "access to s3 for ec2"
 
-    policy = file("${path.module}/templates/ec2-tna-service-backup-policy.json")
+    policy = file("${path.module}/templates/s3-accesss-policy.json")
+}
+
+resource "aws_iam_policy" "ap_access_policy" {
+    name        = "tna-services-backup-ap-access-policy"
+    description = "access to access point for ec2"
+
+    policy = file("${path.module}/templates/ap-access-policy.json")
 }

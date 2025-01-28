@@ -11,7 +11,7 @@ resource "aws_iam_instance_profile" "ec2_tna_service_backup_profile" {
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm" {
     role       = aws_iam_role.ec2_tna_service_backup_role.name
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy_attachment" "asm" {
@@ -19,8 +19,12 @@ resource "aws_iam_role_policy_attachment" "asm" {
     policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_backup" {
+resource "aws_iam_role_policy_attachment" "s3_access" {
     role       = aws_iam_role.ec2_tna_service_backup_role.name
-    policy_arn = aws_iam_policy.ec2_tna_service_backup_policy.arn
+    policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "ap_access" {
+    role       = aws_iam_role.ec2_tna_service_backup_role.name
+    policy_arn = aws_iam_policy.ap_access_policy.arn
+}
