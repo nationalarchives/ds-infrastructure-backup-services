@@ -11,9 +11,7 @@ resource "aws_launch_template" "backup_drop_zone" {
     update_default_version  = true
     disable_api_termination = true
 
-    vpc_security_group_ids = [
-        aws_security_group.backup_drop_zone.id,
-    ]
+    vpc_security_group_ids = var.security_group_ids
 
     user_data = base64encode(file("${path.module}/scripts/userdata.sh"))
 
