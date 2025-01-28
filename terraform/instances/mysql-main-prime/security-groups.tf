@@ -19,6 +19,10 @@ resource "aws_vpc_security_group_ingress_rule" "self_ingress" {
     from_port                    = 3306
     ip_protocol                  = "tcp"
     to_port                      = 3306
+
+    tags = merge(var.tags, {
+        Name = "securitygroup-members"
+    })
 }
 
 resource "aws_vpc_security_group_ingress_rule" "db_port_ingress" {
@@ -30,6 +34,9 @@ resource "aws_vpc_security_group_ingress_rule" "db_port_ingress" {
     from_port   = 3306
     ip_protocol = "tcp"
     to_port     = 3306
+    tags = merge(var.tags, {
+        Name = "access-subnet"
+    })
 }
 
 resource "aws_vpc_security_group_egress_rule" "http_egress" {
@@ -39,6 +46,9 @@ resource "aws_vpc_security_group_egress_rule" "http_egress" {
     from_port   = 80
     ip_protocol = "tcp"
     to_port     = 80
+    tags = merge(var.tags, {
+        Name = "receive-http"
+    })
 }
 
 resource "aws_vpc_security_group_egress_rule" "https_egress" {
@@ -48,23 +58,7 @@ resource "aws_vpc_security_group_egress_rule" "https_egress" {
     from_port   = 443
     ip_protocol = "tcp"
     to_port     = 443
+    tags = merge(var.tags, {
+        Name = "receive-https"
+    })
 }
-
-resource "aws_vpc_security_group_egress_rule" "public_request_egress" {
-    security_group_id = aws_security_group.mysql_main.id
-
-    cidr_ipv4   = var.public_subnet_cidr_block
-    from_port   = 49152
-    ip_protocol = "tcp"
-    to_port     = 65535
-}
-
-resource "aws_vpc_security_group_egress_rule" "private_request_egress" {
-    security_group_id = aws_security_group.mysql_main.id
-
-    cidr_ipv4   = var.private_subnet_cidr_block
-    from_port   = 49152
-    ip_protocol = "tcp"
-    to_port     = 65535
-}
-
