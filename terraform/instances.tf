@@ -53,7 +53,6 @@ module "ec2-backup-drop-zone" {
         local.public_subnet_a_info.cidr,
         local.private_subnet_a_info.cidr
     ]
-    ]
 
     tags = local.default_tags
 }
