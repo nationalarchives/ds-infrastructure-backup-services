@@ -18,7 +18,7 @@ resource "aws_instance" "service_backups" {
         volume_size = var.volume_size
     }
 
-    tags = merge(var.default_tags, {
+    tags = merge(var.tags, {
         Name          = "services-backup"
         Service       = "backup"
         AutoSwitchOff = "false"
