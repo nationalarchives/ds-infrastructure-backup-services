@@ -17,11 +17,11 @@ module "ec2-service-backups" {
 
     vpc_id = local.vpc_info.id
 
-    image_id      = data.aws_ami.service_backups.id
-    instance_type = "t3a.micro"
-    key_name      = "service-backups-eu-west-2"
-    subnet_id     = local.private_subnet_a_info.id
-    volume_size   = 20
+    image_id                  = data.aws_ami.service_backups.id
+    instance_type             = "t3a.micro"
+    key_name                  = "service-backups-eu-west-2"
+    subnet_id                 = local.private_subnet_a_info.id
+    volume_size               = 20
     private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
     default_tags = local.default_tags
@@ -49,6 +49,11 @@ module "ec2-backup-drop-zone" {
 
     vpc_id    = local.vpc_info.id
     subnet_id = local.private_subnet_a_info.id
+    subnet_cidrs = [
+        local.public_subnet_a_info.cidr,
+        local.private_subnet_a_info.cidr
+    ]
+    ]
 
     tags = local.default_tags
 }
@@ -64,9 +69,9 @@ module "ec2-mysql-main-prime" {
     secret_id = "/infrastructure/credentials/mysql-main*"
 
     # iam
-    s3_deployment_bucket         = "tna-backup-tooling"
-    s3_folder                    = "mysql"
-    backup_bucket                = "tna-backup-intake"
+    s3_deployment_bucket = "tna-backup-tooling"
+    s3_folder            = "mysql"
+    backup_bucket        = "tna-backup-intake"
     attach_ebs_volume_policy_arn = module.iam.attach_ebs_volume_policy_arn
 
     # instances
@@ -81,13 +86,13 @@ module "ec2-mysql-main-prime" {
     attached_ebs_volume_id = data.aws_ssm_parameter.mysql_main_prime_volume_id.value
 
     # network
-    vpc_id          = local.vpc_info.id
+    vpc_id = local.vpc_info.id
     db_subnet_cidrs = [
         local.private_subnet_a_info.cidr_block,
     ]
 
-    db_subnet_id = local.private_subnet_a_info.id
-    public_subnet_cidr_block = local.public_subnet_a_info.cidr_block
+    db_subnet_id              = local.private_subnet_a_info.id
+    public_subnet_cidr_block  = local.public_subnet_a_info.cidr_block
     private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
     zone_id   = data.aws_ssm_parameter.route53_private_zone_id.value

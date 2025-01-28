@@ -8,3 +8,4 @@ variable "subnet_id" {}
 
 variable "tags" {}
 
+variable "subnet_cidrs" {}
