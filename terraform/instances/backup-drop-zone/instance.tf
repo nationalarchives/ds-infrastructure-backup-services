@@ -1,12 +1,11 @@
 resource "aws_instance" "backup_drop_zone" {
-    ami                  = var.image_id
-    instance_type        = var.instance_type
-    key_name             = var.key_name
-    iam_instance_profile = aws_iam_instance_profile.ec2_drop_zone_profile.name
-    vpc_security_group_ids = [
-        aws_security_group.backup_drop_zone.id,
-    ]
-    subnet_id = var.subnet_id
+    ami                    = var.image_id
+    instance_type          = var.instance_type
+    key_name               = var.key_name
+    iam_instance_profile   = aws_iam_instance_profile.ec2_drop_zone_profile.name
+    vpc_security_group_ids = var.security_group_ids
+    subnet_id              = var.subnet_id
+
     user_data = templatefile("${path.module}/scripts/userdata.sh", {
         ssm_id = "/application/lambda/backup-check-in"
     })

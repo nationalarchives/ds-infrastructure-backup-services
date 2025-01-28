@@ -9,3 +9,4 @@ variable "subnet_id" {}
 variable "tags" {}
 
 variable "subnet_cidrs" {}
+variable "security_group_ids" {}

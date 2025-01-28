@@ -54,6 +54,11 @@ module "ec2-backup-drop-zone" {
         local.private_subnet_a_info.cidr
     ]
 
+    security_group_ids = [
+        module.sgs.sg_outside_world_id,
+        module.sgs.sg_database_id,
+    ]
+
     tags = local.default_tags
 }
 
