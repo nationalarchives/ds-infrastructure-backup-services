@@ -12,32 +12,32 @@
 #    default_tags = local.default_tags
 #}
 
-#module "ec2-service-backups" {
-#    source = "./instances/service-backups"
-#
-#    vpc_id = local.vpc_info.id
-#
-#    image_id      = data.aws_ami.service_backups.id
-#    instance_type = "t3a.micro"
-#    key_name      = "service-backups-eu-west-2"
-#    subnet_id     = local.private_subnet_a_info.id
-#    volume_size   = 20
-#    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
-#
-#    default_tags = local.default_tags
-#}
-
-module "ec2-shared-lb" {
-    source = "./instances/shared-load-balancer"
+module "ec2-service-backups" {
+    source = "./instances/service-backups"
 
     vpc_id = local.vpc_info.id
-    subnet_id = local.public_subnet_a_info.id
 
-    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.drop_zone_instance_id
-    cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
+    image_id      = data.aws_ami.service_backups.id
+    instance_type = "t3a.micro"
+    key_name      = "service-backups-eu-west-2"
+    subnet_id     = local.private_subnet_a_info.id
+    volume_size   = 20
+    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
-    tags = local.default_tags
+    default_tags = local.default_tags
 }
+
+#module "ec2-shared-lb" {
+#    source = "./instances/shared-load-balancer"
+#
+#    vpc_id = local.vpc_info.id
+#    subnet_id = local.public_subnet_a_info.id
+#
+#    backup_drop_zone_instance_id = module.ec2-backup-drop-zone.drop_zone_instance_id
+#    cert_arn = "arn:aws:acm:eu-west-2:637423167251:certificate/e17f7cd3-4a44-4380-b06c-59d688355cea"
+#
+#    tags = local.default_tags
+#}
 
 module "ec2-backup-drop-zone" {
     source = "./instances/backup-drop-zone"
