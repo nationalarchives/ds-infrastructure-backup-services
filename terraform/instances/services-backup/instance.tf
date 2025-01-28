@@ -3,11 +3,10 @@ resource "aws_instance" "service_backups" {
     instance_type          = var.instance_type
     key_name               = var.key_name
     iam_instance_profile   = aws_iam_instance_profile.ec2_tna_service_backup_profile.name
-    vpc_security_group_ids = [
-        aws_security_group.service_backups.id
-    ]
+    vpc_security_group_ids = var.security_group_ids
     subnet_id              = var.subnet_id
-    user_data              = file("${path.module}/scripts/userdata.sh")
+
+    user_data = file("${path.module}/scripts/userdata.sh")
 
     metadata_options {
         http_tokens            = "required"
@@ -20,7 +19,7 @@ resource "aws_instance" "service_backups" {
     }
 
     tags = merge(var.default_tags, {
-        Name          = "service-backups"
+        Name          = "services-backup"
         Service       = "backup"
         AutoSwitchOff = "false"
         AutoSwitchOn  = "false"

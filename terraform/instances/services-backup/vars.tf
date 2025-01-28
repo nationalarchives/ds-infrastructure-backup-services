@@ -1,10 +1,8 @@
-variable "vpc_id" {}
 variable "image_id" {}
 variable "instance_type" {}
 variable "key_name" {}
 variable "subnet_id" {}
 variable "volume_size" {}
+variable "security_group_ids" {}
 
-variable "private_subnet_cidr_block" {}
-
-variable "default_tags" {}
+variable "tags" {}

@@ -24,5 +24,4 @@ sudo touch /var/log/start-up.log
 echo "$(date '+%Y-%m-%d %T') - system update" | sudo tee -a /var/log/start-up.log > /dev/null
 sudo dnf -y update
 
-
 --//--

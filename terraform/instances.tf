@@ -15,16 +15,17 @@
 module "ec2-service-backups" {
     source = "./instances/services-backup"
 
-    vpc_id = local.vpc_info.id
-
     image_id                  = data.aws_ami.service_backups.id
     instance_type             = "t3a.micro"
     key_name                  = "service-backups-eu-west-2"
     subnet_id                 = local.private_subnet_a_info.id
     volume_size               = 20
-    private_subnet_cidr_block = local.private_subnet_a_info.cidr_block
 
-    default_tags = local.default_tags
+    security_group_ids = [
+        module.sgs.sg_outside_world_id,
+    ]
+
+    tags = local.default_tags
 }
 
 #module "ec2-shared-lb" {
@@ -46,13 +47,7 @@ module "ec2-backup-drop-zone" {
     instance_type = "t3a.medium"
     volume_size   = 100
     key_name      = "backup-drop-zone-eu-west-2"
-
-    vpc_id    = local.vpc_info.id
-    subnet_id = local.private_subnet_a_info.id
-    subnet_cidrs = [
-        local.public_subnet_a_info.cidr,
-        local.private_subnet_a_info.cidr
-    ]
+    subnet_id     = local.private_subnet_a_info.id
 
     security_group_ids = [
         module.sgs.sg_outside_world_id,

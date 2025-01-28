@@ -1,5 +1,5 @@
 resource "aws_launch_template" "service_backups" {
-    name = "service-backups"
+    name = "services-backup"
 
     iam_instance_profile {
         arn = aws_iam_instance_profile.ec2_tna_service_backup_profile.arn
@@ -10,9 +10,7 @@ resource "aws_launch_template" "service_backups" {
     key_name               = "service-backup-eu-west-2"
     update_default_version = true
 
-    vpc_security_group_ids = [
-        aws_security_group.service_backups.id,
-    ]
+    vpc_security_group_ids = var.security_group_ids
 
     user_data = base64encode(file("${path.module}/scripts/userdata.sh"))
 
