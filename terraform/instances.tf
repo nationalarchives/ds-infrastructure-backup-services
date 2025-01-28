@@ -13,7 +13,7 @@
 #}
 
 module "ec2-service-backups" {
-    source = "./instances/service-backups"
+    source = "./instances/services-backup"
 
     vpc_id = local.vpc_info.id
 
