@@ -58,8 +58,8 @@ module "lambda-backup-check-in-test" {
         aws_lambda_layer_version.datetime_5_5.arn,
     ]
 
-    bucket_id = module.s3-tna-backup-drop-zone.tna_backup_drop_zone_id
-    topic_arn = module.sns-backup-check-in.s3_backup_check_in_topic_arn
+    bucket_id = "test-drop-zone"
+    topic_arn = module.sns-backup-check-in-test.s3_backup_check_in_test_topic_arn
 
     tags = local.default_tags
 }

@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "s3_cw" {
 
 # using this option allows setting of log retention and removal of the log group
 # when the function is destroyed
-resource "aws_cloudwatch_log_group" "lambda_backup_check_in_test_test" {
+resource "aws_cloudwatch_log_group" "lambda_backup_check_in_test" {
     name              = "/aws/lambda/${aws_lambda_function.backup_check_in_test.function_name}"
     retention_in_days = 90
 }
