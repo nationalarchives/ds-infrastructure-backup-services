@@ -1,24 +1,11 @@
 #
-setup of user
+# setup of user
 #
-CREATE
-USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT,
-UPDATE,
-SELECT
-ON backups.* TO 'checkin_user'@'localhost'
-WITH GRANT
-OPTION;
-CREATE
-USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
-GRANT INSERT,
-UPDATE,
-SELECT
-ON backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0'
-WITH GRANT
-OPTION;
-FLUSH
-PRIVILEGES;
+CREATE USER 'checkin_user'@'localhost' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'localhost' WITH GRANT OPTION;
+CREATE USER 'checkin_user'@'192.168.2.0/255.255.254.0' IDENTIFIED BY 's-VF!5R1Z!yzX6B61)du';
+GRANT INSERT, UPDATE, SELECT ON backups.* TO 'checkin_user'@'192.168.2.0/255.255.254.0' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
 DROP TABLE object_checkins;
 DELETE
@@ -27,7 +14,7 @@ ALTER TABLE object_checkins AUTO_INCREMENT = 1;
 
 
 #
-set up of database
+# set up of database
 #
 CREATE SCHEMA `backups`;
 

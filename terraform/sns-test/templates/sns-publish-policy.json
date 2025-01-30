@@ -1,0 +1,18 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "s3.amazonaws.com"
+            },
+            "Action": "sns:Publish",
+            "Resource": "arn:aws:sns:eu-west-2:${account_id}:${topic}",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "${bucket_arn}"
+                }
+            }
+        }
+    ]
+}
