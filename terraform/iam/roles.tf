@@ -12,7 +12,7 @@ resource "aws_iam_role_policy_attachment" "ec2_drop_zone_policy" {
 
 resource "aws_iam_role_policy_attachment" "AmazonEC2RoleforSSM" {
     role       = aws_iam_role.ec2_backup_drop_zone.id
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy_attachment" "SecretsManagerReadWrite" {
