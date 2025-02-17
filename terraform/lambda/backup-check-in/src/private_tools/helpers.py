@@ -80,7 +80,7 @@ def deconstruct_path(object_key):
             'access_point': ap_name, 'location': location, 'location_filters': location_filters}
 
 
-def get_parameters(name: str, aws_region: str):
+def get_ssm_parameters(name: str, aws_region: str):
     params = {}
     regex_line = re.compile(r'(?<![{}\[\]])\n')
     regex_comma = re.compile(r',(?=\s*?[{\[\]}])')

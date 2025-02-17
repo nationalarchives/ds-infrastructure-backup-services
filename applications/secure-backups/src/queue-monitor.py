@@ -3,7 +3,7 @@ import json
 import os, sys
 import time
 from datetime import datetime
-from private_tools import SignalHandler, SQSHandler, Database, Secrets, get_parameters
+from private_tools import SignalHandler, SQSHandler, Database, Secrets, get_ssm_parameters
 
 
 def send_queue_metrics(sqs_queue, dbc):
@@ -20,7 +20,7 @@ def send_queue_metrics(sqs_queue, dbc):
 
 def queue_monitor():
     ssm_id = os.getenv('SSM_ID')
-    parameters = get_parameters(ssm_id, 'eu-west-2')
+    parameters = get_ssm_parameters(ssm_id, 'eu-west-2')
 
     signal_handler = SignalHandler()
     interval = 10

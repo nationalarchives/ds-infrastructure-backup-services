@@ -5,14 +5,14 @@ import os, sys
 from datetime import datetime
 from private_tools import SignalHandler, SQSHandler, Database
 from private_tools import Secrets, Bucket
-from private_tools import sub_json, deconstruct_path, get_parameters
+from private_tools import sub_json, deconstruct_path, get_ssm_parameters
 from private_tools import create_upload_map, process_obj_name, extract_checksum_details
 from private_tools import find_value_dict
 
 
 def process_backups():
     ssm_id = os.getenv('SSM_ID')
-    parameters = get_parameters(ssm_id, 'eu-west-2')
+    parameters = get_ssm_parameters(ssm_id, 'eu-west-2')
 
     signal_handler = SignalHandler()
     regex_line = re.compile(r'(?<![{}\[\]])\n')

@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from urllib.parse import unquote_plus
 from private_tools import Database, Queue, Secrets, Bucket
-from private_tools import set_random_id, get_parameters, deconstruct_path
+from private_tools import set_random_id, get_ssm_parameters, deconstruct_path
 from private_tools import find_value_dict
 
 
@@ -19,7 +19,7 @@ def lambda_handler(event, context):
 def process_object(event_data):
     received_ts = datetime.now().timestamp()
     ssm_id = os.getenv('SSM_ID')
-    parameters = get_parameters(ssm_id, 'eu-west-2')
+    parameters = get_ssm_parameters(ssm_id, 'eu-west-2')
 
     db_secrets = Secrets(parameters['asm_id'])
     db_secrets_values = json.loads(db_secrets.get_secrets())

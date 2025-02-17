@@ -80,7 +80,7 @@ def deconstruct_path(object_key):
             'access_point': ap_name, 'location': location, 'location_filters': location_filters}
 
 
-def get_parameters(name: str, aws_region: str):
+def get_ssm_parameters(name: str, aws_region: str):
     params = {}
     regex_line = re.compile(r'(?<![{}\[\]])\n')
     regex_comma = re.compile(r',(?=\s*?[{\[\]}])')
@@ -97,6 +97,17 @@ def get_parameters(name: str, aws_region: str):
     for k, v in values.items():
         params.update({k: v})
     return params
+
+
+def get_asm_parameter(asm_client, name: str, aws_region: str) -> json:
+    client = boto3.client('ssm',
+                          region_name=aws_region)
+
+    try:
+        secrets = asm_client.get_secret_value(SecretId=name)
+    except botocore.exceptions.ClientError as error:
+        raise error
+    return secrets["SecretString"]
 
 
 def create_upload_map(total_size: int):

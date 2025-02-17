@@ -7,7 +7,7 @@ import queue
 from datetime import datetime
 from private_tools import SignalHandler, SQSHandler, Database
 from private_tools import Secrets, Bucket, RBucket, S3CopyProgress
-from private_tools import sub_json, find_value_dict, deconstruct_path, get_parameters
+from private_tools import sub_json, find_value_dict, deconstruct_path, get_ssm_parameters
 
 
 def process_object(tasks, db_secrets_vals, r_bucket, c_bucket):
@@ -54,7 +54,7 @@ def process_object(tasks, db_secrets_vals, r_bucket, c_bucket):
 
 def process_backups():
     ssm_id = os.getenv('SSM_ID')
-    parameters = get_parameters(ssm_id, 'eu-west-2')
+    parameters = get_ssm_parameters(ssm_id, 'eu-west-2')
     max_pp = mp.cpu_count()
 
     signal_handler = SignalHandler()
