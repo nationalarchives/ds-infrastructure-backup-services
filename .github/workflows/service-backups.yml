@@ -19,4 +19,7 @@ jobs:
       key_name: "service-backups-eu-west-2"
       instance_type: "t3a.micro"
       volume_size: 100
+    secrets:
+      vpc_id: "${{ secrets.VPC_ID }}"
+      subnet_id: "${{ secrets.SUBNET_ID }}"
 ...
