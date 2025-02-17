@@ -15,7 +15,7 @@
 module "ec2-services-backup" {
     source = "./instances/services-backup"
 
-    image_id                  = data.aws_ami.service_backups.id
+    image_id                  = data.aws_ami.services_backup.id
     instance_type             = "t3a.micro"
     key_name                  = "service-backups-eu-west-2"
     subnet_id                 = local.private_subnet_a_info.id

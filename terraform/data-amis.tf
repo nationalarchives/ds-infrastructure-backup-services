@@ -1,9 +1,9 @@
-data "aws_ami" "service_backups" {
+data "aws_ami" "services_backup" {
     most_recent = true
     filter {
         name = "name"
         values = [
-            "service-backups-primer*"
+            "services-backup-primer*"
         ]
     }
     filter {

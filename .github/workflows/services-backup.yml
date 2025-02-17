@@ -1,6 +1,6 @@
 ---
-name: Service Backups AMI
-run-name: Service Backups AMI service-backups-primer-(date-time) by @${{ github.actor }}
+name: Services Backup AMI
+run-name: Services Backup AMI services-backup-primer-(date-time) by @${{ github.actor }}
 
 permissions:
   id-token: write
@@ -11,7 +11,7 @@ on:
 
 jobs:
   service-backups-ami:
-    uses: nationalarchives/ds-github-actions/.github/workflows/service-backups-ami-build.yml@main
+    uses: nationalarchives/ds-github-actions/.github/workflows/services-backup-ami-build.yml@main
     with:
       base_role: "arn:aws:iam::637423167251:role/gha-oidc-role"
       playbook_role: "arn:aws:iam::637423167251:role/gha-devops-role"
