@@ -6,10 +6,10 @@ import boto3
 from datetime import datetime, timedelta
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
-from private_tools import get_asm_parameter
+from private_tools import get_asm_parameters
 
 # read repo credentials from ASM
-secret_values = json.loads(get_asm_parameter(name="service-backups/dns/totaluptime/credentials"))
+secret_values = json.loads(get_asm_parameters(name="service-backups/dns/totaluptime/credentials"))
 
 api_url = os.environ['DNS_API_URL']
 access_point = os.environ['S3_ACCESS_POINT']

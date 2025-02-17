@@ -6,7 +6,7 @@ import os
 import tarfile
 from pathlib import Path
 from datetime import datetime, timedelta
-from private_tools import get_asm_parameter, sha256sum, sha1sum
+from private_tools import get_asm_parameters
 
 def main():
     asm_key = os.environ['ASM_KEY']
@@ -17,7 +17,7 @@ def main():
     ap_dir  = 'tna-external-services/github'
 
     # read repo credentials from ASM
-    secret_values = json.loads(get_asm_parameter(name=asm_key))
+    secret_values = json.loads(get_asm_parameters(name=asm_key))
 
     s3_client = boto3.client("s3")
     repos_per_page = 100
