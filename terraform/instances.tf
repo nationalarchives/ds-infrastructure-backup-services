@@ -12,14 +12,14 @@
 #    default_tags = local.default_tags
 #}
 
-module "ec2-service-backups" {
+module "ec2-services-backup" {
     source = "./instances/services-backup"
 
     image_id                  = data.aws_ami.service_backups.id
     instance_type             = "t3a.micro"
     key_name                  = "service-backups-eu-west-2"
     subnet_id                 = local.private_subnet_a_info.id
-    volume_size               = 20
+    volume_size               = 100
 
     security_group_ids = [
         module.sgs.sg_outside_world_id,

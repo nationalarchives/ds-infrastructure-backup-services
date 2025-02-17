@@ -1,8 +1,8 @@
-resource "aws_launch_template" "service_backups" {
+resource "aws_launch_template" "services_backup" {
     name = "services-backup"
 
     iam_instance_profile {
-        arn = aws_iam_instance_profile.ec2_tna_service_backup_profile.arn
+        arn = aws_iam_instance_profile.ec2_tna_services_backup_profile.arn
     }
 
     image_id               = var.image_id

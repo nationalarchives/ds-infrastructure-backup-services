@@ -1,6 +1,6 @@
-#resource "aws_security_group" "service_backups" {
-#    name        = "service-backups"
-#    description = "service backups security group"
+#resource "aws_security_group" "services_backup" {
+#    name        = "services-backup"
+#    description = "services backup security group"
 #    vpc_id      = var.vpc_id
 #
 #    tags = merge(var.default_tags, {

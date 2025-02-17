@@ -1,4 +1,4 @@
-resource "aws_instance" "service_backups" {
+resource "aws_instance" "services_backup" {
     ami                    = var.image_id
     instance_type          = var.instance_type
     key_name               = var.key_name
@@ -23,5 +23,6 @@ resource "aws_instance" "service_backups" {
         Service       = "backup"
         AutoSwitchOff = "false"
         AutoSwitchOn  = "false"
+        CostCentre    = "TNA"
     })
 }
