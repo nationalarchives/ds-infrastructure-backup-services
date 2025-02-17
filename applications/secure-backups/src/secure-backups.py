@@ -118,7 +118,7 @@ def process_backups():
                                     loc_filter = loc_filter + f'access_point_entry = "{obj_filter}" OR '
                                 loc_filter = loc_filter[0:-4]
                                 db_client.where(f'{bucket_filter} ({loc_filter})')
-                                db_client.order_by('length(access_point) DESC')
+                                db_client.order_by('length(access_point_entry) DESC')
                             else:
                                 db_client.where(f'access_point IS NULL')
                             ap_rec = db_client.fetch()
@@ -128,8 +128,12 @@ def process_backups():
                                 access_point = ap_rec['access_point']
                                 target_bucket = ap_rec['target_bucket']
                                 target_name = process_obj_name(checkin_rec['object_name'], name_processing)
-                                target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
-                                target_key = target_destination
+                                # target_destination = f"{checkin_rec['object_key'][len(ap_rec['access_point_entry']) + 1:]}"
+                                target_destination = f"{object_key_parts['location'][len(ap_rec['access_point_entry']) + 1:]}"
+                                if len(target_destination) > 0:
+                                    target_key = f"{target_destination}/{target_name}"
+                                else:
+                                    target_key = target_name
                             else:
                                 name_processing = 1
                                 source_account_id = default_source_account_id
@@ -138,7 +142,7 @@ def process_backups():
                                 target_destination = object_key_parts['location']
                                 target_name = process_obj_name(checkin_rec['object_name'], name_processing)
                                 if len(target_destination) > 0:
-                                    target_key = f"{target_destination}/target_name"
+                                    target_key = f"{target_destination}/{target_name}"
                                 else:
                                     target_key = target_name
                             # check of any changes

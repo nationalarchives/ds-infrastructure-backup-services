@@ -1,5 +1,4 @@
 {
-    "Version": "2012-10-17",
     "Statement": [
         {
             "Action": [
@@ -7,9 +6,20 @@
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services/*",
-                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-external-services/object/tna-external-services/github/*"
-            ]
+                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services-backup/*"
+            ],
+            "Sid": "BucketAccessPermissions"
+        },
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-external-services-backup/object/tna-external-services/*"
+            ],
+            "Sid": "AccessPointPermissons"
         }
-    ]
+    ],
+    "Version": "2012-10-17"
 }

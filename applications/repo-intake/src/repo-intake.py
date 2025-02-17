@@ -9,12 +9,15 @@ from datetime import datetime, timedelta
 from private_tools import get_asm_parameter, sha256sum, sha1sum
 
 def main():
-    access_point = 'tna-external-service-a65ok1p3o5g5bo5nnt1k4p7tqbcygeuw2b-s3alias'
+    asm_key = os.environ['ASM_KEY']
+    access_point = os.environ['S3_ACCESS_POINT']
     root_dir = '/github-backup'
     zip_dir = '/github-zips'
+    tar_dir = '/github-tar'
+    ap_dir  = 'tna-external-services/github'
 
     # read repo credentials from ASM
-    secret_values = json.loads(get_asm_parameter(name="service-backups/github/credentials"))
+    secret_values = json.loads(get_asm_parameter(name=asm_key))
 
     s3_client = boto3.client("s3")
     repos_per_page = 100
@@ -22,6 +25,7 @@ def main():
 
     Path(root_dir).mkdir(parents=True, exist_ok=True)
     Path(zip_dir).mkdir(parents=True, exist_ok=True)
+    Path(tar_dir).mkdir(parents=True, exist_ok=True)
 
     start_time = str(datetime.now())
     for repo in secret_values:
@@ -68,15 +72,15 @@ def main():
             current_page += 1
 
         # create a tar file of the entire github organistion
-        os.chdir('/')
-        tar_file = f'{repo["organisation"]}_{str(datetime.now()).replace(" ", "_").replace(":", "-")}.tar'
+        tar_name = f'{repo["organisation"]}_{str(datetime.now()).replace(" ", "_").replace(":", "-")}.tar'
+        tar_file = f'{tar_dir}/{tar_name}'
         with tarfile.open(tar_file, 'w') as tar:
             for entry in os.scandir(zip_dir):
                 if entry.is_file():
                     tar.add(f'{zip_dir}/{entry.name}')
                     os.remove(f'{zip_dir}/{entry.name}')
 
-        s3_client.upload_file(tar_file, access_point, f'services/github/{tar_file}',
+        s3_client.upload_file(tar_file, access_point, f'{ap_dir}/{tar_name}',
                               ExtraArgs={'Metadata': {'x-amz-meta-legal_hold': 'ON',
                                                       'x-amz-meta-lock_mode': 'governance',
                                                       'x-amz-meta-retain_until_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')

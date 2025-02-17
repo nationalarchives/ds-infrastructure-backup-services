@@ -19,11 +19,6 @@ resource "aws_iam_role_policy_attachment" "asm" {
     policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
 
-resource "aws_iam_role_policy_attachment" "s3_access" {
-    role       = aws_iam_role.ec2_tna_service_backup_role.name
-    policy_arn = aws_iam_policy.s3_access_policy.arn
-}
-
 resource "aws_iam_role_policy_attachment" "ap_access" {
     role       = aws_iam_role.ec2_tna_service_backup_role.name
     policy_arn = aws_iam_policy.ap_access_policy.arn

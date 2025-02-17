@@ -6,10 +6,10 @@
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:s3:::tna-backup-drop-zone",
-                "arn:aws:s3:::tna-backup-drop-zone/*",
-                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-services-bkup-github",
-                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-services-bkup-github/*"
+                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services-backup/github/*",
+                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services-backup/dns-totaluptime/*",
+                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-external-services-bkup-github/object/tna-external-services-backup/github/*",
+                "arn:aws:s3:eu-west-2:637423167251:accesspoint/tna-external-services-bkup-github/object/tna-external-services-backup/dns-totaluptime/*"
             ]
         }
     ],
