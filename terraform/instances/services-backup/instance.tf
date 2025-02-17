@@ -2,7 +2,7 @@ resource "aws_instance" "services_backup" {
     ami                    = var.image_id
     instance_type          = var.instance_type
     key_name               = var.key_name
-    iam_instance_profile   = aws_iam_instance_profile.ec2_tna_service_backup_profile.name
+    iam_instance_profile   = aws_iam_instance_profile.ec2_tna_services_backup_profile.name
     vpc_security_group_ids = var.security_group_ids
     subnet_id              = var.subnet_id
 
