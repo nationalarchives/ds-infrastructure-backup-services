@@ -18,5 +18,5 @@ jobs:
       region: "eu-west-2"
       key_name: "service-backups-eu-west-2"
       instance_type: "t3a.micro"
-      volume_size: 20
+      volume_size: 100
 ...
