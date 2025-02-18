@@ -6,7 +6,7 @@
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services-backup/*"
+                "arn:aws:s3:::tna-backup-drop-zone/tna-external-services/*"
             ],
             "Sid": "BucketAccessPermissions"
         },
