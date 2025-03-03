@@ -11,17 +11,17 @@ from private_tools import get_asm_parameters
 def main():
     asm_key = os.environ['ASM_KEY']
     access_point = os.environ['S3_ACCESS_POINT']
+
     root_dir = '/github-backup'
     zip_dir = '/github-zips'
     tar_dir = '/github-tar'
     ap_dir  = 'tna-external-services/github'
 
     # read repo credentials from ASM
-    secret_values = json.loads(get_asm_parameters(name=asm_key))
+    secret_values = json.loads(get_asm_parameters(name=asm_key, aws_region='eu-west-2'))
 
     s3_client = boto3.client("s3")
     repos_per_page = 100
-    git_fetch = "git fetch --all"
 
     Path(root_dir).mkdir(parents=True, exist_ok=True)
     Path(zip_dir).mkdir(parents=True, exist_ok=True)
@@ -71,7 +71,7 @@ def main():
 
             current_page += 1
 
-        # create a tar file of the entire github organistion
+        # create a tar file of the entire github organisation
         tar_name = f'{repo["organisation"]}_{str(datetime.now()).replace(" ", "_").replace(":", "-")}.tar'
         tar_file = f'{tar_dir}/{tar_name}'
         with tarfile.open(tar_file, 'w') as tar:

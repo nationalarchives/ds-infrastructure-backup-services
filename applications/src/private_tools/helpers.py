@@ -5,6 +5,8 @@ import re
 import boto3
 import botocore.exceptions
 import json
+import hashlib
+from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
 
@@ -99,6 +101,17 @@ def get_ssm_parameters(name: str, aws_region: str):
     return params
 
 
+def get_asm_parameters(asm_client, name: str, aws_region: str) -> json:
+    client = boto3.client('ssm',
+                          region_name=aws_region)
+
+    try:
+        secrets = asm_client.get_secret_value(SecretId=name)
+    except botocore.exceptions.ClientError as error:
+        raise error
+    return secrets["SecretString"]
+
+
 def create_upload_map(total_size: int):
     upload_map = []
     if total_size < 104857601:
@@ -188,3 +201,30 @@ def extract_checksum_details(dataset: dict = None):
         if 'ChecksumCRC64NVME' in dataset:
             return {'checksum_encoding': 'ChecksumCRC64NVME', 'checksum': dataset['ChecksumCRC64NVME']}
     return None
+
+def sha256sum(filename: str) -> str:
+    h = hashlib.sha256()
+    b = bytearray(128 * 1024)
+    mv = memoryview(b)
+    with open(filename, 'rb', buffering=0) as f:
+        while n := f.readinto(mv):
+            h.update(mv[:n])
+    return h.hexdigest()
+
+def sha1sum(filename: str) -> str:
+    h = hashlib.sha1()
+    b = bytearray(128 * 1024)
+    mv = memoryview(b)
+    with open(filename, 'rb', buffering=0) as f:
+        while n := f.readinto(mv):
+            h.update(mv[:n])
+    return h.hexdigest()
+
+def rmdir(directory: str) -> None:
+    directory = Path(directory)
+    for item in directory.iterdir():
+        if item.is_dir():
+            directory.rmdir(item)
+        else:
+            item.unlink()
+    directory.rmdir()
